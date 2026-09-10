@@ -404,7 +404,7 @@
     <p class="subtitle">OLYMPIC FINAL · 奥运决赛</p>
     <div class="match-info">
       <strong>男子单打决赛</strong> · 第7局决胜<br>
-      你 VS 电脑 · 11分制 · 领先2分获胜
+      你 VS 电脑 · 11分制 · 领先2分获胜 · 一方弹2次失分
     </div>
     <div class="start-difficulty" id="startDifficulty">
       <button class="start-diff-btn" data-diff="easy">铜牌赛</button>
@@ -497,6 +497,10 @@
     let ballSpin = new THREE.Vector3();
     let lastHitBy = null;
     let ballBouncedOnTable = false;
+
+    // 球台弹跳次数追踪（某一方弹跳2次即失分）
+    let currentTableSide = null; // 'player' or 'ai'
+    let bounceCountOnSide = 0;
 
     // 乒乓球拖尾
     let ballTrail = [];
@@ -1166,6 +1170,31 @@
       if (ballBottom <= tableTop && ballVelocity.y < 0) {
         if (Math.abs(ball.position.x) <= CONFIG.table.width / 2 &&
             Math.abs(ball.position.z) <= CONFIG.table.length / 2) {
+
+          // 判断球落在哪一方（z > 0 是玩家方，z < 0 是AI方）
+          const side = ball.position.z > 0 ? 'player' : 'ai';
+
+          // 如果换到另一方，重置弹跳计数
+          if (side !== currentTableSide) {
+            currentTableSide = side;
+            bounceCountOnSide = 1;
+          } else {
+            // 同一方再次弹跳
+            bounceCountOnSide++;
+          }
+
+          // 某一方弹跳2次即判该方失分
+          if (bounceCountOnSide >= 2 && gameState === 'playing') {
+            const loser = side;
+            const scorer = loser === 'player' ? 'ai' : 'player';
+            // 延迟一点再判分，让球的弹跳动画播完
+            setTimeout(() => {
+              if (gameState === 'playing') {
+                scorePoint(scorer);
+              }
+            }, 300);
+          }
+
           ball.position.y = tableTop + CONFIG.ball.radius;
           ballVelocity.y = -ballVelocity.y * CONFIG.ball.restitution;
           ballVelocity.x *= 0.94;
@@ -1253,6 +1282,9 @@
 
       lastHitBy = hitter;
       ballBouncedOnTable = false;
+      // 击球后重置弹跳计数，球飞向对方，下一次落地是对方的第一次弹跳
+      currentTableSide = null;
+      bounceCountOnSide = 0;
 
       const intensity = Math.min(1, speed / 6);
       playHitSound(intensity);
@@ -1322,6 +1354,9 @@
       ballSpin.set(0, 0, 0);
       lastHitBy = null;
       ballBouncedOnTable = false;
+      // 重置弹跳计数
+      currentTableSide = null;
+      bounceCountOnSide = 0;
       // 清空拖尾
       ballTrail = [];
       if (trailMeshes.length) {
@@ -1368,6 +1403,8 @@
       ballSpin.set(0, 2 + currentPower * 2, -1 - currentPower);
       lastHitBy = 'player';
       ballBouncedOnTable = false;
+      currentTableSide = null;
+      bounceCountOnSide = 0;
       gameState = 'playing';
       hideMessage();
       playHitSound(0.3 + currentPower * 0.5);
@@ -1390,6 +1427,8 @@
       ballSpin.set(0, -2, 1);
       lastHitBy = 'ai';
       ballBouncedOnTable = false;
+      currentTableSide = null;
+      bounceCountOnSide = 0;
       gameState = 'playing';
       hideMessage();
       playHitSound(0.4);
