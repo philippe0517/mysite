@@ -606,6 +606,190 @@
       line-height: 1.8;
     }
 
+    /* ===== 性格趣味卡 ===== */
+    .personality {
+      background-color: var(--color-bg-alt);
+    }
+
+    .personality__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 48px;
+    }
+
+    .personality__block {
+      background-color: var(--color-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      padding: 32px;
+      transition: var(--transition);
+    }
+
+    .personality__block:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-accent);
+    }
+
+    .personality__block-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--color-text);
+    }
+
+    .personality__block-title svg {
+      width: 22px;
+      height: 22px;
+      color: var(--color-primary);
+    }
+
+    /* 如果我是... 问答列表 */
+    .if-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .if-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background-color: var(--color-bg-alt);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .if-item:hover {
+      background-color: var(--color-accent-light);
+      transform: translateX(4px);
+    }
+
+    .if-item__icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: rgba(91, 141, 239, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-primary);
+    }
+
+    .if-item__icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .if-item__content {
+      flex: 1;
+    }
+
+    .if-item__question {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .if-item__answer {
+      font-size: 15px;
+      color: var(--color-text);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    /* 超能力与弱点 */
+    .power-weakness {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .pw-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pw-group__label {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--color-border);
+    }
+
+    .pw-group__label--power {
+      color: var(--color-primary);
+      border-bottom-color: rgba(91, 141, 239, 0.3);
+    }
+
+    .pw-group__label--weakness {
+      color: #E8876A;
+      border-bottom-color: rgba(232, 135, 106, 0.3);
+    }
+
+    .pw-group__label svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .pw-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--color-text);
+      transition: var(--transition);
+    }
+
+    .pw-item:hover {
+      transform: translateX(4px);
+    }
+
+    .pw-item--power {
+      background-color: rgba(91, 141, 239, 0.06);
+    }
+
+    .pw-item--power:hover {
+      background-color: rgba(91, 141, 239, 0.12);
+    }
+
+    .pw-item--weakness {
+      background-color: rgba(232, 135, 106, 0.06);
+    }
+
+    .pw-item--weakness:hover {
+      background-color: rgba(232, 135, 106, 0.12);
+    }
+
+    .pw-item__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 7px;
+      flex-shrink: 0;
+    }
+
+    .pw-item--power .pw-item__dot {
+      background-color: var(--color-primary);
+    }
+
+    .pw-item--weakness .pw-item__dot {
+      background-color: #E8876A;
+    }
+
     /* ===== 项目作品 ===== */
     .works__grid {
       display: grid;
@@ -1681,6 +1865,15 @@
         grid-column: span 1;
       }
 
+      .personality__grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .personality__block {
+        padding: 24px;
+      }
+
       .works__grid {
         grid-template-columns: 1fr;
       }
@@ -1876,6 +2069,161 @@
             <h3 class="about-card__title">我的城市</h3>
             <p class="about-card__text">来自天津，一座有着海河穿城而过、充满烟火气的城市，最想念天津的早点——煎饼果子和锅巴菜。如今在深圳求学，在这座创新之都开启大学生活，最常去的地方是图书馆和海边，也在津深两地的碰撞中寻找自己的方向。</p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 性格趣味卡 ===== -->
+    <section class="section personality" id="personality">
+      <div class="container">
+        <div class="section__header reveal">
+          <span class="section__eyebrow">PERSONALITY</span>
+          <h2 class="section__title">性格趣味卡</h2>
+          <p class="section__subtitle">用一些有趣的假设和自嘲，更立体地了解我是谁</p>
+        </div>
+        <div class="personality__grid">
+          <!-- 如果我是... -->
+          <div class="personality__block reveal reveal-delay-1">
+            <h3 class="personality__block-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              如果我是...
+            </h3>
+            <div class="if-list">
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 5.172C10 3.48 8.657 2 7 2S4 3.48 4 5.172c0 2.41 1.5 3.56 3 4.828 1.5-1.267 3-2.417 3-4.828z"></path>
+                    <path d="M14 5.172C14 3.48 15.343 2 17 2s3 1.48 3 3.172c0 2.41-1.5 3.56-3 4.828-1.5-1.267-3-2.417-3-4.828z"></path>
+                    <path d="M12 22c-2.5 0-5-1.5-5-4 0-2 1.5-3 3-3h4c1.5 0 3 1 3 3 0 2.5-2.5 4-5 4z"></path>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一种动物</div>
+                  <div class="if-item__answer">狗——忠诚热情，行动力强，喜欢和人打交道，偶尔也会撒个娇</div>
+                </div>
+              </div>
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                    <line x1="6" y1="1" x2="6" y2="4"></line>
+                    <line x1="10" y1="1" x2="10" y2="4"></line>
+                    <line x1="14" y1="1" x2="14" y2="4"></line>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一种食物</div>
+                  <div class="if-item__answer">煎饼果子——朴实但有层次，看似简单实则讲究，是刻在DNA里的味道</div>
+                </div>
+              </div>
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.5 19a4.5 4.5 0 1 0 0-9h-1.8A7 7 0 1 0 4 15.9"></path>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一种天气</div>
+                  <div class="if-item__answer">多云转晴——偶尔发呆，但大部分时候积极向上，雨过天晴就去打乒乓球</div>
+                </div>
+              </div>
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一种编程语言</div>
+                  <div class="if-item__answer">Python——简洁但强大，能搞定很多事，写起来还挺优雅的</div>
+                </div>
+              </div>
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一种运动</div>
+                  <div class="if-item__answer">乒乓球——快节奏、需专注、攻防转换间见真章，输赢都在一念之间</div>
+                </div>
+              </div>
+              <div class="if-item">
+                <div class="if-item__icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                </div>
+                <div class="if-item__content">
+                  <div class="if-item__question">如果我是一座城市</div>
+                  <div class="if-item__answer">天津+深圳的混合体——有烟火气也有创新力，在传统与前沿之间找平衡</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 超能力与弱点 -->
+          <div class="personality__block reveal reveal-delay-2">
+            <h3 class="personality__block-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              我的超能力与弱点
+            </h3>
+            <div class="power-weakness">
+              <div class="pw-group">
+                <div class="pw-group__label pw-group__label--power">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  超能力
+                </div>
+                <div class="pw-item pw-item--power">
+                  <span class="pw-item__dot"></span>
+                  <span>快速切换「医学模式」和「工程模式」，在两个领域的交叉点上找灵感</span>
+                </div>
+                <div class="pw-item pw-item--power">
+                  <span class="pw-item__dot"></span>
+                  <span>在压力下保持冷静，打比赛时尤其明显，越关键越稳</span>
+                </div>
+                <div class="pw-item pw-item--power">
+                  <span class="pw-item__dot"></span>
+                  <span>把复杂问题拆成一步步可执行的小任务，先做出来再逐步改</span>
+                </div>
+              </div>
+              <div class="pw-group">
+                <div class="pw-group__label pw-group__label--weakness">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  弱点
+                </div>
+                <div class="pw-item pw-item--weakness">
+                  <span class="pw-item__dot"></span>
+                  <span>选择困难症——每天中午吃什么是人生难题，能纠结半小时</span>
+                </div>
+                <div class="pw-item pw-item--weakness">
+                  <span class="pw-item__dot"></span>
+                  <span>偶尔拖延，但 deadline 前效率爆表，属于"压力型选手"</span>
+                </div>
+                <div class="pw-item pw-item--weakness">
+                  <span class="pw-item__dot"></span>
+                  <span>看到新技术就想试试，容易分心，经常同时开好几个坑</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
