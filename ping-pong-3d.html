@@ -404,7 +404,7 @@
     <p class="subtitle">OLYMPIC FINAL · 奥运决赛</p>
     <div class="match-info">
       <strong>男子单打决赛</strong> · 第7局决胜<br>
-      你 VS 电脑 · 先得11分获胜
+      你 VS 电脑 · 11分制 · 领先2分获胜
     </div>
     <div class="start-difficulty" id="startDifficulty">
       <button class="start-diff-btn" data-diff="easy">铜牌赛</button>
@@ -414,7 +414,7 @@
     <button class="start-btn" id="startBtn">开赛</button>
     <div class="start-tips">
       移动鼠标控制球拍 · 按住鼠标蓄力，松开击球（蓄力越久力量越大）<br>
-      真实横握拍姿势 · 奥运决赛赛场 · 观众欢呼音效
+      真实横握拍姿势 · 奥运决赛赛场 · 观众欢呼音效 · 乒乓球拖尾
     </div>
   </div>
 
@@ -473,14 +473,14 @@
     const CONFIG = {
       table: { length: 2.74, width: 1.525, height: 0.76, netHeight: 0.1525 },
       ball: { radius: 0.02, mass: 0.0027, gravity: 9.81, restitution: 0.92, airResistance: 0.1 },
-      paddle: { width: 0.15, height: 0.18, thickness: 0.008 },
-      game: { winScore: 11, serveInterval: 2, maxChargeTime: 1.5 }
+      paddle: { width: 0.18, height: 0.22, thickness: 0.008 },
+      game: { winScore: 11, serveInterval: 2, maxChargeTime: 1.5, deuceScore: 10 }
     };
 
     const DIFFICULTY = {
-      easy: { aiSpeed: 0.35, aiError: 0.18, ballSpeedMult: 0.8, name: '铜牌赛' },
-      normal: { aiSpeed: 0.55, aiError: 0.09, ballSpeedMult: 1.0, name: '银牌赛' },
-      hard: { aiSpeed: 0.8, aiError: 0.03, ballSpeedMult: 1.15, name: '金牌赛' }
+      easy: { aiSpeed: 0.18, aiError: 0.35, ballSpeedMult: 0.6, name: '铜牌赛' },
+      normal: { aiSpeed: 0.4, aiError: 0.15, ballSpeedMult: 0.85, name: '银牌赛' },
+      hard: { aiSpeed: 0.7, aiError: 0.05, ballSpeedMult: 1.05, name: '金牌赛' }
     };
 
     // ===== 状态 =====
@@ -497,6 +497,11 @@
     let ballSpin = new THREE.Vector3();
     let lastHitBy = null;
     let ballBouncedOnTable = false;
+
+    // 乒乓球拖尾
+    let ballTrail = [];
+    const TRAIL_LENGTH = 12;
+    let trailMeshes = [];
 
     // 鼠标控制
     let mouseX = 0, mouseY = 0;
@@ -973,6 +978,54 @@
       ball.castShadow = true;
       ball.position.set(0, CONFIG.table.height + 0.2, CONFIG.table.length / 2 - 0.2);
       scene.add(ball);
+
+      // 创建拖尾粒子
+      for (let i = 0; i < TRAIL_LENGTH; i++) {
+        const trailGeo = new THREE.SphereGeometry(CONFIG.ball.radius * (1 - i / TRAIL_LENGTH * 0.7), 12, 12);
+        const trailMat = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0
+        });
+        const trail = new THREE.Mesh(trailGeo, trailMat);
+        trail.visible = false;
+        scene.add(trail);
+        trailMeshes.push(trail);
+      }
+    }
+
+    // 更新拖尾
+    function updateTrail() {
+      if (!ball) return;
+
+      // 只有球在运动时才显示拖尾
+      const speed = ballVelocity.length();
+      if (speed > 0.5 && (gameState === 'playing' || gameState === 'serving')) {
+        // 记录当前位置
+        ballTrail.unshift(ball.position.clone());
+        if (ballTrail.length > TRAIL_LENGTH) {
+          ballTrail.pop();
+        }
+
+        // 更新拖尾粒子
+        for (let i = 0; i < TRAIL_LENGTH; i++) {
+          if (i < ballTrail.length) {
+            trailMeshes[i].position.copy(ballTrail[i]);
+            trailMeshes[i].visible = true;
+            // 越靠后的粒子越透明、越小
+            const alpha = (1 - i / TRAIL_LENGTH) * 0.5 * Math.min(1, speed / 5);
+            trailMeshes[i].material.opacity = alpha;
+            const scale = 1 - i / TRAIL_LENGTH * 0.6;
+            trailMeshes[i].scale.setScalar(scale);
+          } else {
+            trailMeshes[i].visible = false;
+          }
+        }
+      } else {
+        // 球静止时隐藏拖尾并清空
+        ballTrail = [];
+        trailMeshes.forEach(t => t.visible = false);
+      }
     }
 
     // 创建球拍（真实横握拍姿势）
@@ -1140,12 +1193,14 @@
     }
 
     function checkPaddleCollision() {
+      // 玩家球拍碰撞范围放大，降低击中难度
+      const playerHitRadius = CONFIG.paddle.width / 2 * 1.6 + CONFIG.ball.radius;
       if (lastHitBy !== 'player') {
         const dx = ball.position.x - playerPaddle.position.x;
         const dy = ball.position.y - playerPaddle.position.y;
         const dz = ball.position.z - playerPaddle.position.z;
         const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist < CONFIG.paddle.width / 2 + CONFIG.ball.radius && ballVelocity.z < 0) {
+        if (dist < playerHitRadius && ballVelocity.z < 0) {
           hitBall('player');
         }
       }
@@ -1234,18 +1289,26 @@
       updateScoreDisplay();
       serveCount++;
 
-      if (playerScore >= CONFIG.game.winScore || aiScore >= CONFIG.game.winScore) {
+      // 获胜判定：达到11分且领先2分
+      const isDeuce = playerScore >= CONFIG.game.deuceScore && aiScore >= CONFIG.game.deuceScore;
+      const playerWins = playerScore >= CONFIG.game.winScore && (playerScore - aiScore) >= 2;
+      const aiWins = aiScore >= CONFIG.game.winScore && (aiScore - playerScore) >= 2;
+
+      if (playerWins || aiWins) {
         gameState = 'gameover';
-        const isWin = playerScore > aiScore;
+        const isWin = playerWins;
         showMessage(
           isWin ? '冠军！' : '惜败',
-          isWin ? '你赢得了奥运金牌！' : '获得银牌，再接再厉！'
+          isWin ? `你以 ${playerScore}:${aiScore} 赢得了奥运金牌！` : `以 ${playerScore}:${aiScore} 获得银牌，再接再厉！`
         );
         if (isWin) setCrowdIntensity(1);
         return;
       }
 
-      if (serveCount % CONFIG.game.serveInterval === 0) {
+      // 换发球：10平后每1分换发，否则每2分换发
+      if (isDeuce) {
+        isPlayerServing = !isPlayerServing;
+      } else if (serveCount % CONFIG.game.serveInterval === 0) {
         isPlayerServing = !isPlayerServing;
       }
 
@@ -1259,6 +1322,11 @@
       ballSpin.set(0, 0, 0);
       lastHitBy = null;
       ballBouncedOnTable = false;
+      // 清空拖尾
+      ballTrail = [];
+      if (trailMeshes.length) {
+        trailMeshes.forEach(t => t.visible = false);
+      }
     }
 
     function prepareServe() {
@@ -1312,11 +1380,12 @@
       initAudio();
 
       const diff = DIFFICULTY[currentDifficulty];
-      const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.5;
+      const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.4;
+      // 降低发球速度，让玩家更容易接
       ballVelocity.set(
-        (targetX - ball.position.x) * 0.5,
-        2.2,
-        2.8 * diff.ballSpeedMult
+        (targetX - ball.position.x) * 0.4,
+        2.0,
+        2.0 * diff.ballSpeedMult
       );
       ballSpin.set(0, -2, 1);
       lastHitBy = 'ai';
@@ -1436,6 +1505,7 @@
 
       updatePlayerPaddle(dt);
       updatePowerBar();
+      updateTrail();
 
       if (gameState === 'serving' && isPlayerServing) {
         ball.position.x = playerPaddle.position.x;
