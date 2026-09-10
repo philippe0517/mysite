@@ -275,7 +275,7 @@
     .site-header.scrolled {
       background-color: rgba(255, 255, 255, 0.95);
       border-bottom-color: var(--color-border);
-      box-shadow: 0 2px 20px rgba(91, 141, 239, 0.08);
+      box-shadow: var(--shadow-md);
     }
 
     .site-header__inner {
@@ -829,6 +829,42 @@
     }
 
     /* ===== 项目作品 ===== */
+    .works__tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    .works__tab {
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: var(--font-body);
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      background-color: var(--color-white);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .works__tab:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .works__tab.active {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-white);
+    }
+
+    .work-card.hidden {
+      display: none;
+    }
+
     .works__grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -979,7 +1015,7 @@
 
     /* ===== 兴趣技能（Bento Grid） ===== */
     .skills {
-      background-color: var(--color-white);
+      background-color: var(--color-bg-alt);
     }
 
     .skills__bento {
@@ -1284,6 +1320,12 @@
       transform: translateY(-2px);
     }
 
+    .contact-method:hover .contact-method__icon {
+      transform: translateY(-4px);
+      background-color: var(--color-primary);
+      color: var(--color-white);
+    }
+
     .contact-method__icon {
       width: 48px;
       height: 48px;
@@ -1294,6 +1336,7 @@
       justify-content: center;
       flex-shrink: 0;
       color: var(--color-primary);
+      transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
     }
 
     .contact-method__icon svg {
@@ -1325,6 +1368,61 @@
     }
 
     /* ===== 页脚 ===== */
+    /* ===== 页脚 Marquee 跑马灯 ===== */
+    .footer-marquee {
+      overflow: hidden;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 32px;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    }
+
+    .footer-marquee__track {
+      display: flex;
+      gap: 48px;
+      width: max-content;
+      animation: footerMarquee 30s linear infinite;
+    }
+
+    .footer-marquee:hover .footer-marquee__track {
+      animation-play-state: paused;
+    }
+
+    .footer-marquee__item {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-marquee__item::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: rgba(91, 141, 239, 0.5);
+      flex-shrink: 0;
+    }
+
+    @keyframes footerMarquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     .site-footer {
       background-color: #1E3A5F;
       color: rgba(255, 255, 255, 0.7);
@@ -1434,9 +1532,11 @@
       width: 52px;
       height: 52px;
       border-radius: 50%;
-      background-color: var(--color-primary);
-      color: var(--color-white);
-      border: none;
+      background-color: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: var(--color-primary);
+      border: 1px solid rgba(255, 255, 255, 0.5);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -1447,7 +1547,7 @@
     }
 
     .chat-fab:hover {
-      background-color: var(--color-primary-dark);
+      background-color: rgba(255, 255, 255, 0.95);
       transform: translateY(-3px);
       box-shadow: var(--shadow-lg);
     }
@@ -1465,7 +1565,7 @@
       height: 10px;
       border-radius: 50%;
       background-color: var(--color-accent);
-      border: 2px solid var(--color-white);
+      border: 2px solid rgba(255, 255, 255, 0.9);
     }
 
     /* ===== 数字分身聊天窗口 ===== */
@@ -1555,7 +1655,7 @@
       color: var(--color-white);
       cursor: pointer;
       padding: 6px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       opacity: 0.8;
       transition: var(--transition);
       flex-shrink: 0;
@@ -1624,7 +1724,7 @@
 
     .chat-msg__bubble {
       padding: 10px 14px;
-      border-radius: 14px;
+      border-radius: var(--radius-md);
       font-size: 14px;
       line-height: 1.6;
       word-break: break-word;
@@ -1634,7 +1734,7 @@
       background-color: var(--color-white);
       color: var(--color-text);
       border-top-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      box-shadow: var(--shadow-sm);
     }
 
     .chat-msg--user .chat-msg__bubble {
@@ -2271,8 +2371,13 @@
           <h2 class="section__title">项目与作品</h2>
           <p class="section__subtitle">这里记录我的项目和作品，有真实可玩的，也有正在计划中的</p>
         </div>
+        <div class="works__tabs reveal">
+          <button class="works__tab active" data-filter="all" type="button">全部</button>
+          <button class="works__tab" data-filter="completed" type="button">已完成</button>
+          <button class="works__tab" data-filter="planned" type="button">计划中</button>
+        </div>
         <div class="works__grid">
-          <article class="work-card reveal reveal-delay-1">
+          <article class="work-card reveal reveal-delay-1" data-category="completed">
             <div class="work-card__cover">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -2301,7 +2406,7 @@
               </div>
             </div>
           </article>
-          <article class="work-card reveal reveal-delay-2">
+          <article class="work-card reveal reveal-delay-2" data-category="completed">
             <div class="work-card__cover work-card__cover--alt">
               <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:64px;height:64px;">
                 <!-- 球拍 -->
@@ -2337,7 +2442,7 @@
               </div>
             </div>
           </article>
-          <article class="work-card reveal reveal-delay-3">
+          <article class="work-card reveal reveal-delay-3" data-category="planned">
             <div class="work-card__cover work-card__cover--third">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"></path>
@@ -2593,6 +2698,24 @@
 
   <!-- ===== 页脚 ===== -->
   <footer class="site-footer">
+    <div class="footer-marquee">
+      <div class="footer-marquee__track">
+        <span class="footer-marquee__item">智能医学工程</span>
+        <span class="footer-marquee__item">脑机接口</span>
+        <span class="footer-marquee__item">乒乓球</span>
+        <span class="footer-marquee__item">HTML / CSS / JS</span>
+        <span class="footer-marquee__item">天津 → 深圳</span>
+        <span class="footer-marquee__item">保持好奇</span>
+        <span class="footer-marquee__item">持续创造</span>
+        <span class="footer-marquee__item">智能医学工程</span>
+        <span class="footer-marquee__item">脑机接口</span>
+        <span class="footer-marquee__item">乒乓球</span>
+        <span class="footer-marquee__item">HTML / CSS / JS</span>
+        <span class="footer-marquee__item">天津 → 深圳</span>
+        <span class="footer-marquee__item">保持好奇</span>
+        <span class="footer-marquee__item">持续创造</span>
+      </div>
+    </div>
     <div class="container">
       <div class="site-footer__inner">
         <div class="site-footer__brand">于哲<span>.</span></div>
@@ -2765,6 +2888,33 @@
     toTopBtn.addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+
+    // ===== 项目区 Tabs 分类切换 =====
+    (function () {
+      var tabs = document.querySelectorAll('.works__tab');
+      var cards = document.querySelectorAll('.work-card');
+      if (!tabs.length || !cards.length) return;
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          tabs.forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          var filter = tab.getAttribute('data-filter');
+
+          cards.forEach(function (card) {
+            var category = card.getAttribute('data-category');
+            if (filter === 'all' || category === filter) {
+              card.classList.remove('hidden');
+              card.style.animation = 'none';
+              void card.offsetWidth;
+              card.style.animation = 'fadeInUp 0.4s ease both';
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+        });
+      });
+    })();
 
     // ===== 滚动显现动画（Intersection Observer） =====
     (function () {
