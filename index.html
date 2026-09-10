@@ -1043,6 +1043,14 @@
       border-color: var(--color-primary);
     }
 
+    .bento-card:hover .bento-card__icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .bento-card--large:hover .bento-card__icon {
+      transform: scale(1.08) rotate(5deg);
+    }
+
     .bento-card--large {
       grid-column: span 2;
       grid-row: span 2;
@@ -1073,6 +1081,7 @@
       margin-bottom: 16px;
       color: var(--color-primary);
       flex-shrink: 0;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .bento-card--large .bento-card__icon {
@@ -1165,6 +1174,127 @@
       background-color: rgba(91, 141, 239, 0.12);
       color: var(--color-primary);
       letter-spacing: 0.5px;
+    }
+
+    /* 大卡片背景装饰 */
+    .bento-card__deco {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+
+    .bento-card__deco--pingpong {
+      bottom: -20px;
+      right: -20px;
+      width: 180px;
+      height: 180px;
+    }
+
+    /* 卡片编号 */
+    .bento-card__number {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 32px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: rgba(91, 141, 239, 0.15);
+      line-height: 1;
+      letter-spacing: -1px;
+    }
+
+    /* 中等卡片渐变背景变体 */
+    .bento-card--medium.bento-card--web {
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.03) 0%, rgba(126, 182, 232, 0.06) 100%);
+    }
+
+    .bento-card--medium.bento-card--medical {
+      background: linear-gradient(135deg, rgba(126, 182, 232, 0.04) 0%, rgba(91, 141, 239, 0.05) 100%);
+    }
+
+    /* 小卡片重新设计：横向布局 + 编号 */
+    .bento-card--small {
+      grid-column: span 1;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: left;
+      padding: 18px 20px;
+      gap: 14px;
+    }
+
+    .bento-card--small .bento-card__icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .bento-card--small .bento-card__icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .bento-card--small .bento-card__title {
+      font-size: 14px;
+      margin-bottom: 0;
+      flex: 1;
+    }
+
+    .bento-card--small .bento-card__number {
+      position: static;
+      font-size: 20px;
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    .bento-card--small:hover {
+      background-color: rgba(91, 141, 239, 0.04);
+    }
+
+    /* 未来目标卡片渐变边框 */
+    .bento-card--goal {
+      grid-column: span 4;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      padding: 24px 28px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.06) 0%, rgba(126, 182, 232, 0.08) 100%);
+      border: 1px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .bento-card--goal .bento-card__icon {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .bento-card--goal::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.4), rgba(126, 182, 232, 0.2), rgba(91, 141, 239, 0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .bento-card--goal:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    /* 进度条初始状态（JS控制动画） */
+    .bento-card__level-fill {
+      width: 0 !important;
+    }
+
+    .bento-card__level-fill.animate {
+      width: var(--target-width) !important;
     }
 
     /* ===== 数字分身 ===== */
@@ -1914,6 +2044,10 @@
       .bento-card--medium {
         grid-column: span 2;
       }
+
+      .bento-card--goal {
+        grid-column: span 2;
+      }
     }
 
     /* ===== 减少动画偏好支持 ===== */
@@ -2476,6 +2610,12 @@
           <!-- 大卡片：乒乓球 -->
           <article class="bento-card bento-card--large reveal reveal-delay-1">
             <span class="bento-card__badge">最热爱</span>
+            <svg class="bento-card__deco bento-card__deco--pingpong" viewBox="0 0 180 180" fill="none" aria-hidden="true">
+              <circle cx="90" cy="90" r="70" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 6"/>
+              <path d="M30 120 Q70 60 130 80 T160 50" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              <circle cx="160" cy="50" r="6" fill="currentColor"/>
+              <path d="M20 150 Q60 100 100 130" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.5"/>
+            </svg>
             <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -2486,14 +2626,15 @@
             <p class="bento-card__desc">最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
             <div class="bento-card__level">
               <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="width: 80%"></div>
+                <div class="bento-card__level-fill" style="--target-width: 80%"></div>
               </div>
               <span class="bento-card__level-text">熟练 · 打了很多年</span>
             </div>
           </article>
 
           <!-- 中等卡片：网页制作 -->
-          <article class="bento-card bento-card--medium reveal reveal-delay-2">
+          <article class="bento-card bento-card--medium bento-card--web reveal reveal-delay-2">
+            <span class="bento-card__number">01</span>
             <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
@@ -2504,14 +2645,15 @@
             <p class="bento-card__desc">用纯 HTML/CSS/JS 搭建静态网页，从 V1 到 V2 一步步迭代，正在学习响应式布局和交互设计。</p>
             <div class="bento-card__level">
               <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="width: 35%"></div>
+                <div class="bento-card__level-fill" style="--target-width: 35%"></div>
               </div>
               <span class="bento-card__level-text">学习中 · 能独立做简单页面</span>
             </div>
           </article>
 
           <!-- 中等卡片：智能医学 -->
-          <article class="bento-card bento-card--medium reveal reveal-delay-3">
+          <article class="bento-card bento-card--medium bento-card--medical reveal reveal-delay-3">
+            <span class="bento-card__number">02</span>
             <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
@@ -2522,7 +2664,7 @@
             <p class="bento-card__desc">大一在读，正在打牢医学和工程的交叉基础，对脑机接口方向特别感兴趣，希望未来能在这个前沿领域有所发展。</p>
             <div class="bento-card__level">
               <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="width: 30%"></div>
+                <div class="bento-card__level-fill" style="--target-width: 30%"></div>
               </div>
               <span class="bento-card__level-text">入门 · 大一打基础中</span>
             </div>
@@ -2537,6 +2679,7 @@
               </svg>
             </div>
             <h3 class="bento-card__title">阅读</h3>
+            <span class="bento-card__number">01</span>
           </article>
 
           <!-- 小卡片：科技探索 -->
@@ -2548,6 +2691,7 @@
               </svg>
             </div>
             <h3 class="bento-card__title">科技探索</h3>
+            <span class="bento-card__number">02</span>
           </article>
 
           <!-- 小卡片：城市漫步 -->
@@ -2559,6 +2703,7 @@
               </svg>
             </div>
             <h3 class="bento-card__title">城市漫步</h3>
+            <span class="bento-card__number">03</span>
           </article>
 
           <!-- 小卡片：时间管理 -->
@@ -2570,9 +2715,10 @@
               </svg>
             </div>
             <h3 class="bento-card__title">时间管理</h3>
+            <span class="bento-card__number">04</span>
           </article>
-          <article class="bento-card bento-card--small bento-card--goal reveal reveal-delay-1" style="grid-column: span 4; display: flex; flex-direction: row; align-items: center; gap: 20px; padding: 24px 28px;">
-            <div class="bento-card__icon" style="margin-bottom: 0; flex-shrink: 0;">
+          <article class="bento-card bento-card--goal reveal reveal-delay-1">
+            <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
                 <circle cx="12" cy="12" r="6"></circle>
@@ -2951,12 +3097,10 @@
       if (bentoAnimated || bentoFills.length === 0) return;
       const rect = skillsSection.getBoundingClientRect();
       if (rect.top < window.innerHeight * 0.8) {
-        bentoFills.forEach(function (fill) {
-          const width = fill.style.width;
-          fill.style.width = '0%';
+        bentoFills.forEach(function (fill, index) {
           setTimeout(function () {
-            fill.style.width = width;
-          }, 200);
+            fill.classList.add('animate');
+          }, 150 + index * 150);
         });
         bentoAnimated = true;
       }
