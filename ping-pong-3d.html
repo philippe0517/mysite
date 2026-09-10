@@ -414,7 +414,8 @@
     <button class="start-btn" id="startBtn">开赛</button>
     <div class="start-tips">
       移动鼠标控制球拍 · 按住鼠标蓄力，松开击球（蓄力越久力量越大）<br>
-      真实横握拍姿势 · 奥运决赛赛场 · 观众欢呼音效 · 乒乓球拖尾
+      右键切换正反手（正手红胶皮/反手黑胶皮）
+      真实横握拍姿势 · 正反手切换 · 奥运决赛赛场 · 观众欢呼音效 · 乒乓球拖尾
     </div>
   </div>
 
@@ -458,7 +459,7 @@
     </div>
 
     <div class="controls-hint">
-      <strong>移动鼠标</strong> 控制球拍 · <strong>按住鼠标</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>Esc</strong> 暂停
+      <strong>移动鼠标</strong> 控制球拍 · <strong>按住左键</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>右键</strong> 切换正反手 · <strong>Esc</strong> 暂停
     </div>
 
     <a href="index.html" class="back-link">← 返回主页</a>
@@ -510,6 +511,12 @@
     // 鼠标控制
     let mouseX = 0, mouseY = 0;
     let targetPaddleX = 0, targetPaddleY = 0;
+
+    // 正反手状态
+    let isForehand = true; // true=正手(红色胶皮), false=反手(黑色胶皮)
+    let paddleTransition = 1; // 正反手切换过渡 0-1
+    let isCelebrating = false; // 庆祝动画状态
+    let celebrateTime = 0;
 
     // 蓄力
     let isCharging = false;
@@ -1034,12 +1041,13 @@
 
     // 创建球拍（真实横握拍姿势）
     function createPaddles() {
-      // 玩家球拍 + 手臂（第一人称视角，横握拍）
-      playerPaddle = createRealPaddle(0x7EB6D9, true);
+      // 玩家球拍 + 手臂（第一人称视角，横握拍，正手红色胶皮朝向镜头）
+      playerPaddle = createRealPaddle(true);
       playerPaddle.position.set(0, CONFIG.table.height + 0.08, CONFIG.table.length / 2 - 0.1);
-      // 横握拍姿势：拍面略微前倾，手柄向身体方向
-      playerPaddle.rotation.x = -0.3;
-      playerPaddle.rotation.z = 0.1;
+      // 正手握拍姿势：拍面稍前倾，手柄向身体右下方（右手持拍）
+      playerPaddle.rotation.x = -0.35;
+      playerPaddle.rotation.y = -0.2;
+      playerPaddle.rotation.z = 0.15;
       scene.add(playerPaddle);
 
       // 玩家手臂（从镜头下方延伸出）
@@ -1047,69 +1055,133 @@
       scene.add(playerArm);
 
       // 电脑球拍（对面，横握拍）
-      aiPaddle = createRealPaddle(0xE8787A, false);
+      aiPaddle = createRealPaddle(false);
       aiPaddle.position.set(0, CONFIG.table.height + 0.08, -CONFIG.table.length / 2 + 0.1);
-      aiPaddle.rotation.x = 0.3;
-      aiPaddle.rotation.z = -0.1;
+      aiPaddle.rotation.x = 0.35;
+      aiPaddle.rotation.y = 0.2;
+      aiPaddle.rotation.z = -0.15;
       scene.add(aiPaddle);
     }
 
     // 创建真实球拍（横拍）
-    function createRealPaddle(color, isPlayer) {
+    function createRealPaddle(isPlayer) {
       const group = new THREE.Group();
 
-      // 拍面（椭圆形，真实球拍形状）
+      // 拍面底板（木质）
       const bladeShape = new THREE.Shape();
       const w = CONFIG.paddle.width / 2;
       const h = CONFIG.paddle.height / 2;
-      bladeShape.moveTo(0, -h);
-      bladeShape.bezierCurveTo(w, -h, w, h, 0, h);
-      bladeShape.bezierCurveTo(-w, h, -w, -h, 0, -h);
+      // 真实球拍形状：略圆的拍头，稍窄的拍肩
+      bladeShape.moveTo(0, -h * 0.85);
+      bladeShape.bezierCurveTo(w * 0.9, -h * 0.85, w, -h * 0.3, w, h * 0.2);
+      bladeShape.bezierCurveTo(w, h * 0.8, w * 0.6, h, 0, h);
+      bladeShape.bezierCurveTo(-w * 0.6, h, -w, h * 0.8, -w, h * 0.2);
+      bladeShape.bezierCurveTo(-w, -h * 0.3, -w * 0.9, -h * 0.85, 0, -h * 0.85);
 
-      const extrudeSettings = { depth: CONFIG.paddle.thickness, bevelEnabled: true, bevelThickness: 0.002, bevelSize: 0.002, bevelSegments: 2 };
+      const extrudeSettings = {
+        depth: CONFIG.paddle.thickness,
+        bevelEnabled: true,
+        bevelThickness: 0.002,
+        bevelSize: 0.002,
+        bevelSegments: 2
+      };
       const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings);
-      const bladeMat = new THREE.MeshStandardMaterial({
-        color: color,
-        roughness: 0.55,
+      const woodMat = new THREE.MeshStandardMaterial({
+        color: 0xD4A574,
+        roughness: 0.6,
         metalness: 0.05
       });
-      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      const blade = new THREE.Mesh(bladeGeo, woodMat);
       blade.rotation.x = Math.PI / 2;
       blade.castShadow = true;
       group.add(blade);
 
+      // 正手胶皮（红色，朝向镜头/前方）
+      const rubberGeo = new THREE.ExtrudeGeometry(bladeShape, {
+        depth: 0.003,
+        bevelEnabled: false
+      });
+      const forehandMat = new THREE.MeshStandardMaterial({
+        color: 0xCC2222,
+        roughness: 0.8,
+        metalness: 0.0
+      });
+      const forehandRubber = new THREE.Mesh(rubberGeo, forehandMat);
+      forehandRubber.rotation.x = Math.PI / 2;
+      forehandRubber.position.z = CONFIG.paddle.thickness / 2 + 0.001;
+      forehandRubber.name = 'forehandRubber';
+      group.add(forehandRubber);
+
+      // 反手胶皮（黑色，朝向后方）
+      const backhandMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        roughness: 0.85,
+        metalness: 0.0
+      });
+      const backhandRubber = new THREE.Mesh(rubberGeo, backhandMat);
+      backhandRubber.rotation.x = Math.PI / 2;
+      backhandRubber.rotation.y = Math.PI;
+      backhandRubber.position.z = -CONFIG.paddle.thickness / 2 - 0.001;
+      backhandRubber.name = 'backhandRubber';
+      group.add(backhandRubber);
+
       // 拍面边缘（木质包边）
-      const edgeGeo = new THREE.TorusGeometry(w * 0.9, 0.004, 8, 32);
+      const edgeGeo = new THREE.TorusGeometry(w * 0.85, 0.004, 8, 32);
       const edgeMat = new THREE.MeshStandardMaterial({
         color: 0x8B4513,
         roughness: 0.7
       });
       const edge = new THREE.Mesh(edgeGeo, edgeMat);
       edge.rotation.x = Math.PI / 2;
-      edge.scale.y = h / w;
+      edge.scale.y = h / w * 0.9;
       group.add(edge);
 
-      // 手柄（横拍长手柄）
-      const handleGeo = new THREE.CylinderGeometry(0.018, 0.022, 0.12, 12);
+      // 手柄（横拍长手柄，FL收腰柄）
+      const handleGeo = new THREE.CylinderGeometry(0.016, 0.024, 0.1, 12);
       const handleMat = new THREE.MeshStandardMaterial({
         color: 0x6B4423,
         roughness: 0.75
       });
       const handle = new THREE.Mesh(handleGeo, handleMat);
-      handle.position.set(0, -0.08, 0);
+      handle.position.set(0, -0.09, 0);
       handle.rotation.x = Math.PI / 2;
       handle.castShadow = true;
       group.add(handle);
 
+      // 手柄底部收腰
+      const handleEndGeo = new THREE.CylinderGeometry(0.02, 0.016, 0.02, 12);
+      const handleEnd = new THREE.Mesh(handleEndGeo, handleMat);
+      handleEnd.position.set(0, -0.145, 0);
+      handleEnd.rotation.x = Math.PI / 2;
+      group.add(handleEnd);
+
       // 手柄防滑纹理（深色环）
-      for (let i = 0; i < 3; i++) {
-        const gripGeo = new THREE.TorusGeometry(0.02, 0.003, 6, 16);
+      for (let i = 0; i < 4; i++) {
+        const gripGeo = new THREE.TorusGeometry(0.019, 0.002, 6, 16);
         const gripMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a });
         const grip = new THREE.Mesh(gripGeo, gripMat);
-        grip.position.set(0, -0.06 - i * 0.025, 0);
+        grip.position.set(0, -0.065 - i * 0.02, 0);
         grip.rotation.x = Math.PI / 2;
         group.add(grip);
       }
+
+      // 拍肩标识（小标签）
+      const labelGeo = new THREE.PlaneGeometry(0.04, 0.015);
+      const labelCanvas = document.createElement('canvas');
+      labelCanvas.width = 64;
+      labelCanvas.height = 24;
+      const labelCtx = labelCanvas.getContext('2d');
+      labelCtx.fillStyle = '#c9a96e';
+      labelCtx.font = 'bold 10px sans-serif';
+      labelCtx.textAlign = 'center';
+      labelCtx.textBaseline = 'middle';
+      labelCtx.fillText('DHS', 32, 12);
+      const labelTexture = new THREE.CanvasTexture(labelCanvas);
+      const labelMat = new THREE.MeshBasicMaterial({ map: labelTexture, transparent: true });
+      const label = new THREE.Mesh(labelGeo, labelMat);
+      label.position.set(0, -0.02, CONFIG.paddle.thickness / 2 + 0.005);
+      label.rotation.x = -Math.PI / 2;
+      group.add(label);
 
       return group;
     }
@@ -1333,7 +1405,11 @@
           isWin ? '冠军！' : '惜败',
           isWin ? `你以 ${playerScore}:${aiScore} 赢得了奥运金牌！` : `以 ${playerScore}:${aiScore} 获得银牌，再接再厉！`
         );
-        if (isWin) setCrowdIntensity(1);
+        if (isWin) {
+          startCelebration();
+        } else {
+          setCrowdIntensity(0.3);
+        }
         return;
       }
 
@@ -1458,26 +1534,98 @@
 
     // ===== 玩家控制 =====
     function updatePlayerPaddle(dt) {
-      targetPaddleX = mouseX * CONFIG.table.width * 0.55;
-      targetPaddleY = CONFIG.table.height + 0.06 + mouseY * 0.25;
-
-      targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetPaddleX));
-      targetPaddleY = Math.max(CONFIG.table.height + 0.03, Math.min(CONFIG.table.height + 0.4, targetPaddleY));
-
-      playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, 18 * dt);
-      playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, 18 * dt);
-
-      // 真实握拍姿势：球拍随鼠标移动倾斜，蓄力时拍面更闭合
-      const chargeTilt = isCharging ? currentPower * 0.3 : 0;
-      playerPaddle.rotation.y = mouseX * 0.25;
-      playerPaddle.rotation.x = -0.25 - mouseY * 0.15 - chargeTilt;
-      playerPaddle.rotation.z = 0.1 + mouseX * 0.1;
-
-      // 手臂跟随
-      if (playerArm) {
-        playerArm.position.x = playerPaddle.position.x * 0.3;
-        playerArm.rotation.y = playerPaddle.position.x * 0.1;
+      // 庆祝动画优先
+      if (isCelebrating) {
+        celebrateTime += dt;
+        // 球拍上举挥动庆祝
+        const celebrateY = CONFIG.table.height + 0.3 + Math.sin(celebrateTime * 8) * 0.1;
+        const celebrateX = Math.sin(celebrateTime * 4) * 0.15;
+        playerPaddle.position.x += (celebrateX - playerPaddle.position.x) * Math.min(1, 8 * dt);
+        playerPaddle.position.y += (celebrateY - playerPaddle.position.y) * Math.min(1, 8 * dt);
+        playerPaddle.rotation.x = -0.8 + Math.sin(celebrateTime * 6) * 0.3;
+        playerPaddle.rotation.z = 0.3 + Math.sin(celebrateTime * 5) * 0.2;
+        playerPaddle.rotation.y = Math.sin(celebrateTime * 3) * 0.4;
+        return;
       }
+
+      // 球拍中心跟随鼠标（鼠标位置即球拍中心）
+      // 限制鼠标范围在球桌内，不会拉出屏幕
+      const clampedMouseX = Math.max(-0.85, Math.min(0.85, mouseX));
+      const clampedMouseY = Math.max(-0.7, Math.min(0.7, mouseY));
+
+      // 正反手位置偏移：正手偏右，反手偏左（右手持拍）
+      const handOffsetX = isForehand ? 0.05 : -0.05;
+      const handOffsetY = isForehand ? 0 : 0.02;
+
+      targetPaddleX = clampedMouseX * CONFIG.table.width * 0.5 + handOffsetX;
+      targetPaddleY = CONFIG.table.height + 0.08 + clampedMouseY * 0.22 + handOffsetY;
+
+      // 严格限制球拍范围（不拉出屏幕/球桌）
+      targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.12, Math.min(CONFIG.table.width / 2 - 0.12, targetPaddleX));
+      targetPaddleY = Math.max(CONFIG.table.height + 0.04, Math.min(CONFIG.table.height + 0.35, targetPaddleY));
+
+      // 平滑跟随（更快的响应，球拍中心紧跟鼠标）
+      playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, 25 * dt);
+      playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, 25 * dt);
+
+      // 正反手切换过渡动画
+      const targetTransition = isForehand ? 1 : 0;
+      paddleTransition += (targetTransition - paddleTransition) * Math.min(1, 10 * dt);
+
+      // 真实握拍角度
+      // 正手：拍面前倾，手腕外展，球拍稍向右
+      // 反手：拍面后仰，手腕内收，球拍稍向左
+      const forehandRotX = -0.35;
+      const backhandRotX = -0.15;
+      const forehandRotY = -0.25;
+      const backhandRotY = 0.35;
+      const forehandRotZ = 0.2;
+      const backhandRotZ = -0.15;
+
+      const chargeTilt = isCharging ? currentPower * 0.25 : 0;
+
+      playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - mouseY * 0.1 - chargeTilt;
+      playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + mouseX * 0.15;
+      playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + mouseX * 0.08;
+
+      // 手臂跟随（正反手手臂位置不同）
+      if (playerArm) {
+        const armOffsetX = isForehand ? 0.1 : -0.1;
+        playerArm.position.x = playerPaddle.position.x * 0.4 + armOffsetX;
+        playerArm.rotation.y = playerPaddle.position.x * 0.15;
+        playerArm.rotation.z = isForehand ? -0.1 : 0.1;
+      }
+    }
+
+    // 切换正反手
+    function toggleForehand() {
+      isForehand = !isForehand;
+      // 切换时播放轻微音效
+      if (audioCtx) {
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(isForehand ? 600 : 500, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.08);
+        } catch (e) {}
+      }
+    }
+
+    // 开始庆祝动画
+    function startCelebration() {
+      isCelebrating = true;
+      celebrateTime = 0;
+      setCrowdIntensity(1);
+      // 5秒后结束庆祝
+      setTimeout(() => {
+        isCelebrating = false;
+      }, 5000);
     }
 
     // ===== 蓄力控制 =====
@@ -1577,6 +1725,20 @@
         }
       });
 
+      // 右键切换正反手
+      document.addEventListener('mousedown', (e) => {
+        if (e.button === 2) {
+          e.preventDefault();
+          initAudio();
+          toggleForehand();
+        }
+      });
+
+      // 禁用右键菜单
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+      });
+
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           if (gameState === 'playing') {
@@ -1636,6 +1798,10 @@
       serveCount = 0;
       isPlayerServing = true;
       currentPower = 0;
+      isCelebrating = false;
+      celebrateTime = 0;
+      isForehand = true;
+      paddleTransition = 1;
       updateScoreDisplay();
       setCrowdIntensity(0.2);
       prepareServe();
@@ -1647,6 +1813,10 @@
       serveCount = 0;
       isPlayerServing = true;
       currentPower = 0;
+      isCelebrating = false;
+      celebrateTime = 0;
+      isForehand = true;
+      paddleTransition = 1;
       updateScoreDisplay();
       hideMessage();
       setCrowdIntensity(0.2);
