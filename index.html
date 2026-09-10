@@ -76,6 +76,210 @@
       scrollbar-width: thin;
     }
 
+    /* ===== 乒乓球弹跳加载动画 ===== */
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--color-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .page-loader.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-ball {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0 40%, #d0d0d0 100%);
+      box-shadow: inset -3px -3px 8px rgba(0,0,0,0.1), 0 4px 12px rgba(91,141,239,0.2);
+      position: relative;
+      animation: loaderBounce 0.6s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    }
+
+    .loader-ball::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.8);
+    }
+
+    .loader-shadow {
+      width: 50px;
+      height: 8px;
+      background: radial-gradient(ellipse, rgba(91,141,239,0.25), transparent 70%);
+      border-radius: 50%;
+      margin-top: 8px;
+      animation: loaderShadow 0.6s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    }
+
+    .loader-text {
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      letter-spacing: 1px;
+      animation: loaderTextPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes loaderBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-50px); }
+    }
+
+    @keyframes loaderShadow {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(0.6); opacity: 0.3; }
+    }
+
+    @keyframes loaderTextPulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    /* ===== Konami 乒乓球游戏全屏覆盖层 ===== */
+    .pingpong-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(30, 58, 95, 0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .pingpong-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .pingpong-overlay__title {
+      color: var(--color-white);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-family: var(--font-display);
+    }
+
+    .pingpong-overlay__subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .pingpong-overlay__canvas {
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .pingpong-overlay__score {
+      display: flex;
+      gap: 48px;
+      margin-top: 20px;
+      color: var(--color-white);
+      font-size: 24px;
+      font-weight: 700;
+      font-family: var(--font-display);
+    }
+
+    .pingpong-overlay__score span {
+      min-width: 40px;
+      text-align: center;
+    }
+
+    .pingpong-overlay__score .label {
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.5);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .pingpong-overlay__hint {
+      margin-top: 20px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .pingpong-overlay__close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: var(--color-white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease;
+      font-size: 20px;
+    }
+
+    .pingpong-overlay__close:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .pingpong-overlay__message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--color-white);
+      font-size: 32px;
+      font-weight: 700;
+      font-family: var(--font-display);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .pingpong-overlay__message.show {
+      opacity: 1;
+    }
+
+    /* 鼠标脑电波轨迹 Canvas */
+    #eegTrailCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+    }
+
     body {
       font-family: var(--font-body);
       background-color: var(--color-bg);
@@ -116,6 +320,47 @@
 
     .section {
       padding: 96px 0;
+    }
+
+    /* ===== 脑电波波形分隔线 ===== */
+    .eeg-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 0;
+      margin: 0;
+      height: 40px;
+      overflow: hidden;
+    }
+
+    .eeg-divider__line {
+      flex: 1;
+      max-width: 300px;
+      height: 40px;
+    }
+
+    .eeg-divider__line path {
+      fill: none;
+      stroke: rgba(91, 141, 239, 0.2);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      transition: stroke-dashoffset 1.5s ease;
+    }
+
+    .eeg-divider.visible .eeg-divider__line path {
+      stroke-dashoffset: 0;
+    }
+
+    .eeg-divider__label {
+      font-size: 11px;
+      color: rgba(91, 141, 239, 0.4);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+      white-space: nowrap;
     }
 
     /* ===== 滚动显现动画 ===== */
@@ -544,6 +789,17 @@
       right: 8%;
       width: 280px;
       height: 280px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: opacity 0.3s ease;
+    }
+
+    .hero__deco--arc:hover {
+      opacity: 0.25;
+    }
+
+    .hero__deco--arc:active {
+      transform: scale(0.95);
     }
 
     .hero__deco--ball {
@@ -552,6 +808,38 @@
       width: 60px;
       height: 60px;
       animation: floatBall 6s ease-in-out infinite;
+    }
+
+    /* 爆冲乒乓球动画 */
+    .smash-ball {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff, #f0f0f0 40%, #d0d0d0 100%);
+      box-shadow: 0 2px 8px rgba(91,141,239,0.3);
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    .smash-ball.animate {
+      animation: smashFly 0.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+    }
+
+    @keyframes smashFly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+      30% {
+        opacity: 1;
+        transform: translate(80px, -60px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(300px, -120px) scale(0.5);
+      }
     }
 
     @keyframes floatBall {
@@ -1360,6 +1648,94 @@
 
     .bento-card--goal:hover {
       box-shadow: var(--shadow-md);
+    }
+
+    /* 思维读取器彩蛋 */
+    .mind-reader {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background-color: rgba(91, 141, 239, 0.08);
+      border: 1px solid rgba(91, 141, 239, 0.2);
+      border-radius: 100px;
+      font-size: 12px;
+      color: var(--color-primary);
+      cursor: pointer;
+      transition: var(--transition);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .mind-reader:hover {
+      background-color: rgba(91, 141, 239, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .mind-reader__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      animation: mindDotPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes mindDotPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .mind-reader__line {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(90deg, var(--color-primary), transparent);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 10;
+    }
+
+    .mind-reader.reading .mind-reader__line {
+      opacity: 0.6;
+    }
+
+    .mind-reader__result {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background-color: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--color-text);
+      white-space: nowrap;
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+      z-index: 20;
+    }
+
+    .mind-reader__result.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .mind-reader__result::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-white);
+      border-left: 1px solid var(--color-border);
+      border-top: 1px solid var(--color-border);
     }
 
     /* 进度条初始状态（JS控制动画） */
@@ -2356,8 +2732,32 @@
 </head>
 <body>
 
+  <!-- ===== 乒乓球弹跳加载动画 ===== -->
+  <div class="page-loader" id="pageLoader">
+    <div class="loader-ball"></div>
+    <div class="loader-shadow"></div>
+    <div class="loader-text">正在加载...</div>
+  </div>
+
+  <!-- ===== Konami 乒乓球游戏全屏覆盖层 ===== -->
+  <div class="pingpong-overlay" id="pingpongOverlay">
+    <button class="pingpong-overlay__close" id="pingpongClose" type="button" aria-label="关闭游戏">&times;</button>
+    <div class="pingpong-overlay__title">乒乓球对战</div>
+    <div class="pingpong-overlay__subtitle">彩蛋解锁！先得 5 分获胜</div>
+    <canvas class="pingpong-overlay__canvas" id="pingpongCanvas" width="600" height="400"></canvas>
+    <div class="pingpong-overlay__score">
+      <div><span class="label">你</span><span id="playerScore">0</span></div>
+      <div><span class="label">电脑</span><span id="aiScore">0</span></div>
+    </div>
+    <div class="pingpong-overlay__hint">鼠标上下移动控制左侧球拍 · 按 Esc 或点击右上角关闭</div>
+    <div class="pingpong-overlay__message" id="pingpongMessage"></div>
+  </div>
+
   <!-- ===== 页面滚动进度条 ===== -->
   <div class="scroll-progress" id="scrollProgress"></div>
+
+  <!-- ===== 鼠标脑电波轨迹 ===== -->
+  <canvas id="eegTrailCanvas"></canvas>
 
   <!-- ===== 顶部导航 ===== -->
   <header class="site-header">
@@ -2387,8 +2787,8 @@
 
     <!-- ===== Hero 首屏 ===== -->
     <section class="hero">
-      <!-- 乒乓球轨迹装饰 -->
-      <svg class="hero__deco hero__deco--arc" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+      <!-- 乒乓球轨迹装饰（可点击爆冲彩蛋） -->
+      <svg class="hero__deco hero__deco--arc" id="heroArc" viewBox="0 0 200 200" fill="none" aria-label="点击触发爆冲" role="button" tabindex="0">
         <path d="M20 180 Q100 20 180 100" stroke="#5B8DEF" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 8"/>
         <circle cx="180" cy="100" r="6" fill="#7EB6E8"/>
         <circle cx="20" cy="180" r="4" fill="#5B8DEF" opacity="0.5"/>
@@ -2501,6 +2901,17 @@
         </div>
       </div>
     </section>
+
+    <!-- 脑电波分隔线（α波 - 放松状态） -->
+    <div class="eeg-divider" data-wave="alpha">
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 Q15 20 20 15 Q25 10 30 20 Q35 30 40 20 Q45 10 50 20 Q55 30 60 20 Q65 10 70 20 Q75 30 80 20 Q85 10 90 20 Q95 30 100 20 Q105 10 110 20 Q115 30 120 20 Q125 10 130 20 Q135 30 140 20 Q145 10 150 20 Q155 30 160 20 Q165 10 170 20 Q175 30 180 20 Q185 10 190 20 Q195 30 200 20 Q205 10 210 20 Q215 30 220 20 Q225 10 230 20 Q235 30 240 20 Q245 10 250 20 Q255 30 260 20 Q265 10 270 20 Q275 30 280 20 Q285 10 290 20 Q295 25 300 20"/>
+      </svg>
+      <span class="eeg-divider__label">α wave</span>
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 Q15 20 20 15 Q25 10 30 20 Q35 30 40 20 Q45 10 50 20 Q55 30 60 20 Q65 10 70 20 Q75 30 80 20 Q85 10 90 20 Q95 30 100 20 Q105 10 110 20 Q115 30 120 20 Q125 10 130 20 Q135 30 140 20 Q145 10 150 20 Q155 30 160 20 Q165 10 170 20 Q175 30 180 20 Q185 10 190 20 Q195 30 200 20 Q205 10 210 20 Q215 30 220 20 Q225 10 230 20 Q235 30 240 20 Q245 10 250 20 Q255 30 260 20 Q265 10 270 20 Q275 30 280 20 Q285 10 290 20 Q295 25 300 20"/>
+      </svg>
+    </div>
 
     <!-- ===== 性格趣味卡 ===== -->
     <section class="section personality" id="personality">
@@ -2730,6 +3141,17 @@
       </div>
     </section>
 
+    <!-- 脑电波分隔线（β波 - 专注状态） -->
+    <div class="eeg-divider" data-wave="beta">
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 L10 20 L15 8 L20 32 L25 12 L30 28 L35 15 L40 25 L45 10 L50 30 L55 14 L60 26 L65 11 L70 29 L75 13 L80 27 L85 10 L90 30 L95 15 L100 25 L105 12 L110 28 L115 10 L120 30 L125 14 L130 26 L135 11 L140 29 L145 13 L150 27 L155 10 L160 30 L165 15 L170 25 L175 12 L180 28 L185 10 L190 30 L195 14 L200 26 L205 11 L210 29 L215 13 L220 27 L225 10 L230 30 L235 15 L240 25 L245 12 L250 28 L255 10 L260 30 L265 14 L270 26 L275 11 L280 29 L285 13 L290 27 L295 18 L300 20"/>
+      </svg>
+      <span class="eeg-divider__label">β wave</span>
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 L10 20 L15 8 L20 32 L25 12 L30 28 L35 15 L40 25 L45 10 L50 30 L55 14 L60 26 L65 11 L70 29 L75 13 L80 27 L85 10 L90 30 L95 15 L100 25 L105 12 L110 28 L115 10 L120 30 L125 14 L130 26 L135 11 L140 29 L145 13 L150 27 L155 10 L160 30 L165 15 L170 25 L175 12 L180 28 L185 10 L190 30 L195 14 L200 26 L205 11 L210 29 L215 13 L220 27 L225 10 L230 30 L235 15 L240 25 L245 12 L250 28 L255 10 L260 30 L265 14 L270 26 L275 11 L280 29 L285 13 L290 27 L295 18 L300 20"/>
+      </svg>
+    </div>
+
     <!-- ===== 兴趣技能（Bento Grid） ===== -->
     <section class="section skills" id="skills">
       <div class="container">
@@ -2861,7 +3283,12 @@
               <h3 class="bento-card__title" style="margin-bottom: 6px;">未来目标 · 脑机接口方向</h3>
               <p class="bento-card__desc" style="margin-bottom: 0;">对智能医学领域的脑机接口方向特别着迷，希望未来能用技术手段帮助更多人。路还很长，先从大一的基础打扎实，一步步靠近这个目标。</p>
             </div>
-            <span class="bento-card__badge" style="position: static; flex-shrink: 0;">Future Goal</span>
+            <div class="mind-reader" id="mindReader" tabindex="0" role="button" aria-label="点击读取思维">
+              <span class="mind-reader__dot"></span>
+              <span class="mind-reader__text">读取思维</span>
+              <div class="mind-reader__line" id="mindReaderLine"></div>
+              <div class="mind-reader__result" id="mindReaderResult">检测到：想做脑机接口研究</div>
+            </div>
           </article>
         </div>
       </div>
@@ -2918,6 +3345,17 @@
         </div>
       </div>
     </section>
+
+    <!-- 脑电波分隔线（θ波 - 创意状态） -->
+    <div class="eeg-divider" data-wave="theta">
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 Q20 20 25 10 Q30 0 40 20 Q50 40 60 20 Q70 5 80 20 Q90 35 100 20 Q110 8 120 20 Q130 32 140 20 Q150 10 160 20 Q170 30 180 20 Q190 12 200 20 Q210 28 220 20 Q230 14 240 20 Q250 26 260 20 Q270 16 280 20 Q290 24 300 20"/>
+      </svg>
+      <span class="eeg-divider__label">θ wave</span>
+      <svg class="eeg-divider__line" viewBox="0 0 300 40" preserveAspectRatio="none">
+        <path d="M0 20 Q20 20 25 10 Q30 0 40 20 Q50 40 60 20 Q70 5 80 20 Q90 35 100 20 Q110 8 120 20 Q130 32 140 20 Q150 10 160 20 Q170 30 180 20 Q190 12 200 20 Q210 28 220 20 Q230 14 240 20 Q250 26 260 20 Q270 16 280 20 Q290 24 300 20"/>
+      </svg>
+    </div>
 
     <!-- ===== 联系我 ===== -->
     <section class="section contact" id="contact">
@@ -3074,6 +3512,49 @@
       });
     });
 
+    // ===== 乒乓球弹跳加载动画 + 音效 =====
+    (function () {
+      var loader = document.getElementById('pageLoader');
+      if (!loader) return;
+
+      // Web Audio 合成乒乓球弹跳声
+      var audioCtx = null;
+      function playBounceSound() {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          var oscillator = audioCtx.createOscillator();
+          var gainNode = audioCtx.createGain();
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+          oscillator.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+          oscillator.start(audioCtx.currentTime);
+          oscillator.stop(audioCtx.currentTime + 0.1);
+        } catch (e) { /* 静默失败 */ }
+      }
+
+      // 第一次用户交互后解锁音频，播放弹跳声
+      var firstInteract = function () {
+        playBounceSound();
+        document.removeEventListener('click', firstInteract);
+        document.removeEventListener('keydown', firstInteract);
+      };
+      document.addEventListener('click', firstInteract);
+      document.addEventListener('keydown', firstInteract);
+
+      // 1.5秒后隐藏加载动画
+      setTimeout(function () {
+        loader.classList.add('hidden');
+        setTimeout(function () {
+          if (loader.parentNode) loader.parentNode.removeChild(loader);
+        }, 500);
+      }, 1500);
+    })();
+
     // ===== Hero Spotlight 聚光灯跟随鼠标 =====
     (function () {
       const hero = document.querySelector('.hero');
@@ -3086,6 +3567,54 @@
         const y = e.clientY - rect.top;
         spotlight.style.left = x + 'px';
         spotlight.style.top = y + 'px';
+      });
+    })();
+
+    // ===== Hero 乒乓球爆冲彩蛋 =====
+    (function () {
+      var arc = document.getElementById('heroArc');
+      var hero = document.querySelector('.hero');
+      if (!arc || !hero) return;
+
+      function playSmashSound() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(150, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.15);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.15);
+        } catch (e) { /* 静默失败 */ }
+      }
+
+      function triggerSmash() {
+        var ball = document.createElement('div');
+        ball.className = 'smash-ball';
+        var arcRect = arc.getBoundingClientRect();
+        var heroRect = hero.getBoundingClientRect();
+        ball.style.left = (arcRect.left - heroRect.left + 20) + 'px';
+        ball.style.top = (arcRect.top - heroRect.top + arcRect.height - 30) + 'px';
+        hero.appendChild(ball);
+        void ball.offsetWidth;
+        ball.classList.add('animate');
+        playSmashSound();
+        setTimeout(function () {
+          if (ball.parentNode) ball.parentNode.removeChild(ball);
+        }, 900);
+      }
+
+      arc.addEventListener('click', triggerSmash);
+      arc.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerSmash();
+        }
       });
     })();
 
@@ -3289,6 +3818,399 @@
         revealElements.forEach(function (el) { observer.observe(el); });
       } catch (e) {
         console.error('滚动显现动画初始化失败:', e);
+      }
+    })();
+
+    // ===== 脑电波分隔线动画（滚动进入视口时画出） =====
+    (function () {
+      var dividers = document.querySelectorAll('.eeg-divider');
+      if (!dividers.length || !('IntersectionObserver' in window)) {
+        dividers.forEach(function (d) { d.classList.add('visible'); });
+        return;
+      }
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+      dividers.forEach(function (d) { observer.observe(d); });
+    })();
+
+    // ===== 思维读取器彩蛋 =====
+    (function () {
+      var reader = document.getElementById('mindReader');
+      var line = document.getElementById('mindReaderLine');
+      var result = document.getElementById('mindReaderResult');
+      var textEl = reader ? reader.querySelector('.mind-reader__text') : null;
+      if (!reader || !line || !result || !textEl) return;
+
+      var isReading = false;
+      var mouseX = 0;
+      var mouseY = 0;
+
+      document.addEventListener('mousemove', function (e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (isReading) {
+          updateLine();
+        }
+      });
+
+      function updateLine() {
+        var rect = reader.getBoundingClientRect();
+        var startX = rect.left + rect.width / 2;
+        var startY = rect.top + rect.height / 2;
+        var dx = mouseX - startX;
+        var dy = mouseY - startY;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        var angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        line.style.width = length + 'px';
+        line.style.left = (rect.width / 2) + 'px';
+        line.style.top = (rect.height / 2) + 'px';
+        line.style.transform = 'rotate(' + angle + 'deg)';
+        line.style.transformOrigin = '0 50%';
+      }
+
+      function startReading() {
+        if (isReading) return;
+        isReading = true;
+        reader.classList.add('reading');
+        textEl.textContent = '正在读取...';
+        result.classList.remove('show');
+        updateLine();
+
+        setTimeout(function () {
+          textEl.textContent = '读取完成';
+          result.classList.add('show');
+          setTimeout(function () {
+            isReading = false;
+            reader.classList.remove('reading');
+            textEl.textContent = '读取思维';
+            setTimeout(function () {
+              result.classList.remove('show');
+            }, 2000);
+          }, 1500);
+        }, 2000);
+      }
+
+      reader.addEventListener('click', startReading);
+      reader.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          startReading();
+        }
+      });
+    })();
+
+    // ===== Konami 代码 + 乒乓球游戏彩蛋 =====
+    (function () {
+      var konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+      var konamiIndex = 0;
+      var overlay = document.getElementById('pingpongOverlay');
+      var canvas = document.getElementById('pingpongCanvas');
+      var closeBtn = document.getElementById('pingpongClose');
+      var playerScoreEl = document.getElementById('playerScore');
+      var aiScoreEl = document.getElementById('aiScore');
+      var messageEl = document.getElementById('pingpongMessage');
+      if (!overlay || !canvas || !closeBtn) return;
+
+      var ctx = canvas.getContext('2d');
+      var gameRunning = false;
+      var animationId = null;
+
+      // 游戏状态
+      var ball = { x: 300, y: 200, vx: 5, vy: 3, radius: 8 };
+      var player = { x: 20, y: 160, width: 10, height: 80 };
+      var ai = { x: 570, y: 160, width: 10, height: 80 };
+      var playerScore = 0;
+      var aiScore = 0;
+      var winScore = 5;
+
+      function resetBall(direction) {
+        ball.x = 300;
+        ball.y = 200;
+        ball.vx = direction * (4 + Math.random() * 2);
+        ball.vy = (Math.random() - 0.5) * 6;
+      }
+
+      function showMessage(text, duration) {
+        messageEl.textContent = text;
+        messageEl.classList.add('show');
+        setTimeout(function () {
+          messageEl.classList.remove('show');
+        }, duration || 1500);
+      }
+
+      function updateScore() {
+        playerScoreEl.textContent = playerScore;
+        aiScoreEl.textContent = aiScore;
+      }
+
+      function gameLoop() {
+        if (!gameRunning) return;
+
+        // 清空画布
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 画中线
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(300, 0);
+        ctx.lineTo(300, 400);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 移动球
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+
+        // 上下边界
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+          ball.vy = -ball.vy;
+          ball.y = Math.max(ball.radius, Math.min(canvas.height - ball.radius, ball.y));
+        }
+
+        // 玩家球拍碰撞
+        if (ball.x - ball.radius < player.x + player.width &&
+            ball.x - ball.radius > player.x &&
+            ball.y > player.y &&
+            ball.y < player.y + player.height &&
+            ball.vx < 0) {
+          ball.vx = -ball.vx * 1.05;
+          var hitPos = (ball.y - player.y) / player.height;
+          ball.vy = (hitPos - 0.5) * 8;
+          ball.x = player.x + player.width + ball.radius;
+        }
+
+        // AI 球拍碰撞
+        if (ball.x + ball.radius > ai.x &&
+            ball.x + ball.radius < ai.x + ai.width &&
+            ball.y > ai.y &&
+            ball.y < ai.y + ai.height &&
+            ball.vx > 0) {
+          ball.vx = -ball.vx * 1.05;
+          var aiHitPos = (ball.y - ai.y) / ai.height;
+          ball.vy = (aiHitPos - 0.5) * 8;
+          ball.x = ai.x - ball.radius;
+        }
+
+        // 得分
+        if (ball.x < 0) {
+          aiScore++;
+          updateScore();
+          if (aiScore >= winScore) {
+            endGame('电脑获胜！');
+            return;
+          }
+          resetBall(1);
+        }
+        if (ball.x > canvas.width) {
+          playerScore++;
+          updateScore();
+          if (playerScore >= winScore) {
+            endGame('你赢了！');
+            return;
+          }
+          resetBall(-1);
+        }
+
+        // AI 移动（简单难度）
+        var aiCenter = ai.y + ai.height / 2;
+        if (aiCenter < ball.y - 20) {
+          ai.y += 3.5;
+        } else if (aiCenter > ball.y + 20) {
+          ai.y -= 3.5;
+        }
+        ai.y = Math.max(0, Math.min(canvas.height - ai.height, ai.y));
+
+        // 画球拍
+        ctx.fillStyle = '#5B8DEF';
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+        ctx.fillStyle = '#7EB6E8';
+        ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
+
+        // 画球
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.shadowColor = 'rgba(91,141,239,0.5)';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        animationId = requestAnimationFrame(gameLoop);
+      }
+
+      function startGame() {
+        playerScore = 0;
+        aiScore = 0;
+        updateScore();
+        resetBall(Math.random() > 0.5 ? 1 : -1);
+        gameRunning = true;
+        showMessage('开始！', 1000);
+        setTimeout(gameLoop, 1000);
+      }
+
+      function endGame(text) {
+        gameRunning = false;
+        if (animationId) cancelAnimationFrame(animationId);
+        showMessage(text, 2500);
+        setTimeout(function () {
+          if (gameRunning) return;
+          startGame();
+        }, 3000);
+      }
+
+      function openGame() {
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        // 重置玩家球拍位置
+        player.y = 160;
+        ai.y = 160;
+        startGame();
+      }
+
+      function closeGame() {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        gameRunning = false;
+        if (animationId) cancelAnimationFrame(animationId);
+      }
+
+      // 鼠标控制玩家球拍
+      canvas.addEventListener('mousemove', function (e) {
+        var rect = canvas.getBoundingClientRect();
+        var y = e.clientY - rect.top - player.height / 2;
+        player.y = Math.max(0, Math.min(canvas.height - player.height, y));
+      });
+
+      // 触摸控制
+      canvas.addEventListener('touchmove', function (e) {
+        e.preventDefault();
+        var rect = canvas.getBoundingClientRect();
+        var y = e.touches[0].clientY - rect.top - player.height / 2;
+        player.y = Math.max(0, Math.min(canvas.height - player.height, y));
+      }, { passive: false });
+
+      closeBtn.addEventListener('click', closeGame);
+
+      // Konami 代码监听
+      document.addEventListener('keydown', function (e) {
+        // Esc 关闭游戏
+        if (e.key === 'Escape' && overlay.classList.contains('active')) {
+          closeGame();
+          return;
+        }
+
+        var expectedKey = konamiCode[konamiIndex];
+        var pressedKey = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+
+        if (pressedKey === expectedKey) {
+          konamiIndex++;
+          if (konamiIndex === konamiCode.length) {
+            konamiIndex = 0;
+            openGame();
+          }
+        } else {
+          konamiIndex = 0;
+        }
+      });
+    })();
+
+    // ===== 鼠标脑电波轨迹 =====
+    (function () {
+      var canvas = document.getElementById('eegTrailCanvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var points = [];
+      var maxPoints = 40;
+      var mouseX = -100;
+      var mouseY = -100;
+      var isMoving = false;
+      var moveTimeout = null;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      document.addEventListener('mousemove', function (e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        isMoving = true;
+        if (moveTimeout) clearTimeout(moveTimeout);
+        moveTimeout = setTimeout(function () { isMoving = false; }, 100);
+      });
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (isMoving) {
+          points.push({ x: mouseX, y: mouseY, age: 0 });
+          if (points.length > maxPoints) points.shift();
+        }
+
+        if (points.length < 2) {
+          requestAnimationFrame(draw);
+          return;
+        }
+
+        // 绘制脑电波波形轨迹
+        for (var i = 1; i < points.length; i++) {
+          var p1 = points[i - 1];
+          var p2 = points[i];
+          var alpha = (i / points.length) * 0.4;
+
+          // 主波形线
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+
+          // 添加脑电波波动
+          var midX = (p1.x + p2.x) / 2;
+          var midY = (p1.y + p2.y) / 2;
+          var waveAmplitude = 6 * (i / points.length);
+          var waveOffset = Math.sin(Date.now() / 100 + i) * waveAmplitude;
+
+          ctx.quadraticCurveTo(midX, midY + waveOffset, p2.x, p2.y);
+          ctx.strokeStyle = 'rgba(91, 141, 239, ' + alpha + ')';
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+
+          // 高频小波（模拟脑电信号）
+          if (i % 3 === 0) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            var highFreq = Math.sin(Date.now() / 50 + i * 2) * 3;
+            ctx.quadraticCurveTo(midX, midY + highFreq, p2.x, p2.y);
+            ctx.strokeStyle = 'rgba(126, 182, 232, ' + (alpha * 0.6) + ')';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+
+        // 更新点的年龄
+        for (var j = 0; j < points.length; j++) {
+          points[j].age++;
+        }
+
+        // 移除过老的点
+        points = points.filter(function (p) { return p.age < 60; });
+
+        requestAnimationFrame(draw);
+      }
+
+      // 尊重减少动画偏好
+      if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        draw();
       }
     })();
 
