@@ -82,8 +82,25 @@
     }
 
     .section {
-      padding: 80px 0;
+      padding: 96px 0;
     }
+
+    /* ===== 滚动显现动画 ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
 
     .section__header {
       text-align: center;
@@ -141,6 +158,10 @@
       box-shadow: var(--shadow-md);
     }
 
+    .btn--primary:active {
+      transform: translateY(0) scale(0.97);
+    }
+
     .btn--ghost {
       background-color: transparent;
       color: var(--color-primary);
@@ -151,6 +172,10 @@
       background-color: var(--color-primary);
       color: var(--color-white);
       transform: translateY(-2px);
+    }
+
+    .btn--ghost:active {
+      transform: translateY(0) scale(0.97);
     }
 
     .btn--disabled {
@@ -335,7 +360,38 @@
     }
 
     .hero__title span {
-      color: var(--color-primary);
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+
+    /* 乒乓球轨迹装饰 */
+    .hero__deco {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+
+    .hero__deco--arc {
+      top: 20%;
+      right: 8%;
+      width: 280px;
+      height: 280px;
+    }
+
+    .hero__deco--ball {
+      bottom: 15%;
+      left: 5%;
+      width: 60px;
+      height: 60px;
+      animation: floatBall 6s ease-in-out infinite;
+    }
+
+    @keyframes floatBall {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
     }
 
     .hero__subtitle {
@@ -462,6 +518,19 @@
     .work-card:hover {
       transform: translateY(-6px);
       box-shadow: var(--shadow-lg);
+      border-color: var(--color-primary);
+    }
+
+    .work-card:hover .work-card__cover svg {
+      transform: scale(1.15);
+    }
+
+    .work-card:hover .work-card__title {
+      color: var(--color-primary);
+    }
+
+    .work-card:hover .work-card__link svg {
+      transform: translateX(3px);
     }
 
     .work-card__cover {
@@ -487,6 +556,7 @@
       width: 48px;
       height: 48px;
       opacity: 0.9;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .work-card__body {
@@ -499,6 +569,7 @@
     .work-card__title {
       font-size: 18px;
       margin-bottom: 8px;
+      transition: color 0.3s ease;
     }
 
     .work-card__desc {
@@ -536,103 +607,161 @@
     .work-card__link svg {
       width: 14px;
       height: 14px;
+      transition: transform 0.3s ease;
     }
 
-    /* ===== 兴趣技能 ===== */
+    /* ===== 兴趣技能（Bento Grid） ===== */
     .skills {
       background-color: var(--color-white);
     }
 
-    .skills__grid {
+    .skills__bento {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(140px, auto);
+      gap: 20px;
     }
 
-    .skills__block h3 {
-      font-size: 20px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .skills__block h3 svg {
-      width: 22px;
-      height: 22px;
-      color: var(--color-accent);
-    }
-
-    .skill-list {
+    .bento-card {
+      background-color: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      transition: var(--transition);
       display: flex;
       flex-direction: column;
-      gap: 16px;
-    }
-
-    .skill-item {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .skill-item__header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .skill-item__name {
-      font-size: 15px;
-      font-weight: 500;
-    }
-
-    .skill-item__level {
-      font-size: 13px;
-      color: var(--color-text-light);
-    }
-
-    .skill-item__bar {
-      height: 8px;
-      background-color: var(--color-bg-alt);
-      border-radius: 100px;
+      position: relative;
       overflow: hidden;
     }
 
-    .skill-item__fill {
+    .bento-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-primary);
+    }
+
+    .bento-card--large {
+      grid-column: span 2;
+      grid-row: span 2;
+      background: linear-gradient(135deg, rgba(91, 141, 239, 0.06) 0%, rgba(126, 182, 232, 0.1) 100%);
+      border-color: rgba(91, 141, 239, 0.2);
+    }
+
+    .bento-card--medium {
+      grid-column: span 2;
+    }
+
+    .bento-card--small {
+      grid-column: span 1;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .bento-card__icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background-color: rgba(91, 141, 239, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+
+    .bento-card--large .bento-card__icon {
+      width: 56px;
+      height: 56px;
+      margin-bottom: 20px;
+      background-color: rgba(91, 141, 239, 0.12);
+    }
+
+    .bento-card--small .bento-card__icon {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 10px;
+    }
+
+    .bento-card__icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .bento-card--large .bento-card__icon svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .bento-card--small .bento-card__icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .bento-card__title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .bento-card--large .bento-card__title {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .bento-card--small .bento-card__title {
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+
+    .bento-card__desc {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    .bento-card--large .bento-card__desc {
+      font-size: 15px;
+    }
+
+    .bento-card__level {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .bento-card__level-bar {
+      height: 6px;
+      background-color: rgba(91, 141, 239, 0.1);
+      border-radius: 100px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .bento-card__level-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
       border-radius: 100px;
       transition: width 1s ease;
     }
 
-    .interest-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .interest-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      background-color: var(--color-bg);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      font-size: 14px;
+    .bento-card__level-text {
+      font-size: 12px;
+      color: var(--color-text-light);
       font-weight: 500;
-      transition: var(--transition);
     }
 
-    .interest-tag:hover {
-      border-color: var(--color-accent);
-      background-color: var(--color-accent-light);
-    }
-
-    .interest-tag svg {
-      width: 18px;
-      height: 18px;
-      color: var(--color-accent);
+    .bento-card__badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 100px;
+      background-color: rgba(91, 141, 239, 0.12);
+      color: var(--color-primary);
+      letter-spacing: 0.5px;
     }
 
     /* ===== 数字分身 ===== */
@@ -745,7 +874,9 @@
       align-items: center;
       gap: 16px;
       padding: 24px;
-      background-color: var(--color-white);
+      background-color: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
       text-align: left;
@@ -1220,15 +1351,23 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .skills__grid {
-        grid-template-columns: 1fr;
-        gap: 40px;
+      .skills__bento {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bento-card--large {
+        grid-column: span 2;
+        grid-row: span 1;
+      }
+
+      .bento-card--medium {
+        grid-column: span 2;
       }
     }
 
     @media (max-width: 768px) {
       .section {
-        padding: 56px 0;
+        padding: 64px 0;
       }
 
       .section__title {
@@ -1284,6 +1423,17 @@
 
       .works__grid {
         grid-template-columns: 1fr;
+      }
+
+      .skills__bento {
+        grid-template-columns: 1fr;
+      }
+
+      .bento-card--large,
+      .bento-card--medium,
+      .bento-card--small {
+        grid-column: span 1;
+        grid-row: span 1;
       }
 
       .contact__methods {
@@ -1356,6 +1506,17 @@
 
     <!-- ===== Hero 首屏 ===== -->
     <section class="hero">
+      <!-- 乒乓球轨迹装饰 -->
+      <svg class="hero__deco hero__deco--arc" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+        <path d="M20 180 Q100 20 180 100" stroke="#5B8DEF" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 8"/>
+        <circle cx="180" cy="100" r="6" fill="#7EB6E8"/>
+        <circle cx="20" cy="180" r="4" fill="#5B8DEF" opacity="0.5"/>
+      </svg>
+      <svg class="hero__deco hero__deco--ball" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+        <circle cx="30" cy="30" r="26" fill="#5B8DEF" opacity="0.15"/>
+        <circle cx="30" cy="30" r="18" fill="none" stroke="#5B8DEF" stroke-width="1.5" opacity="0.4"/>
+        <path d="M12 30 Q30 18 48 30" stroke="#7EB6E8" stroke-width="1" opacity="0.5"/>
+      </svg>
       <div class="container hero__inner">
         <div class="hero__content">
           <div class="hero__greeting">
@@ -1391,13 +1552,13 @@
     <!-- ===== 关于我 ===== -->
     <section class="section about" id="about">
       <div class="container">
-        <div class="section__header">
+        <div class="section__header reveal">
           <span class="section__eyebrow">ABOUT ME</span>
           <h2 class="section__title">关于我</h2>
           <p class="section__subtitle">用几张卡片，快速了解我是谁、在做什么、来自哪里</p>
         </div>
         <div class="about__grid">
-          <article class="about-card">
+          <article class="about-card reveal reveal-delay-1">
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
@@ -1407,7 +1568,7 @@
             <h3 class="about-card__title">我的身份</h3>
             <p class="about-card__text">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生。对前沿科技充满好奇，喜欢把想法一步步变成真实的作品，在实践中学习和成长。</p>
           </article>
-          <article class="about-card">
+          <article class="about-card reveal reveal-delay-2">
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
@@ -1417,7 +1578,7 @@
             <h3 class="about-card__title">我的方向</h3>
             <p class="about-card__text">对产品设计和数字创作有浓厚兴趣，喜欢把想法快速变成可运行的原型。相信「先做出来，再逐步改」的做事方式，正在从一个能看的个人主页开始，一步步做出可发布的真实作品。</p>
           </article>
-          <article class="about-card">
+          <article class="about-card reveal reveal-delay-3">
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -1427,7 +1588,7 @@
             <h3 class="about-card__title">我的记忆点</h3>
             <p class="about-card__text">乒乓球是我最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
           </article>
-          <article class="about-card">
+          <article class="about-card reveal reveal-delay-4">
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -1444,13 +1605,13 @@
     <!-- ===== 项目作品 ===== -->
     <section class="section works" id="works">
       <div class="container">
-        <div class="section__header">
+        <div class="section__header reveal">
           <span class="section__eyebrow">SELECTED WORKS</span>
           <h2 class="section__title">项目与作品</h2>
           <p class="section__subtitle">这里记录我的项目和作品，有真实可玩的，也有正在计划中的</p>
         </div>
         <div class="works__grid">
-          <article class="work-card">
+          <article class="work-card reveal reveal-delay-1">
             <div class="work-card__cover">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -1474,7 +1635,7 @@
               </div>
             </div>
           </article>
-          <article class="work-card">
+          <article class="work-card reveal reveal-delay-2">
             <div class="work-card__cover work-card__cover--alt">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -1497,7 +1658,7 @@
               </div>
             </div>
           </article>
-          <article class="work-card">
+          <article class="work-card reveal reveal-delay-3">
             <div class="work-card__cover work-card__cover--third">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 20h9"></path>
@@ -1519,107 +1680,113 @@
       </div>
     </section>
 
-    <!-- ===== 兴趣技能 ===== -->
+    <!-- ===== 兴趣技能（Bento Grid） ===== -->
     <section class="section skills" id="skills">
       <div class="container">
-        <div class="section__header">
+        <div class="section__header reveal">
           <span class="section__eyebrow">INTERESTS & SKILLS</span>
           <h2 class="section__title">兴趣与技能</h2>
           <p class="section__subtitle">学习中的技能，和生活里的热爱</p>
         </div>
-        <div class="skills__grid">
-          <div class="skills__block">
-            <h3>
+        <div class="skills__bento">
+          <!-- 大卡片：乒乓球 -->
+          <article class="bento-card bento-card--large reveal reveal-delay-1">
+            <span class="bento-card__badge">最热爱</span>
+            <div class="bento-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M4.93 4.93l4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"></path>
+              </svg>
+            </div>
+            <h3 class="bento-card__title">乒乓球</h3>
+            <p class="bento-card__desc">最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
+            <div class="bento-card__level">
+              <div class="bento-card__level-bar">
+                <div class="bento-card__level-fill" style="width: 80%"></div>
+              </div>
+              <span class="bento-card__level-text">熟练 · 打了很多年</span>
+            </div>
+          </article>
+
+          <!-- 中等卡片：网页制作 -->
+          <article class="bento-card bento-card--medium reveal reveal-delay-2">
+            <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
               </svg>
-              技能（学习中）
-            </h3>
-            <div class="skill-list">
-              <div class="skill-item">
-                <div class="skill-item__header">
-                  <span class="skill-item__name">网页制作 / 个人主页搭建</span>
-                  <span class="skill-item__level">学习中</span>
-                </div>
-                <div class="skill-item__bar">
-                  <div class="skill-item__fill" style="width: 35%"></div>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-item__header">
-                  <span class="skill-item__name">智能医学工程 / 专业基础</span>
-                  <span class="skill-item__level">入门</span>
-                </div>
-                <div class="skill-item__bar">
-                  <div class="skill-item__fill" style="width: 30%"></div>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-item__header">
-                  <span class="skill-item__name">产品设计 / 原型实践</span>
-                  <span class="skill-item__level">了解</span>
-                </div>
-                <div class="skill-item__bar">
-                  <div class="skill-item__fill" style="width: 25%"></div>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-item__header">
-                  <span class="skill-item__name">乒乓球</span>
-                  <span class="skill-item__level">熟练</span>
-                </div>
-                <div class="skill-item__bar">
-                  <div class="skill-item__fill" style="width: 80%"></div>
-                </div>
-              </div>
             </div>
-          </div>
-          <div class="skills__block">
-            <h3>
+            <h3 class="bento-card__title">网页制作 / 个人主页搭建</h3>
+            <p class="bento-card__desc">用纯 HTML/CSS/JS 搭建静态网页，从 V1 到 V2 一步步迭代，正在学习响应式布局和交互设计。</p>
+            <div class="bento-card__level">
+              <div class="bento-card__level-bar">
+                <div class="bento-card__level-fill" style="width: 35%"></div>
+              </div>
+              <span class="bento-card__level-text">学习中 · 能独立做简单页面</span>
+            </div>
+          </article>
+
+          <!-- 中等卡片：智能医学 -->
+          <article class="bento-card bento-card--medium reveal reveal-delay-3">
+            <div class="bento-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
               </svg>
-              兴趣爱好
-            </h3>
-            <div class="interest-tags">
-              <div class="interest-tag">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M4.93 4.93l4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"></path>
-                </svg>
-                乒乓球
-              </div>
-              <div class="interest-tag">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
-                阅读
-              </div>
-              <div class="interest-tag">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
-                科技探索
-              </div>
-              <div class="interest-tag">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                城市漫步
-              </div>
-              <div class="interest-tag">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                时间管理
-              </div>
             </div>
-          </div>
+            <h3 class="bento-card__title">智能医学工程 / 专业基础</h3>
+            <p class="bento-card__desc">大一在读，正在打牢医学和工程的交叉基础，对脑机接口方向特别感兴趣，希望未来能在这个前沿领域有所发展。</p>
+            <div class="bento-card__level">
+              <div class="bento-card__level-bar">
+                <div class="bento-card__level-fill" style="width: 30%"></div>
+              </div>
+              <span class="bento-card__level-text">入门 · 大一打基础中</span>
+            </div>
+          </article>
+
+          <!-- 小卡片：阅读 -->
+          <article class="bento-card bento-card--small reveal reveal-delay-1">
+            <div class="bento-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </div>
+            <h3 class="bento-card__title">阅读</h3>
+          </article>
+
+          <!-- 小卡片：科技探索 -->
+          <article class="bento-card bento-card--small reveal reveal-delay-2">
+            <div class="bento-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="bento-card__title">科技探索</h3>
+          </article>
+
+          <!-- 小卡片：城市漫步 -->
+          <article class="bento-card bento-card--small reveal reveal-delay-3">
+            <div class="bento-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+            </div>
+            <h3 class="bento-card__title">城市漫步</h3>
+          </article>
+
+          <!-- 小卡片：时间管理 -->
+          <article class="bento-card bento-card--small reveal reveal-delay-4">
+            <div class="bento-card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <h3 class="bento-card__title">时间管理</h3>
+          </article>
         </div>
       </div>
     </section>
@@ -1627,12 +1794,12 @@
     <!-- ===== 数字分身（静态对话版） ===== -->
     <section class="section digital-twin" id="digital-twin">
       <div class="container">
-        <div class="section__header">
+        <div class="section__header reveal">
           <span class="section__eyebrow">DIGITAL TWIN</span>
           <h2 class="section__title">数字分身</h2>
           <p class="section__subtitle">和「数字版的我」聊聊天，问问关于我的事情</p>
         </div>
-        <div class="twin-card">
+        <div class="twin-card reveal reveal-delay-2">
           <div class="twin-card__icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="11" width="18" height="10" rx="2"></rect>
@@ -1667,11 +1834,13 @@
     <section class="section contact" id="contact">
       <div class="container">
         <div class="contact__inner">
-          <span class="section__eyebrow">GET IN TOUCH</span>
-          <h2 class="section__title">联系我</h2>
-          <p class="section__subtitle">欢迎交流学习、乒乓球、大学生活，或任何有趣的话题</p>
+          <div class="reveal">
+            <span class="section__eyebrow">GET IN TOUCH</span>
+            <h2 class="section__title">联系我</h2>
+            <p class="section__subtitle">欢迎交流学习、乒乓球、大学生活，或任何有趣的话题</p>
+          </div>
           <div class="contact__methods">
-            <div class="contact-method">
+            <div class="contact-method reveal reveal-delay-1">
               <div class="contact-method__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -1683,7 +1852,7 @@
                 <div class="contact-method__value">16602256906@163.com</div>
               </div>
             </div>
-            <div class="contact-method">
+            <div class="contact-method reveal reveal-delay-2">
               <div class="contact-method__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
@@ -1695,7 +1864,7 @@
               </div>
             </div>
           </div>
-          <div class="contact__cta" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+          <div class="contact__cta reveal reveal-delay-3" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
             <a class="btn btn--primary" href="mailto:16602256906@163.com">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -1834,28 +2003,54 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ===== 技能条动画（滚动进入视口时触发） =====
-    const skillFills = document.querySelectorAll('.skill-item__fill');
-    const skillsSection = document.getElementById('skills');
-    let skillsAnimated = false;
+    // ===== 滚动显现动画（Intersection Observer） =====
+    (function () {
+      try {
+        var revealElements = document.querySelectorAll('.reveal');
+        if (!('IntersectionObserver' in window)) {
+          // 不支持时直接显示
+          revealElements.forEach(function (el) { el.classList.add('visible'); });
+          return;
+        }
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.1,
+          rootMargin: '0px 0px -40px 0px'
+        });
+        revealElements.forEach(function (el) { observer.observe(el); });
+      } catch (e) {
+        console.error('滚动显现动画初始化失败:', e);
+      }
+    })();
 
-    function animateSkills() {
-      if (skillsAnimated) return;
+    // ===== Bento Grid 技能条动画（滚动进入视口时触发） =====
+    const bentoFills = document.querySelectorAll('.bento-card__level-fill');
+    const skillsSection = document.getElementById('skills');
+    let bentoAnimated = false;
+
+    function animateBentoSkills() {
+      if (bentoAnimated || bentoFills.length === 0) return;
       const rect = skillsSection.getBoundingClientRect();
       if (rect.top < window.innerHeight * 0.8) {
-        skillFills.forEach(function (fill) {
+        bentoFills.forEach(function (fill) {
           const width = fill.style.width;
           fill.style.width = '0%';
           setTimeout(function () {
             fill.style.width = width;
-          }, 100);
+          }, 200);
         });
-        skillsAnimated = true;
+        bentoAnimated = true;
       }
     }
 
-    window.addEventListener('scroll', animateSkills);
-    animateSkills();
+    window.addEventListener('scroll', animateBentoSkills);
+    animateBentoSkills();
 
     // ===== 数字分身（静态对话版） =====
     (function () {
