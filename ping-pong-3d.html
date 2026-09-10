@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D乒乓球对战 | 于哲的个人主页</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237EB6D9'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #F2F8FB 0%, #EBF4F9 100%);
+      overflow: hidden;
+      color: #2C3E50;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: none;
+    }
+
+    /* 2D叠加层 */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* 记分牌 */
+    .scoreboard {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 16px 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 30px rgba(126, 182, 217, 0.2);
+      border: 1px solid rgba(126, 182, 217, 0.3);
+    }
+
+    .score-side {
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .score-label {
+      font-size: 13px;
+      color: #6B7C93;
+      margin-bottom: 4px;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .score-value {
+      font-size: 42px;
+      font-weight: 700;
+      color: #5A9BC7;
+      line-height: 1;
+      font-family: 'Noto Sans SC', sans-serif;
+    }
+
+    .score-divider {
+      font-size: 28px;
+      color: #9AABBE;
+      font-weight: 300;
+    }
+
+    /* 游戏信息 */
+    .game-info {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 14px 20px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(126, 182, 217, 0.15);
+      border: 1px solid rgba(126, 182, 217, 0.25);
+    }
+
+    .game-info h2 {
+      font-size: 16px;
+      color: #5A9BC7;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .game-info p {
+      font-size: 12px;
+      color: #6B7C93;
+      line-height: 1.6;
+    }
+
+    /* 难度选择 */
+    .difficulty {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .diff-btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(126, 182, 217, 0.3);
+      background: rgba(255, 255, 255, 0.8);
+      color: #6B7C93;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .diff-btn:hover {
+      background: rgba(126, 182, 217, 0.15);
+      color: #5A9BC7;
+    }
+
+    .diff-btn.active {
+      background: #7EB6D9;
+      color: white;
+      border-color: #7EB6D9;
+    }
+
+    /* 中央提示 */
+    .center-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .center-message.show {
+      opacity: 1;
+    }
+
+    .center-message h1 {
+      font-size: 56px;
+      color: #5A9BC7;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-shadow: 0 4px 20px rgba(126, 182, 217, 0.3);
+    }
+
+    .center-message p {
+      font-size: 18px;
+      color: #6B7C93;
+    }
+
+    /* 操作提示 */
+    .controls-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #6B7C93;
+      box-shadow: 0 2px 15px rgba(126, 182, 217, 0.12);
+      border: 1px solid rgba(126, 182, 217, 0.2);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .controls-hint strong {
+      color: #5A9BC7;
+      font-weight: 600;
+    }
+
+    /* 开始界面 */
+    .start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(242, 248, 251, 0.95) 0%, rgba(235, 244, 249, 0.95) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .start-screen h1 {
+      font-size: 64px;
+      color: #5A9BC7;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 30px rgba(126, 182, 217, 0.3);
+    }
+
+    .start-screen .subtitle {
+      font-size: 20px;
+      color: #6B7C93;
+      margin-bottom: 50px;
+      letter-spacing: 2px;
+    }
+
+    .start-btn {
+      padding: 18px 60px;
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #7EB6D9 0%, #5A9BC7 100%);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(126, 182, 217, 0.4);
+      letter-spacing: 4px;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(126, 182, 217, 0.5);
+    }
+
+    .start-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .start-difficulty {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .start-diff-btn {
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #6B7C93;
+      background: rgba(255, 255, 255, 0.8);
+      border: 2px solid rgba(126, 182, 217, 0.3);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .start-diff-btn:hover {
+      border-color: #7EB6D9;
+      color: #5A9BC7;
+    }
+
+    .start-diff-btn.active {
+      background: #7EB6D9;
+      color: white;
+      border-color: #7EB6D9;
+    }
+
+    .start-tips {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #9AABBE;
+      text-align: center;
+      line-height: 2;
+    }
+
+    /* 返回链接 */
+    .back-link {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      color: #5A9BC7;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      border: 1px solid rgba(126, 182, 217, 0.25);
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+
+    .back-link:hover {
+      background: #7EB6D9;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <!-- 开始界面 -->
+  <div class="start-screen" id="startScreen">
+    <h1>3D 乒乓球对战</h1>
+    <p class="subtitle">第一人称视角 · 物理模拟 · 真实音效</p>
+    <div class="start-difficulty" id="startDifficulty">
+      <button class="start-diff-btn" data-diff="easy">简单</button>
+      <button class="start-diff-btn active" data-diff="normal">普通</button>
+      <button class="start-diff-btn" data-diff="hard">困难</button>
+    </div>
+    <button class="start-btn" id="startBtn">开始游戏</button>
+    <div class="start-tips">
+      移动鼠标控制球拍 · 点击鼠标击球 · 先得 11 分获胜<br>
+      球会根据击球位置产生不同旋转和速度
+    </div>
+  </div>
+
+  <!-- 3D画布 -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- 2D叠加层 -->
+  <div class="overlay">
+    <!-- 记分牌 -->
+    <div class="scoreboard">
+      <div class="score-side">
+        <div class="score-label">你</div>
+        <div class="score-value" id="playerScore">0</div>
+      </div>
+      <div class="score-divider">:</div>
+      <div class="score-side">
+        <div class="score-label">电脑</div>
+        <div class="score-value" id="aiScore">0</div>
+      </div>
+    </div>
+
+    <!-- 游戏信息 -->
+    <div class="game-info">
+      <h2>3D乒乓球对战</h2>
+      <p>第一人称视角 · 物理模拟</p>
+    </div>
+
+    <!-- 难度切换 -->
+    <div class="difficulty" id="difficulty">
+      <button class="diff-btn" data-diff="easy">简单</button>
+      <button class="diff-btn active" data-diff="normal">普通</button>
+      <button class="diff-btn" data-diff="hard">困难</button>
+    </div>
+
+    <!-- 中央消息 -->
+    <div class="center-message" id="centerMessage">
+      <h1 id="messageTitle">准备</h1>
+      <p id="messageSub">点击鼠标发球</p>
+    </div>
+
+    <!-- 操作提示 -->
+    <div class="controls-hint">
+      <strong>移动鼠标</strong> 控制球拍位置 · <strong>点击鼠标</strong> 击球/发球 · <strong>Esc</strong> 暂停
+    </div>
+
+    <!-- 返回链接 -->
+    <a href="index.html" class="back-link">← 返回主页</a>
+  </div>
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    // ===== 游戏配置 =====
+    const CONFIG = {
+      table: {
+        length: 2.74,    // 球桌长度（米）
+        width: 1.525,     // 球桌宽度（米）
+        height: 0.76,     // 球桌高度（米）
+        netHeight: 0.1525 // 球网高度（米）
+      },
+      ball: {
+        radius: 0.02,     // 球半径（米）
+        mass: 0.0027,     // 球质量（kg）
+        gravity: 9.81,    // 重力加速度
+        restitution: 0.9, // 弹性系数
+        airResistance: 0.12 // 空气阻力系数
+      },
+      paddle: {
+        width: 0.15,      // 球拍宽度
+        height: 0.18,     // 球拍高度
+        thickness: 0.01   // 球拍厚度
+      },
+      game: {
+        winScore: 11,     // 获胜分数
+        serveInterval: 2  // 每2分换发球
+      }
+    };
+
+    // 难度配置
+    const DIFFICULTY = {
+      easy: { aiSpeed: 0.4, aiError: 0.15, ballSpeedMult: 0.85 },
+      normal: { aiSpeed: 0.6, aiError: 0.08, ballSpeedMult: 1.0 },
+      hard: { aiSpeed: 0.85, aiError: 0.03, ballSpeedMult: 1.15 }
+    };
+
+    // ===== 游戏状态 =====
+    let currentDifficulty = 'normal';
+    let gameState = 'waiting'; // waiting, serving, playing, paused, gameover
+    let playerScore = 0;
+    let aiScore = 0;
+    let isPlayerServing = true;
+    let serveCount = 0;
+
+    // ===== Three.js 场景 =====
+    let scene, camera, renderer;
+    let table, net, ball, playerPaddle, aiPaddle;
+    let ballVelocity = new THREE.Vector3();
+    let ballSpin = new THREE.Vector3(); // 旋转向量
+    let lastHitBy = null; // 'player' or 'ai'
+    let ballBouncedOnTable = false;
+
+    // 鼠标控制
+    let mouseX = 0, mouseY = 0;
+    let targetPaddleX = 0, targetPaddleY = 0;
+
+    // 动画循环
+    let clock = new THREE.Clock();
+    let animationId = null;
+
+    // ===== 音效系统（Web Audio） =====
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // 击球音效
+    function playHitSound(intensity) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        // 击球声：短促的木质撞击声
+        osc.type = 'square';
+        const baseFreq = 800 + intensity * 400;
+        osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(3000, audioCtx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.1);
+
+        gain.gain.setValueAtTime(0.15 + intensity * 0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.1);
+      } catch (e) {}
+    }
+
+    // 球落桌音效
+    function playBounceSound() {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        // 落桌声：清脆的弹跳声
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.05);
+
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.06);
+      } catch (e) {}
+    }
+
+    // 得分音效
+    function playScoreSound(isPlayer) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'sine';
+        if (isPlayer) {
+          osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+          osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2);
+        } else {
+          osc.frequency.setValueAtTime(392, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(330, audioCtx.currentTime + 0.15);
+        }
+
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.4);
+      } catch (e) {}
+    }
+
+    // ===== 场景初始化 =====
+    function initScene() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xEBF4F9);
+      scene.fog = new THREE.Fog(0xEBF4F9, 5, 15);
+
+      // 相机（第一人称视角，在球桌一端）
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
+      camera.position.set(0, CONFIG.table.height + 0.3, CONFIG.table.length / 2 + 0.5);
+      camera.lookAt(0, CONFIG.table.height, -CONFIG.table.length / 2);
+
+      // 渲染器
+      renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('gameCanvas'),
+        antialias: true
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // 灯光
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      mainLight.position.set(2, 4, 2);
+      mainLight.castShadow = true;
+      mainLight.shadow.mapSize.width = 2048;
+      mainLight.shadow.mapSize.height = 2048;
+      mainLight.shadow.camera.near = 0.5;
+      mainLight.shadow.camera.far = 20;
+      mainLight.shadow.camera.left = -3;
+      mainLight.shadow.camera.right = 3;
+      mainLight.shadow.camera.top = 3;
+      mainLight.shadow.camera.bottom = -3;
+      scene.add(mainLight);
+
+      const fillLight = new THREE.DirectionalLight(0xA8D0E6, 0.3);
+      fillLight.position.set(-2, 2, -2);
+      scene.add(fillLight);
+
+      // 地面
+      const floorGeo = new THREE.PlaneGeometry(20, 20);
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0xDCE9F0,
+        roughness: 0.8,
+        metalness: 0.1
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = 0;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      createTable();
+      createNet();
+      createBall();
+      createPaddles();
+    }
+
+    // 创建球桌
+    function createTable() {
+      const tableGroup = new THREE.Group();
+
+      // 桌面
+      const tableTopGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.05, CONFIG.table.length);
+      const tableTopMat = new THREE.MeshStandardMaterial({
+        color: 0x2D5A7A,
+        roughness: 0.4,
+        metalness: 0.1
+      });
+      const tableTop = new THREE.Mesh(tableTopGeo, tableTopMat);
+      tableTop.position.y = CONFIG.table.height;
+      tableTop.castShadow = true;
+      tableTop.receiveShadow = true;
+      tableGroup.add(tableTop);
+
+      // 白色边线
+      const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const lineThickness = 0.02;
+
+      // 边线（长边）
+      const sideLineGeo = new THREE.BoxGeometry(lineThickness, 0.001, CONFIG.table.length);
+      const leftLine = new THREE.Mesh(sideLineGeo, lineMat);
+      leftLine.position.set(-CONFIG.table.width / 2 + lineThickness / 2, CONFIG.table.height + 0.026, 0);
+      tableGroup.add(leftLine);
+      const rightLine = leftLine.clone();
+      rightLine.position.x = CONFIG.table.width / 2 - lineThickness / 2;
+      tableGroup.add(rightLine);
+
+      // 端线（短边）
+      const endLineGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.001, lineThickness);
+      const farLine = new THREE.Mesh(endLineGeo, lineMat);
+      farLine.position.set(0, CONFIG.table.height + 0.026, -CONFIG.table.length / 2 + lineThickness / 2);
+      tableGroup.add(farLine);
+      const nearLine = farLine.clone();
+      nearLine.position.z = CONFIG.table.length / 2 - lineThickness / 2;
+      tableGroup.add(nearLine);
+
+      // 中线
+      const centerLineGeo = new THREE.BoxGeometry(lineThickness, 0.001, CONFIG.table.length);
+      const centerLine = new THREE.Mesh(centerLineGeo, lineMat);
+      centerLine.position.set(0, CONFIG.table.height + 0.026, 0);
+      tableGroup.add(centerLine);
+
+      // 桌腿
+      const legGeo = new THREE.CylinderGeometry(0.03, 0.04, CONFIG.table.height, 8);
+      const legMat = new THREE.MeshStandardMaterial({
+        color: 0x4A6B7A,
+        roughness: 0.5,
+        metalness: 0.3
+      });
+      const legPositions = [
+        [-CONFIG.table.width / 2 + 0.1, CONFIG.table.height / 2, -CONFIG.table.length / 2 + 0.1],
+        [CONFIG.table.width / 2 - 0.1, CONFIG.table.height / 2, -CONFIG.table.length / 2 + 0.1],
+        [-CONFIG.table.width / 2 + 0.1, CONFIG.table.height / 2, CONFIG.table.length / 2 - 0.1],
+        [CONFIG.table.width / 2 - 0.1, CONFIG.table.height / 2, CONFIG.table.length / 2 - 0.1]
+      ];
+      legPositions.forEach(pos => {
+        const leg = new THREE.Mesh(legGeo, legMat);
+        leg.position.set(pos[0], pos[1], pos[2]);
+        leg.castShadow = true;
+        tableGroup.add(leg);
+      });
+
+      table = tableGroup;
+      scene.add(table);
+    }
+
+    // 创建球网
+    function createNet() {
+      const netGroup = new THREE.Group();
+
+      // 网柱
+      const postGeo = new THREE.CylinderGeometry(0.008, 0.008, CONFIG.table.netHeight + 0.05, 8);
+      const postMat = new THREE.MeshStandardMaterial({
+        color: 0x333333,
+        metalness: 0.6,
+        roughness: 0.3
+      });
+      const leftPost = new THREE.Mesh(postGeo, postMat);
+      leftPost.position.set(-CONFIG.table.width / 2, CONFIG.table.height + (CONFIG.table.netHeight + 0.05) / 2, 0);
+      netGroup.add(leftPost);
+      const rightPost = leftPost.clone();
+      rightPost.position.x = CONFIG.table.width / 2;
+      netGroup.add(rightPost);
+
+      // 球网（用半透明平面）
+      const netGeo = new THREE.PlaneGeometry(CONFIG.table.width, CONFIG.table.netHeight);
+      const netMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        roughness: 0.8
+      });
+      const netMesh = new THREE.Mesh(netGeo, netMat);
+      netMesh.position.set(0, CONFIG.table.height + CONFIG.table.netHeight / 2, 0);
+      netGroup.add(netMesh);
+
+      // 网顶白带
+      const topBandGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.015, 0.005);
+      const topBandMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const topBand = new THREE.Mesh(topBandGeo, topBandMat);
+      topBand.position.set(0, CONFIG.table.height + CONFIG.table.netHeight, 0);
+      netGroup.add(topBand);
+
+      net = netGroup;
+      scene.add(net);
+    }
+
+    // 创建乒乓球
+    function createBall() {
+      const ballGeo = new THREE.SphereGeometry(CONFIG.ball.radius, 32, 32);
+      const ballMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.3,
+        metalness: 0.05
+      });
+      ball = new THREE.Mesh(ballGeo, ballMat);
+      ball.castShadow = true;
+      ball.position.set(0, CONFIG.table.height + 0.3, CONFIG.table.length / 2 - 0.3);
+      scene.add(ball);
+    }
+
+    // 创建球拍
+    function createPaddles() {
+      // 玩家球拍（在镜头下方，第一人称视角能看到）
+      const playerPaddleGroup = createPaddle(0x7EB6D9);
+      playerPaddleGroup.position.set(0, CONFIG.table.height + 0.1, CONFIG.table.length / 2 - 0.15);
+      playerPaddle = playerPaddleGroup;
+      scene.add(playerPaddle);
+
+      // 电脑球拍（在对面）
+      const aiPaddleGroup = createPaddle(0xE8787A);
+      aiPaddleGroup.position.set(0, CONFIG.table.height + 0.1, -CONFIG.table.length / 2 + 0.15);
+      aiPaddle = aiPaddleGroup;
+      scene.add(aiPaddle);
+    }
+
+    function createPaddle(color) {
+      const group = new THREE.Group();
+
+      // 拍面
+      const bladeGeo = new THREE.CylinderGeometry(CONFIG.paddle.width / 2, CONFIG.paddle.width / 2, CONFIG.paddle.thickness, 32);
+      const bladeMat = new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.6,
+        metalness: 0.1
+      });
+      const blade = new THREE.Mesh(bladeGeo, bladeMat);
+      blade.rotation.x = Math.PI / 2;
+      blade.castShadow = true;
+      group.add(blade);
+
+      // 拍面边缘
+      const edgeGeo = new THREE.TorusGeometry(CONFIG.paddle.width / 2, CONFIG.paddle.thickness / 2, 8, 32);
+      const edgeMat = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.7
+      });
+      const edge = new THREE.Mesh(edgeGeo, edgeMat);
+      edge.rotation.x = Math.PI / 2;
+      group.add(edge);
+
+      // 手柄
+      const handleGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.1, 12);
+      const handleMat = new THREE.MeshStandardMaterial({
+        color: 0x8B4513,
+        roughness: 0.8
+      });
+      const handle = new THREE.Mesh(handleGeo, handleMat);
+      handle.position.set(0, -0.08, 0);
+      handle.rotation.x = Math.PI / 2;
+      handle.castShadow = true;
+      group.add(handle);
+
+      return group;
+    }
+
+    // ===== 物理模拟 =====
+    function updatePhysics(dt) {
+      if (gameState !== 'playing' && gameState !== 'serving') return;
+
+      // 应用重力
+      ballVelocity.y -= CONFIG.ball.gravity * dt;
+
+      // 应用空气阻力
+      const drag = Math.exp(-CONFIG.ball.airResistance * dt);
+      ballVelocity.multiplyScalar(drag);
+
+      // 应用旋转效应（马格努斯力简化）
+      const magnus = ballSpin.clone().multiplyScalar(0.5 * dt);
+      ballVelocity.add(magnus);
+
+      // 更新位置
+      ball.position.add(ballVelocity.clone().multiplyScalar(dt));
+
+      // 球旋转（视觉）
+      ball.rotation.x += ballSpin.x * dt * 10;
+      ball.rotation.y += ballSpin.y * dt * 10;
+      ball.rotation.z += ballSpin.z * dt * 10;
+
+      // 球桌碰撞检测
+      checkTableCollision();
+
+      // 球网碰撞
+      checkNetCollision();
+
+      // 球拍碰撞
+      checkPaddleCollision();
+
+      // 出界检测
+      checkOutOfBounds();
+    }
+
+    // 球桌碰撞
+    function checkTableCollision() {
+      const tableTop = CONFIG.table.height + 0.025;
+      const ballBottom = ball.position.y - CONFIG.ball.radius;
+
+      if (ballBottom <= tableTop && ballVelocity.y < 0) {
+        // 检查是否在球桌范围内
+        if (Math.abs(ball.position.x) <= CONFIG.table.width / 2 &&
+            Math.abs(ball.position.z) <= CONFIG.table.length / 2) {
+
+          ball.position.y = tableTop + CONFIG.ball.radius;
+          ballVelocity.y = -ballVelocity.y * CONFIG.ball.restitution;
+
+          // 桌面摩擦
+          ballVelocity.x *= 0.95;
+          ballVelocity.z *= 0.95;
+
+          // 旋转衰减
+          ballSpin.multiplyScalar(0.9);
+
+          playBounceSound();
+          ballBouncedOnTable = true;
+        }
+      }
+    }
+
+    // 球网碰撞
+    function checkNetCollision() {
+      const netZ = 0;
+      const netTop = CONFIG.table.height + CONFIG.table.netHeight;
+
+      if (Math.abs(ball.position.z - netZ) < CONFIG.ball.radius + 0.005 &&
+          ball.position.y < netTop &&
+          ball.position.y > CONFIG.table.height) {
+
+        // 检查是否在网的宽度范围内
+        if (Math.abs(ball.position.x) <= CONFIG.table.width / 2) {
+          ballVelocity.z = -ballVelocity.z * 0.5;
+          ball.position.z = netZ + (ballVelocity.z > 0 ? 1 : -1) * (CONFIG.ball.radius + 0.01);
+          playBounceSound();
+        }
+      }
+    }
+
+    // 球拍碰撞
+    function checkPaddleCollision() {
+      // 玩家球拍
+      if (lastHitBy !== 'player') {
+        const dx = ball.position.x - playerPaddle.position.x;
+        const dy = ball.position.y - playerPaddle.position.y;
+        const dz = ball.position.z - playerPaddle.position.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (dist < CONFIG.paddle.width / 2 + CONFIG.ball.radius && ballVelocity.z < 0) {
+          hitBall('player');
+        }
+      }
+
+      // 电脑球拍
+      if (lastHitBy !== 'ai') {
+        const dx = ball.position.x - aiPaddle.position.x;
+        const dy = ball.position.y - aiPaddle.position.y;
+        const dz = ball.position.z - aiPaddle.position.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (dist < CONFIG.paddle.width / 2 + CONFIG.ball.radius && ballVelocity.z > 0) {
+          hitBall('ai');
+        }
+      }
+    }
+
+    // 击球
+    function hitBall(hitter) {
+      const diff = DIFFICULTY[currentDifficulty];
+      const paddle = hitter === 'player' ? playerPaddle : aiPaddle;
+
+      // 计算击球点相对球拍中心的位置
+      const relX = (ball.position.x - paddle.position.x) / (CONFIG.paddle.width / 2);
+      const relY = (ball.position.y - paddle.position.y) / (CONFIG.paddle.height / 2);
+
+      // 基础球速
+      let speed = 3 * diff.ballSpeedMult;
+      if (hitter === 'player') {
+        // 玩家击球：根据鼠标移动速度增加力量
+        speed *= 1.2;
+      }
+
+      // 设置速度方向
+      if (hitter === 'player') {
+        ballVelocity.set(
+          relX * 1.5,
+          2 + relY * 1.5,
+          -speed
+        );
+      } else {
+        // AI 击球：瞄准玩家区域，带误差
+        const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.8;
+        const error = (Math.random() - 0.5) * diff.aiError * 2;
+        ballVelocity.set(
+          (targetX - ball.position.x) * 0.8 + error,
+          2 + Math.random() * 1,
+          speed
+        );
+      }
+
+      // 设置旋转（根据击球位置）
+      ballSpin.set(
+        relY * 5,
+        relX * 3,
+        hitter === 'player' ? -2 : 2
+      );
+
+      lastHitBy = hitter;
+      ballBouncedOnTable = false;
+
+      const intensity = Math.min(1, speed / 5);
+      playHitSound(intensity);
+    }
+
+    // 出界检测
+    function checkOutOfBounds() {
+      // 球掉得太低
+      if (ball.position.y < 0.2) {
+        if (gameState === 'playing') {
+          // 判断谁得分
+          if (lastHitBy === 'player') {
+            // 玩家击球后出界，电脑得分
+            scorePoint('ai');
+          } else if (lastHitBy === 'ai') {
+            // 电脑击球后出界，玩家得分
+            scorePoint('player');
+          }
+        }
+        resetBall();
+      }
+
+      // 球飞出侧面
+      if (Math.abs(ball.position.x) > 3 || Math.abs(ball.position.z) > 4) {
+        if (gameState === 'playing') {
+          if (lastHitBy === 'player') {
+            scorePoint('ai');
+          } else if (lastHitBy === 'ai') {
+            scorePoint('player');
+          }
+        }
+        resetBall();
+      }
+    }
+
+    // 得分
+    function scorePoint(scorer) {
+      if (scorer === 'player') {
+        playerScore++;
+        playScoreSound(true);
+      } else {
+        aiScore++;
+        playScoreSound(false);
+      }
+      updateScoreDisplay();
+      serveCount++;
+
+      // 检查获胜
+      if (playerScore >= CONFIG.game.winScore || aiScore >= CONFIG.game.winScore) {
+        gameState = 'gameover';
+        showMessage(
+          playerScore > aiScore ? '你赢了！' : '电脑获胜',
+          playerScore > aiScore ? '恭喜你赢得比赛！' : '再接再厉！'
+        );
+        return;
+      }
+
+      // 换发球
+      if (serveCount % CONFIG.game.serveInterval === 0) {
+        isPlayerServing = !isPlayerServing;
+      }
+
+      // 准备下一球
+      setTimeout(() => {
+        if (gameState !== 'gameover') {
+          prepareServe();
+        }
+      }, 1000);
+    }
+
+    // 重置球位置
+    function resetBall() {
+      ballVelocity.set(0, 0, 0);
+      ballSpin.set(0, 0, 0);
+      lastHitBy = null;
+      ballBouncedOnTable = false;
+    }
+
+    // 准备发球
+    function prepareServe() {
+      resetBall();
+      gameState = 'serving';
+
+      if (isPlayerServing) {
+        ball.position.set(
+          playerPaddle.position.x,
+          CONFIG.table.height + 0.15,
+          CONFIG.table.length / 2 - 0.3
+        );
+        showMessage('准备发球', '点击鼠标发球');
+      } else {
+        ball.position.set(
+          aiPaddle.position.x,
+          CONFIG.table.height + 0.15,
+          -CONFIG.table.length / 2 + 0.3
+        );
+        showMessage('电脑发球', '准备接球');
+        // AI 自动发球
+        setTimeout(() => {
+          if (gameState === 'serving') {
+            aiServe();
+          }
+        }, 1500);
+      }
+    }
+
+    // 玩家发球
+    function playerServe() {
+      if (gameState !== 'serving' || !isPlayerServing) return;
+      initAudio();
+
+      const diff = DIFFICULTY[currentDifficulty];
+      ballVelocity.set(
+        (Math.random() - 0.5) * 0.5,
+        2.5,
+        -3 * diff.ballSpeedMult
+      );
+      ballSpin.set(0, 2, -1);
+      lastHitBy = 'player';
+      ballBouncedOnTable = false;
+      gameState = 'playing';
+      hideMessage();
+      playHitSound(0.5);
+    }
+
+    // AI 发球
+    function aiServe() {
+      if (gameState !== 'serving' || isPlayerServing) return;
+      initAudio();
+
+      const diff = DIFFICULTY[currentDifficulty];
+      const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.6;
+      ballVelocity.set(
+        (targetX - ball.position.x) * 0.5,
+        2.5,
+        3 * diff.ballSpeedMult
+      );
+      ballSpin.set(0, -2, 1);
+      lastHitBy = 'ai';
+      ballBouncedOnTable = false;
+      gameState = 'playing';
+      hideMessage();
+      playHitSound(0.5);
+    }
+
+    // ===== AI 控制 =====
+    function updateAI(dt) {
+      if (gameState !== 'playing') return;
+
+      const diff = DIFFICULTY[currentDifficulty];
+
+      // AI 追踪球的位置
+      let targetX = ball.position.x;
+      let targetY = ball.position.y;
+
+      // 加入误差
+      targetX += (Math.random() - 0.5) * diff.aiError;
+      targetY += (Math.random() - 0.5) * diff.aiError * 0.5;
+
+      // 限制在合理范围
+      targetX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetX));
+      targetY = Math.max(CONFIG.table.height + 0.05, Math.min(CONFIG.table.height + 0.4, targetY));
+
+      // 平滑移动
+      const speed = diff.aiSpeed * 3;
+      aiPaddle.position.x += (targetX - aiPaddle.position.x) * Math.min(1, speed * dt);
+      aiPaddle.position.y += (targetY - aiPaddle.position.y) * Math.min(1, speed * dt);
+
+      // 球拍朝向球
+      aiPaddle.rotation.y = Math.atan2(ball.position.x - aiPaddle.position.x, 1) * 0.3;
+    }
+
+    // ===== 玩家控制 =====
+    function updatePlayerPaddle(dt) {
+      // 鼠标位置映射到球拍位置
+      targetPaddleX = mouseX * CONFIG.table.width * 0.6;
+      targetPaddleY = CONFIG.table.height + 0.1 + mouseY * 0.3;
+
+      // 限制范围
+      targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetPaddleX));
+      targetPaddleY = Math.max(CONFIG.table.height + 0.05, Math.min(CONFIG.table.height + 0.5, targetPaddleY));
+
+      // 平滑移动
+      playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, 15 * dt);
+      playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, 15 * dt);
+
+      // 球拍轻微倾斜
+      playerPaddle.rotation.y = mouseX * 0.2;
+      playerPaddle.rotation.x = -mouseY * 0.1;
+    }
+
+    // ===== UI 更新 =====
+    function updateScoreDisplay() {
+      document.getElementById('playerScore').textContent = playerScore;
+      document.getElementById('aiScore').textContent = aiScore;
+    }
+
+    function showMessage(title, sub) {
+      document.getElementById('messageTitle').textContent = title;
+      document.getElementById('messageSub').textContent = sub;
+      document.getElementById('centerMessage').classList.add('show');
+    }
+
+    function hideMessage() {
+      document.getElementById('centerMessage').classList.remove('show');
+    }
+
+    // ===== 游戏循环 =====
+    function animate() {
+      animationId = requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      if (gameState === 'playing' || gameState === 'serving') {
+        updatePhysics(dt);
+        updateAI(dt);
+      }
+
+      updatePlayerPaddle(dt);
+
+      // 发球时球跟随玩家球拍
+      if (gameState === 'serving' && isPlayerServing) {
+        ball.position.x = playerPaddle.position.x;
+        ball.position.y = playerPaddle.position.y + 0.08;
+        ball.position.z = CONFIG.table.length / 2 - 0.25;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // ===== 事件监听 =====
+    function initEvents() {
+      // 鼠标移动
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -((e.clientY / window.innerHeight) * 2 - 1);
+      });
+
+      // 鼠标点击（击球/发球）
+      document.addEventListener('click', () => {
+        initAudio();
+        if (gameState === 'serving' && isPlayerServing) {
+          playerServe();
+        }
+      });
+
+      // 键盘
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (gameState === 'playing') {
+            gameState = 'paused';
+            showMessage('已暂停', '按 Esc 继续');
+          } else if (gameState === 'paused') {
+            gameState = 'playing';
+            hideMessage();
+          }
+        }
+        if (e.key === ' ' && gameState === 'gameover') {
+          restartGame();
+        }
+      });
+
+      // 窗口大小
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      // 开始按钮
+      document.getElementById('startBtn').addEventListener('click', startGame);
+
+      // 难度选择（开始界面）
+      document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentDifficulty = btn.dataset.diff;
+          updateDifficultyButtons();
+        });
+      });
+
+      // 难度切换（游戏中）
+      document.querySelectorAll('#difficulty .diff-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentDifficulty = btn.dataset.diff;
+          updateDifficultyButtons();
+        });
+      });
+    }
+
+    function updateDifficultyButtons() {
+      document.querySelectorAll('#difficulty .diff-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.diff === currentDifficulty);
+      });
+      document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.diff === currentDifficulty);
+      });
+    }
+
+    // ===== 游戏控制 =====
+    function startGame() {
+      initAudio();
+      document.getElementById('startScreen').classList.add('hidden');
+      playerScore = 0;
+      aiScore = 0;
+      serveCount = 0;
+      isPlayerServing = true;
+      updateScoreDisplay();
+      prepareServe();
+    }
+
+    function restartGame() {
+      playerScore = 0;
+      aiScore = 0;
+      serveCount = 0;
+      isPlayerServing = true;
+      updateScoreDisplay();
+      hideMessage();
+      prepareServe();
+    }
+
+    // ===== 初始化 =====
+    function init() {
+      initScene();
+      initEvents();
+      animate();
+    }
+
+    // 启动
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
