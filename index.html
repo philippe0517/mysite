@@ -602,6 +602,23 @@
       overflow: hidden;
     }
 
+    .work-card__cover::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.6s ease;
+      pointer-events: none;
+    }
+
+    .work-card:hover .work-card__cover::after {
+      left: 130%;
+    }
+
     .work-card__cover--alt {
       background: linear-gradient(135deg, #7EB6E8 0%, #5B8DEF 100%);
     }
@@ -642,6 +659,14 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .work-card__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .work-card__tag {
@@ -651,6 +676,13 @@
       border-radius: 100px;
       background-color: rgba(91, 141, 239, 0.08);
       color: var(--color-primary);
+    }
+
+    .work-card__tag--tech {
+      background-color: rgba(126, 182, 232, 0.12);
+      color: var(--color-accent);
+      font-size: 11px;
+      padding: 3px 8px;
     }
 
     .work-card__link {
@@ -840,6 +872,34 @@
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
       pointer-events: none;
+    }
+
+    /* 对话气泡装饰 */
+    .digital-twin__deco {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.08;
+    }
+
+    .digital-twin__deco--1 {
+      top: 15%;
+      left: 8%;
+      width: 80px;
+      height: 50px;
+    }
+
+    .digital-twin__deco--2 {
+      bottom: 20%;
+      right: 10%;
+      width: 100px;
+      height: 60px;
+    }
+
+    .digital-twin__deco--3 {
+      top: 50%;
+      left: 15%;
+      width: 60px;
+      height: 40px;
     }
 
     .digital-twin .section__title,
@@ -1694,6 +1754,7 @@
             <p class="about-card__text">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生。对前沿科技充满好奇，喜欢把想法一步步变成真实的作品，在实践中学习和成长。</p>
           </article>
           <article class="about-card reveal reveal-delay-2">
+            <span class="about-card__badge">未来</span>
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="16 18 22 12 16 6"></polyline>
@@ -1704,6 +1765,7 @@
             <p class="about-card__text">对产品设计和数字创作有浓厚兴趣，喜欢把想法快速变成可运行的原型。相信「先做出来，再逐步改」的做事方式，正在从一个能看的个人主页开始，一步步做出可发布的真实作品。</p>
           </article>
           <article class="about-card reveal reveal-delay-3">
+            <span class="about-card__badge">热爱</span>
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -1714,6 +1776,7 @@
             <p class="about-card__text">乒乓球是我最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
           </article>
           <article class="about-card reveal reveal-delay-4">
+            <span class="about-card__badge">天津→深圳</span>
             <div class="about-card__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -1748,7 +1811,12 @@
               <h3 class="work-card__title">个人主页 V1</h3>
               <p class="work-card__desc">课程项目，用纯 HTML/CSS/JS 搭建的个人主页。实践语义化标签、响应式布局和产品迭代思维的成果。</p>
               <div class="work-card__footer">
-                <span class="work-card__tag">网页设计</span>
+                <div class="work-card__tags">
+                  <span class="work-card__tag">网页设计</span>
+                  <span class="work-card__tag work-card__tag--tech">HTML</span>
+                  <span class="work-card__tag work-card__tag--tech">CSS</span>
+                  <span class="work-card__tag work-card__tag--tech">JavaScript</span>
+                </div>
                 <a class="work-card__link" href="#top">
                   正在浏览
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1780,7 +1848,11 @@
               <h3 class="work-card__title">乒乓球对战游戏</h3>
               <p class="work-card__desc">用纯 HTML/CSS/JS + Canvas 制作的乒乓球对战小游戏，单人 vs 电脑模式，支持三种难度、鼠标和键盘控制、粒子特效和音效。</p>
               <div class="work-card__footer">
-                <span class="work-card__tag">网页游戏</span>
+                <div class="work-card__tags">
+                  <span class="work-card__tag">网页游戏</span>
+                  <span class="work-card__tag work-card__tag--tech">Canvas</span>
+                  <span class="work-card__tag work-card__tag--tech">Web Audio</span>
+                </div>
                 <a class="work-card__link" href="ping-pong.html" target="_blank">
                   立即游玩
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1927,6 +1999,19 @@
 
     <!-- ===== 数字分身（静态对话版） ===== -->
     <section class="section digital-twin" id="digital-twin">
+      <!-- 对话气泡装饰 -->
+      <svg class="digital-twin__deco digital-twin__deco--1" viewBox="0 0 80 50" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="70" height="38" rx="12" stroke="white" stroke-width="2"/>
+        <path d="M20 44 L12 50 L16 40" fill="white"/>
+      </svg>
+      <svg class="digital-twin__deco digital-twin__deco--2" viewBox="0 0 100 60" fill="none" aria-hidden="true">
+        <rect x="5" y="5" width="80" height="42" rx="14" stroke="white" stroke-width="2"/>
+        <path d="M75 47 L88 58 L82 45" fill="white"/>
+      </svg>
+      <svg class="digital-twin__deco digital-twin__deco--3" viewBox="0 0 60 40" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="50" height="28" rx="10" stroke="white" stroke-width="2"/>
+        <path d="M15 30 L8 38 L12 28" fill="white"/>
+      </svg>
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">DIGITAL TWIN</span>
@@ -1986,7 +2071,7 @@
                 <div class="contact-method__value">16602256906@163.com</div>
               </div>
             </div>
-            <div class="contact-method reveal reveal-delay-2">
+            <a class="contact-method reveal reveal-delay-2" href="https://github.com/philippe0517" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;">
               <div class="contact-method__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
@@ -1996,7 +2081,7 @@
                 <div class="contact-method__label">GitHub</div>
                 <div class="contact-method__value">github.com/philippe0517</div>
               </div>
-            </div>
+            </a>
           </div>
           <div class="contact__cta reveal reveal-delay-3" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
             <a class="btn btn--primary" href="mailto:16602256906@163.com">
