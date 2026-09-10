@@ -7,415 +7,157 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237EB6D9'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
       background: #0a1628;
       overflow: hidden;
       color: #fff;
     }
+    #gameCanvas { display: block; width: 100vw; height: 100vh; cursor: none; }
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
-    #gameCanvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      cursor: none;
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    /* 记分牌 - 奥运风格 */
+    /* 记分牌 */
     .scoreboard {
-      position: absolute;
-      top: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 0;
+      position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 0;
       background: linear-gradient(180deg, #1a2a4a 0%, #0d1a30 100%);
-      border: 2px solid #c9a96e;
-      border-radius: 12px;
-      padding: 12px 28px;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+      border: 2px solid #c9a96e; border-radius: 12px;
+      padding: 10px 24px; box-shadow: 0 4px 30px rgba(0,0,0,0.5);
     }
-
-    .score-side {
-      text-align: center;
-      min-width: 100px;
-      padding: 0 16px;
-    }
-
-    .score-label {
-      font-size: 12px;
-      color: #c9a96e;
-      margin-bottom: 4px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
-    .score-value {
-      font-size: 48px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1;
-      font-family: 'Noto Sans SC', sans-serif;
-      text-shadow: 0 2px 10px rgba(201,169,110,0.5);
-    }
-
-    .score-divider {
-      font-size: 32px;
-      color: #c9a96e;
-      font-weight: 300;
-      padding: 0 8px;
+    .score-side { text-align: center; min-width: 70px; padding: 0 12px; }
+    .score-label { font-size: 11px; color: #c9a96e; margin-bottom: 2px; font-weight: 700; letter-spacing: 1px; }
+    .score-value { font-size: 36px; font-weight: 900; color: #fff; line-height: 1; }
+    .score-divider { font-size: 24px; color: #c9a96e; font-weight: 300; padding: 0 6px; }
+    .game-score { font-size: 12px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 2px; }
+    .serve-indicator {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: #4ade80; margin-right: 4px; vertical-align: middle;
+      box-shadow: 0 0 6px #4ade80;
     }
 
     .game-info {
-      position: absolute;
-      top: 24px;
-      left: 24px;
+      position: absolute; top: 20px; left: 20px;
       background: linear-gradient(180deg, rgba(26,42,74,0.9) 0%, rgba(13,26,48,0.9) 100%);
-      border: 1px solid rgba(201,169,110,0.5);
-      padding: 12px 18px;
-      border-radius: 10px;
-      backdrop-filter: blur(10px);
+      border: 1px solid rgba(201,169,110,0.5); padding: 10px 16px; border-radius: 10px;
     }
+    .game-info h2 { font-size: 13px; color: #c9a96e; margin-bottom: 2px; font-weight: 700; }
+    .game-info p { font-size: 11px; color: rgba(255,255,255,0.6); line-height: 1.5; }
 
-    .game-info h2 {
-      font-size: 14px;
-      color: #c9a96e;
-      margin-bottom: 2px;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-
-    .game-info p {
-      font-size: 11px;
-      color: rgba(255,255,255,0.6);
-      line-height: 1.5;
-    }
-
-    .difficulty {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      display: flex;
-      gap: 6px;
-      pointer-events: auto;
-    }
-
+    .difficulty { position: absolute; top: 20px; right: 20px; display: flex; gap: 6px; pointer-events: auto; }
     .diff-btn {
-      padding: 8px 16px;
-      border: 1px solid rgba(201,169,110,0.4);
-      background: rgba(26,42,74,0.8);
-      color: rgba(255,255,255,0.6);
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 6px 14px; border: 1px solid rgba(201,169,110,0.4);
+      background: rgba(26,42,74,0.8); color: rgba(255,255,255,0.6);
+      border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;
       transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
     }
+    .diff-btn:hover { background: rgba(201,169,110,0.2); color: #c9a96e; }
+    .diff-btn.active { background: #c9a96e; color: #0d1a30; border-color: #c9a96e; }
 
-    .diff-btn:hover {
-      background: rgba(201,169,110,0.2);
-      color: #c9a96e;
+    /* 旋转/时机指示器 */
+    .spin-indicator {
+      position: absolute; top: 90px; left: 20px;
+      background: rgba(13,26,48,0.85); border: 1px solid rgba(201,169,110,0.4);
+      padding: 10px 14px; border-radius: 8px; font-size: 11px;
+      color: rgba(255,255,255,0.7); line-height: 1.8; min-width: 140px;
     }
-
-    .diff-btn.active {
-      background: #c9a96e;
-      color: #0d1a30;
-      border-color: #c9a96e;
-    }
+    .spin-indicator .title { color: #c9a96e; font-weight: 700; margin-bottom: 4px; font-size: 12px; }
+    .spin-indicator .value { color: #4ade80; font-weight: 600; }
 
     /* 蓄力条 */
     .power-bar-container {
-      position: absolute;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 300px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
+      position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+      width: 280px; opacity: 0; transition: opacity 0.2s ease;
     }
-
-    .power-bar-container.active {
-      opacity: 1;
-    }
-
-    .power-bar-label {
-      text-align: center;
-      font-size: 12px;
-      color: #c9a96e;
-      margin-bottom: 6px;
-      font-weight: 700;
-      letter-spacing: 2px;
-    }
-
-    .power-bar {
-      width: 100%;
-      height: 14px;
-      background: rgba(13,26,48,0.8);
-      border: 2px solid #c9a96e;
-      border-radius: 7px;
-      overflow: hidden;
-    }
-
-    .power-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #4ade80 0%, #facc15 50%, #ef4444 100%);
-      transition: width 0.05s linear;
-      border-radius: 5px;
-    }
+    .power-bar-container.active { opacity: 1; }
+    .power-bar-label { text-align: center; font-size: 11px; color: #c9a96e; margin-bottom: 4px; font-weight: 700; letter-spacing: 1px; }
+    .power-bar { width: 100%; height: 12px; background: rgba(13,26,48,0.8); border: 2px solid #c9a96e; border-radius: 6px; overflow: hidden; }
+    .power-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80 0%, #facc15 50%, #ef4444 100%); transition: width 0.05s linear; }
 
     .center-message {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
+      position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
     }
-
-    .center-message.show {
-      opacity: 1;
-    }
-
-    .center-message h1 {
-      font-size: 64px;
-      color: #c9a96e;
-      font-weight: 900;
-      margin-bottom: 12px;
-      text-shadow: 0 4px 30px rgba(201,169,110,0.5);
-      letter-spacing: 4px;
-    }
-
-    .center-message p {
-      font-size: 20px;
-      color: rgba(255,255,255,0.8);
-      letter-spacing: 2px;
-    }
+    .center-message.show { opacity: 1; }
+    .center-message h1 { font-size: 52px; color: #c9a96e; font-weight: 900; margin-bottom: 8px; text-shadow: 0 4px 30px rgba(201,169,110,0.5); letter-spacing: 4px; }
+    .center-message p { font-size: 18px; color: rgba(255,255,255,0.8); letter-spacing: 2px; }
 
     .controls-hint {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(13,26,48,0.85);
-      border: 1px solid rgba(201,169,110,0.4);
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 12px;
-      color: rgba(255,255,255,0.7);
-      text-align: center;
-      line-height: 1.8;
-      backdrop-filter: blur(10px);
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: rgba(13,26,48,0.85); border: 1px solid rgba(201,169,110,0.4);
+      padding: 8px 20px; border-radius: 8px; font-size: 11px;
+      color: rgba(255,255,255,0.7); text-align: center; line-height: 1.8;
     }
-
-    .controls-hint strong {
-      color: #c9a96e;
-      font-weight: 700;
-    }
-
-    /* 开始界面 - 奥运风格 */
-    .start-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(ellipse at center, #1a2a4a 0%, #0a1628 70%, #050d1a 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: opacity 0.6s ease, visibility 0.6s ease;
-    }
-
-    .start-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-
-    .olympic-rings {
-      display: flex;
-      gap: -8px;
-      margin-bottom: 30px;
-    }
-
-    .ring {
-      width: 50px;
-      height: 50px;
-      border: 5px solid;
-      border-radius: 50%;
-      margin: 0 -8px;
-    }
-
-    .ring:nth-child(1) { border-color: #0085C7; }
-    .ring:nth-child(2) { border-color: #000000; margin-top: 25px; }
-    .ring:nth-child(3) { border-color: #DF0024; }
-    .ring:nth-child(4) { border-color: #F4C300; margin-top: 25px; }
-    .ring:nth-child(5) { border-color: #009F3D; }
-
-    .start-screen h1 {
-      font-size: 56px;
-      color: #c9a96e;
-      font-weight: 900;
-      margin-bottom: 8px;
-      text-shadow: 0 4px 30px rgba(201,169,110,0.4);
-      letter-spacing: 6px;
-    }
-
-    .start-screen .subtitle {
-      font-size: 18px;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 50px;
-      letter-spacing: 4px;
-    }
-
-    .start-screen .match-info {
-      font-size: 14px;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 40px;
-      letter-spacing: 2px;
-      text-align: center;
-      line-height: 2;
-    }
-
-    .start-screen .match-info strong {
-      color: #c9a96e;
-    }
-
-    .start-difficulty {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-
-    .start-diff-btn {
-      padding: 14px 36px;
-      font-size: 16px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.6);
-      background: rgba(26,42,74,0.6);
-      border: 2px solid rgba(201,169,110,0.4);
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      letter-spacing: 2px;
-    }
-
-    .start-diff-btn:hover {
-      border-color: #c9a96e;
-      color: #c9a96e;
-      background: rgba(201,169,110,0.1);
-    }
-
-    .start-diff-btn.active {
-      background: #c9a96e;
-      color: #0d1a30;
-      border-color: #c9a96e;
-    }
-
-    .start-btn {
-      padding: 18px 70px;
-      font-size: 22px;
-      font-weight: 900;
-      color: #0d1a30;
-      background: linear-gradient(180deg, #e8c98a 0%, #c9a96e 50%, #a8894e 100%);
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 40px rgba(201,169,110,0.4), inset 0 1px 0 rgba(255,255,255,0.4);
-      letter-spacing: 8px;
-    }
-
-    .start-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 50px rgba(201,169,110,0.6), inset 0 1px 0 rgba(255,255,255,0.4);
-    }
-
-    .start-btn:active {
-      transform: translateY(-1px);
-    }
-
-    .start-tips {
-      margin-top: 40px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.4);
-      text-align: center;
-      line-height: 2.2;
-      letter-spacing: 1px;
-    }
+    .controls-hint strong { color: #c9a96e; font-weight: 700; }
 
     .back-link {
-      position: absolute;
-      bottom: 24px;
-      right: 24px;
-      color: #c9a96e;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 10px 20px;
-      background: rgba(13,26,48,0.85);
-      border: 1px solid rgba(201,169,110,0.4);
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      pointer-events: auto;
-      letter-spacing: 1px;
+      position: absolute; bottom: 20px; right: 20px; color: #c9a96e;
+      text-decoration: none; font-size: 12px; font-weight: 600;
+      padding: 8px 16px; background: rgba(13,26,48,0.85);
+      border: 1px solid rgba(201,169,110,0.4); border-radius: 8px;
+      transition: all 0.3s ease; pointer-events: auto;
     }
+    .back-link:hover { background: #c9a96e; color: #0d1a30; }
 
-    .back-link:hover {
-      background: #c9a96e;
-      color: #0d1a30;
+    /* 开始界面 */
+    .start-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(ellipse at center, #1a2a4a 0%, #0a1628 70%, #050d1a 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 100; transition: opacity 0.6s ease, visibility 0.6s ease;
     }
+    .start-screen.hidden { opacity: 0; visibility: hidden; }
+    .olympic-rings { display: flex; margin-bottom: 24px; }
+    .ring { width: 44px; height: 44px; border: 4px solid; border-radius: 50%; margin: 0 -7px; }
+    .ring:nth-child(1) { border-color: #0085C7; }
+    .ring:nth-child(2) { border-color: #000000; margin-top: 22px; }
+    .ring:nth-child(3) { border-color: #DF0024; }
+    .ring:nth-child(4) { border-color: #F4C300; margin-top: 22px; }
+    .ring:nth-child(5) { border-color: #009F3D; }
+    .start-screen h1 { font-size: 48px; color: #c9a96e; font-weight: 900; margin-bottom: 6px; letter-spacing: 6px; }
+    .start-screen .subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 30px; letter-spacing: 3px; }
+    .start-screen .match-info { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 30px; letter-spacing: 1px; text-align: center; line-height: 2; }
+    .start-screen .match-info strong { color: #c9a96e; }
+    .start-difficulty { display: flex; gap: 14px; margin-bottom: 30px; }
+    .start-diff-btn {
+      padding: 12px 28px; font-size: 14px; font-weight: 600;
+      color: rgba(255,255,255,0.6); background: rgba(26,42,74,0.6);
+      border: 2px solid rgba(201,169,110,0.4); border-radius: 10px;
+      cursor: pointer; transition: all 0.3s ease; letter-spacing: 1px;
+    }
+    .start-diff-btn:hover { border-color: #c9a96e; color: #c9a96e; }
+    .start-diff-btn.active { background: #c9a96e; color: #0d1a30; border-color: #c9a96e; }
+    .start-btn {
+      padding: 16px 60px; font-size: 20px; font-weight: 900; color: #0d1a30;
+      background: linear-gradient(180deg, #e8c98a 0%, #c9a96e 50%, #a8894e 100%);
+      border: none; border-radius: 50px; cursor: pointer;
+      transition: all 0.3s ease; box-shadow: 0 8px 40px rgba(201,169,110,0.4);
+      letter-spacing: 6px;
+    }
+    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 50px rgba(201,169,110,0.6); }
+    .start-tips { margin-top: 30px; font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; line-height: 2.2; }
   </style>
 </head>
 <body>
-  <!-- 开始界面 -->
   <div class="start-screen" id="startScreen">
     <div class="olympic-rings">
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
-      <div class="ring"></div>
+      <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
     </div>
     <h1>乒乓球决赛</h1>
-    <p class="subtitle">OLYMPIC FINAL · 奥运决赛</p>
+    <p class="subtitle">OLYMPIC FINAL · 7局4胜</p>
     <div class="match-info">
-      <strong>男子单打决赛</strong> · 第7局决胜<br>
-      你 VS 电脑 · 11分制 · 领先2分获胜 · 一方弹2次失分
+      <strong>男子单打决赛</strong> · 7局4胜制 · 11分制(领先2分)<br>
+      真实旋转系统 · 发球规则 · 擦网擦边判定 · AI战术风格
     </div>
     <div class="start-difficulty" id="startDifficulty">
-      <button class="start-diff-btn" data-diff="easy">铜牌赛</button>
-      <button class="start-diff-btn active" data-diff="normal">银牌赛</button>
-      <button class="start-diff-btn" data-diff="hard">金牌赛</button>
+      <button class="start-diff-btn" data-diff="easy">快攻型</button>
+      <button class="start-diff-btn active" data-diff="normal">弧圈型</button>
+      <button class="start-diff-btn" data-diff="hard">削球型</button>
     </div>
     <button class="start-btn" id="startBtn">开赛</button>
     <div class="start-tips">
-      移动鼠标控制球拍 · 按住鼠标蓄力，松开击球（蓄力越久力量越大）<br>
-      右键切换正反手（正手红胶皮/反手黑胶皮）
-      真实横握拍姿势 · 正反手切换 · 奥运决赛赛场 · 观众欢呼音效 · 乒乓球拖尾
+      移动鼠标控制球拍 · 按住左键蓄力，松开击球<br>
+      右键切换正反手 · 击球时机影响回球质量 · 不同旋转不同弹跳
     </div>
   </div>
 
@@ -424,33 +166,39 @@
   <div class="overlay">
     <div class="scoreboard">
       <div class="score-side">
-        <div class="score-label">你</div>
+        <div class="score-label"><span class="serve-indicator" id="playerServeDot" style="display:none"></span>你</div>
         <div class="score-value" id="playerScore">0</div>
+        <div class="game-score" id="playerGames">局 0</div>
       </div>
       <div class="score-divider">:</div>
       <div class="score-side">
-        <div class="score-label">对手</div>
+        <div class="score-label"><span class="serve-indicator" id="aiServeDot" style="display:none"></span>对手</div>
         <div class="score-value" id="aiScore">0</div>
+        <div class="game-score" id="aiGames">局 0</div>
       </div>
     </div>
 
     <div class="game-info">
       <h2>奥运乒乓球决赛</h2>
-      <p>第一人称视角 · 真实物理模拟</p>
+      <p>第 <span id="currentGame">1</span> 局 · 7局4胜</p>
     </div>
 
     <div class="difficulty" id="difficulty">
-      <button class="diff-btn" data-diff="easy">铜牌</button>
-      <button class="diff-btn active" data-diff="normal">银牌</button>
-      <button class="diff-btn" data-diff="hard">金牌</button>
+      <button class="diff-btn" data-diff="easy">快攻</button>
+      <button class="diff-btn active" data-diff="normal">弧圈</button>
+      <button class="diff-btn" data-diff="hard">削球</button>
     </div>
 
-    <!-- 蓄力条 -->
+    <div class="spin-indicator">
+      <div class="title">球的状态</div>
+      <div>旋转: <span class="value" id="spinType">--</span></div>
+      <div>击球点: <span class="value" id="hitTiming">--</span></div>
+      <div>球速: <span class="value" id="ballSpeed">0</span> m/s</div>
+    </div>
+
     <div class="power-bar-container" id="powerBarContainer">
       <div class="power-bar-label">击球力度</div>
-      <div class="power-bar">
-        <div class="power-bar-fill" id="powerBarFill"></div>
-      </div>
+      <div class="power-bar"><div class="power-bar-fill" id="powerBarFill"></div></div>
     </div>
 
     <div class="center-message" id="centerMessage">
@@ -459,7 +207,7 @@
     </div>
 
     <div class="controls-hint">
-      <strong>移动鼠标</strong> 控制球拍 · <strong>按住左键</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>右键</strong> 切换正反手 · <strong>Esc</strong> 暂停
+      <strong>移动鼠标</strong> 控制球拍 · <strong>按住左键</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>右键</strong> 正反手 · <strong>Esc</strong> 暂停
     </div>
 
     <a href="index.html" class="back-link">← 返回主页</a>
@@ -470,64 +218,127 @@
   (function () {
     'use strict';
 
-    // ===== 游戏配置 =====
+    // ===== 配置 =====
     const CONFIG = {
       table: { length: 2.74, width: 1.525, height: 0.76, netHeight: 0.1525 },
       ball: { radius: 0.02, mass: 0.0027, gravity: 9.81, restitution: 0.92, airResistance: 0.1 },
       paddle: { width: 0.18, height: 0.22, thickness: 0.008 },
-      game: { winScore: 11, serveInterval: 2, maxChargeTime: 1.5, deuceScore: 10 }
+      game: { winScore: 11, serveInterval: 2, maxChargeTime: 1.5, deuceScore: 10, gamesToWin: 4, totalGames: 7 }
     };
 
-    const DIFFICULTY = {
-      easy: { aiSpeed: 0.18, aiError: 0.35, ballSpeedMult: 0.6, name: '铜牌赛' },
-      normal: { aiSpeed: 0.4, aiError: 0.15, ballSpeedMult: 0.85, name: '银牌赛' },
-      hard: { aiSpeed: 0.7, aiError: 0.05, ballSpeedMult: 1.05, name: '金牌赛' }
+    // AI风格配置（不同打法风格）
+    const AI_STYLES = {
+      easy: {
+        name: '快攻型',
+        aiSpeed: 0.35, aiError: 0.3, ballSpeedMult: 0.7,
+        topspinProb: 0.3, backspinProb: 0.1, sidespinProb: 0.1,
+        attackThreshold: 0.4, // 进攻倾向
+        reactionTime: 0.25,
+        tactic: 'fast_attack'
+      },
+      normal: {
+        name: '弧圈型',
+        aiSpeed: 0.55, aiError: 0.12, ballSpeedMult: 0.95,
+        topspinProb: 0.6, backspinProb: 0.15, sidespinProb: 0.2,
+        attackThreshold: 0.6,
+        reactionTime: 0.18,
+        tactic: 'loop'
+      },
+      hard: {
+        name: '削球型',
+        aiSpeed: 0.7, aiError: 0.05, ballSpeedMult: 1.1,
+        topspinProb: 0.25, backspinProb: 0.5, sidespinProb: 0.25,
+        attackThreshold: 0.3,
+        reactionTime: 0.12,
+        tactic: 'chop'
+      }
+    };
+
+    // 旋转类型定义
+    const SPIN_TYPES = {
+      none: { name: '无旋转', topspin: 0, backspin: 0, sidespin: 0, bounceMult: 1.0, speedMult: 1.0 },
+      topspin: { name: '上旋', topspin: 8, backspin: 0, sidespin: 0, bounceMult: 1.15, speedMult: 1.1 },
+      backspin: { name: '下旋', topspin: 0, backspin: -8, sidespin: 0, bounceMult: 0.7, speedMult: 0.85 },
+      sidespin_left: { name: '左侧旋', topspin: 0, backspin: 0, sidespin: -6, bounceMult: 0.95, speedMult: 0.95 },
+      sidespin_right: { name: '右侧旋', topspin: 0, backspin: 0, sidespin: 6, bounceMult: 0.95, speedMult: 0.95 },
+      topspin_left: { name: '左侧上旋', topspin: 6, backspin: 0, sidespin: -4, bounceMult: 1.1, speedMult: 1.05 },
+      topspin_right: { name: '右侧上旋', topspin: 6, backspin: 0, sidespin: 4, bounceMult: 1.1, speedMult: 1.05 },
+      backspin_left: { name: '左侧下旋', topspin: 0, backspin: -6, sidespin: -4, bounceMult: 0.75, speedMult: 0.85 },
+      backspin_right: { name: '右侧下旋', topspin: 0, backspin: -6, sidespin: 4, bounceMult: 0.75, speedMult: 0.85 }
+    };
+
+    // 击球时机定义
+    const HIT_TIMING = {
+      rising: { name: '上升期', speedMult: 1.2, spinMult: 0.8, quality: '借力' },
+      peak: { name: '高点期', speedMult: 1.0, spinMult: 1.0, quality: '稳定' },
+      falling_early: { name: '下降前期', speedMult: 0.9, spinMult: 1.3, quality: '拉球' },
+      falling_late: { name: '下降后期', speedMult: 0.7, spinMult: 1.5, quality: '防守' }
     };
 
     // ===== 状态 =====
     let currentDifficulty = 'normal';
-    let gameState = 'waiting';
+    let gameState = 'waiting'; // waiting, serving, playing, paused, gameover, matchover
     let playerScore = 0, aiScore = 0;
+    let playerGames = 0, aiGames = 0;
+    let currentGame = 1;
     let isPlayerServing = true;
     let serveCount = 0;
+    let isDeuce = false;
 
     // Three.js
     let scene, camera, renderer;
     let table, net, ball, playerPaddle, aiPaddle, playerArm;
     let ballVelocity = new THREE.Vector3();
-    let ballSpin = new THREE.Vector3();
+    let ballSpinVector = new THREE.Vector3(); // 旋转向量
+    let currentSpinType = 'none';
     let lastHitBy = null;
     let ballBouncedOnTable = false;
+    let ballBounceCountOnSide = 0;
+    let currentTableSide = null;
+    let isBallFalling = false; // 球是否在下降（用于击球时机判定）
+    let lastHitTiming = 'peak';
 
-    // 球台弹跳次数追踪（某一方弹跳2次即失分）
-    let currentTableSide = null; // 'player' or 'ai'
-    let bounceCountOnSide = 0;
+    // 发球状态
+    let isTossing = false;
+    let tossStartTime = 0;
+    let tossHeight = 0;
+    let serveFault = false;
 
-    // 乒乓球拖尾
+    // 擦网状态
+    let letBall = false; // 发球擦网
+
+    // 拖尾
     let ballTrail = [];
     const TRAIL_LENGTH = 12;
     let trailMeshes = [];
 
-    // 鼠标控制
+    // 鼠标
     let mouseX = 0, mouseY = 0;
     let targetPaddleX = 0, targetPaddleY = 0;
-
-    // 正反手状态
-    let isForehand = true; // true=正手(红色胶皮), false=反手(黑色胶皮)
-    let paddleTransition = 1; // 正反手切换过渡 0-1
-    let isCelebrating = false; // 庆祝动画状态
-    let celebrateTime = 0;
 
     // 蓄力
     let isCharging = false;
     let chargeStartTime = 0;
     let currentPower = 0;
 
+    // 正反手
+    let isForehand = true;
+    let paddleTransition = 1;
+
+    // 庆祝
+    let isCelebrating = false;
+    let celebrateTime = 0;
+
+    // AI状态
+    let aiReactionTimer = 0;
+    let aiTargetX = 0, aiTargetY = 0;
+    let aiMood = 1.0; // AI状态 0.5-1.5
+
     // 动画
     let clock = new THREE.Clock();
     let animationId = null;
 
-    // ===== 音效系统 =====
+    // ===== 音效 =====
     let audioCtx = null;
     let crowdNoiseNode = null;
     let crowdGainNode = null;
@@ -540,61 +351,43 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // 观众欢呼声（白噪声+带通滤波模拟人群）
     function initCrowdSound() {
       try {
-        // 创建白噪声
         const bufferSize = 2 * audioCtx.sampleRate;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
         crowdNoiseNode = audioCtx.createBufferSource();
         crowdNoiseNode.buffer = noiseBuffer;
         crowdNoiseNode.loop = true;
-
-        // 带通滤波模拟人群声
         const bandpass = audioCtx.createBiquadFilter();
         bandpass.type = 'bandpass';
         bandpass.frequency.value = 800;
         bandpass.Q.value = 0.5;
-
-        // 低通滤波让声音更柔和
         const lowpass = audioCtx.createBiquadFilter();
         lowpass.type = 'lowpass';
         lowpass.frequency.value = 2000;
-
         crowdGainNode = audioCtx.createGain();
-        crowdGainNode.gain.value = 0.04; // 基础音量
-
+        crowdGainNode.gain.value = 0.04;
         crowdNoiseNode.connect(bandpass);
         bandpass.connect(lowpass);
         lowpass.connect(crowdGainNode);
         crowdGainNode.connect(audioCtx.destination);
-
         crowdNoiseNode.start();
       } catch (e) {}
     }
 
-    // 观众欢呼强度变化
     function setCrowdIntensity(intensity) {
       if (!crowdGainNode || !audioCtx) return;
-      const targetGain = 0.03 + intensity * 0.12;
-      crowdGainNode.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.3);
+      crowdGainNode.gain.setTargetAtTime(0.03 + intensity * 0.12, audioCtx.currentTime, 0.3);
     }
 
-    // 得分时的欢呼爆发
     function playCrowdCheer(isPlayerScore) {
       if (!audioCtx) return;
+      setCrowdIntensity(1);
+      setTimeout(() => setCrowdIntensity(0.3), 2000);
+      setTimeout(() => setCrowdIntensity(0.1), 4000);
       try {
-        // 短暂提升观众音量
-        setCrowdIntensity(1);
-        setTimeout(() => setCrowdIntensity(0.3), 2000);
-        setTimeout(() => setCrowdIntensity(0), 4000);
-
-        // 加一个"加油"的呼喊感（用频率调制）
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -609,36 +402,32 @@
       } catch (e) {}
     }
 
-    // 击球音效（木质撞击声）
-    function playHitSound(intensity) {
+    function playHitSound(intensity, spinType) {
       if (!audioCtx) return;
       try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         const filter = audioCtx.createBiquadFilter();
-
         osc.connect(filter);
         filter.connect(gain);
         gain.connect(audioCtx.destination);
-
+        // 不同旋转不同声音
+        let baseFreq = 700 + intensity * 500;
+        if (spinType === 'backspin' || spinType.includes('backspin')) baseFreq *= 0.8;
+        if (spinType === 'topspin' || spinType.includes('topspin')) baseFreq *= 1.1;
         osc.type = 'square';
-        const baseFreq = 700 + intensity * 500;
         osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.07);
-
         filter.type = 'lowpass';
         filter.frequency.setValueAtTime(3500, audioCtx.currentTime);
         filter.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.09);
-
         gain.gain.setValueAtTime(0.12 + intensity * 0.18, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.09);
-
-        osc.start(audioCtx.currentTime);
+        osc.start();
         osc.stop(audioCtx.currentTime + 0.09);
       } catch (e) {}
     }
 
-    // 球落桌音效
     function playBounceSound() {
       if (!audioCtx) return;
       try {
@@ -656,21 +445,49 @@
       } catch (e) {}
     }
 
+    function playLetSound() {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(1000, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function playFaultSound() {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
     // ===== 场景初始化 =====
     function initScene() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a1628);
       scene.fog = new THREE.Fog(0x0a1628, 8, 25);
-
-      // 相机 - 真实持拍人视角（人眼高度约1.2m，略微俯视球桌）
       camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.01, 100);
       camera.position.set(0, 1.15, CONFIG.table.length / 2 + 0.35);
       camera.lookAt(0, CONFIG.table.height + 0.05, -0.3);
-
-      renderer = new THREE.WebGLRenderer({
-        canvas: document.getElementById('gameCanvas'),
-        antialias: true
-      });
+      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.shadowMap.enabled = true;
@@ -678,11 +495,8 @@
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.2;
 
-      // 灯光 - 奥运赛场聚光灯
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
       scene.add(ambientLight);
-
-      // 主聚光灯（球桌上方）
       const mainSpot = new THREE.SpotLight(0xffffff, 1.5, 15, Math.PI / 4, 0.4, 1);
       mainSpot.position.set(0, 5, 0);
       mainSpot.target.position.set(0, CONFIG.table.height, 0);
@@ -691,12 +505,9 @@
       mainSpot.shadow.mapSize.height = 2048;
       scene.add(mainSpot);
       scene.add(mainSpot.target);
-
-      // 两侧辅助灯
       const fillLight1 = new THREE.PointLight(0x7EB6D9, 0.4, 10);
       fillLight1.position.set(-4, 3, 0);
       scene.add(fillLight1);
-
       const fillLight2 = new THREE.PointLight(0xE8787A, 0.3, 10);
       fillLight2.position.set(4, 3, 0);
       scene.add(fillLight2);
@@ -708,87 +519,67 @@
       createPaddles();
     }
 
-    // 奥运赛场环境
     function createOlympicVenue() {
-      // 比赛场地地板（深蓝色塑胶）
       const floorGeo = new THREE.PlaneGeometry(12, 12);
-      const floorMat = new THREE.MeshStandardMaterial({
-        color: 0x1a3a5c,
-        roughness: 0.7,
-        metalness: 0.1
-      });
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a3a5c, roughness: 0.7, metalness: 0.1 });
       const floor = new THREE.Mesh(floorGeo, floorMat);
       floor.rotation.x = -Math.PI / 2;
-      floor.position.y = 0;
       floor.receiveShadow = true;
       scene.add(floor);
 
-      // 场地边线（白色）
       const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const boundaryLineGeo = new THREE.BoxGeometry(8, 0.005, 0.05);
-      const boundary1 = new THREE.Mesh(boundaryLineGeo, lineMat);
-      boundary1.position.set(0, 0.003, -3.5);
-      scene.add(boundary1);
-      const boundary2 = boundary1.clone();
-      boundary2.position.z = 3.5;
-      scene.add(boundary2);
-
+      const b1 = new THREE.Mesh(boundaryLineGeo, lineMat);
+      b1.position.set(0, 0.003, -3.5);
+      scene.add(b1);
+      const b2 = b1.clone();
+      b2.position.z = 3.5;
+      scene.add(b2);
       const sideLineGeo = new THREE.BoxGeometry(0.05, 0.005, 7);
-      const side1 = new THREE.Mesh(sideLineGeo, lineMat);
-      side1.position.set(-4, 0.003, 0);
-      scene.add(side1);
-      const side2 = side1.clone();
-      side2.position.x = 4;
-      scene.add(side2);
+      const s1 = new THREE.Mesh(sideLineGeo, lineMat);
+      s1.position.set(-4, 0.003, 0);
+      scene.add(s1);
+      const s2 = s1.clone();
+      s2.position.x = 4;
+      scene.add(s2);
 
-      // 观众席（四周阶梯式）
+      // 观众席
       const seatColors = [0x2a4a6a, 0x3a5a7a, 0x1a3a5c, 0x4a6a8a];
       for (let side = 0; side < 4; side++) {
         for (let row = 0; row < 8; row++) {
           const seatGeo = new THREE.BoxGeometry(side < 2 ? 10 + row * 0.5 : 0.4, 0.3, side < 2 ? 0.4 : 10 + row * 0.5);
-          const seatMat = new THREE.MeshStandardMaterial({
-            color: seatColors[Math.floor(Math.random() * seatColors.length)],
-            roughness: 0.8
-          });
+          const seatMat = new THREE.MeshStandardMaterial({ color: seatColors[Math.floor(Math.random() * seatColors.length)], roughness: 0.8 });
           const seat = new THREE.Mesh(seatGeo, seatMat);
           const radius = 5 + row * 0.6;
           const height = 0.5 + row * 0.35;
-          if (side === 0) { seat.position.set(0, height, -radius); }
-          else if (side === 1) { seat.position.set(0, height, radius); }
-          else if (side === 2) { seat.position.set(-radius, height, 0); }
-          else { seat.position.set(radius, height, 0); }
+          if (side === 0) seat.position.set(0, height, -radius);
+          else if (side === 1) seat.position.set(0, height, radius);
+          else if (side === 2) seat.position.set(-radius, height, 0);
+          else seat.position.set(radius, height, 0);
           scene.add(seat);
         }
       }
 
-      // 观众（大量小色块模拟人群）
+      // 观众
       const crowdColors = [0xE8787A, 0x7EB6D9, 0xF4C300, 0x009F3D, 0xDF0024, 0xffffff, 0x000000, 0xFF8C00];
       for (let i = 0; i < 300; i++) {
         const personGeo = new THREE.BoxGeometry(0.15, 0.35, 0.15);
-        const personMat = new THREE.MeshStandardMaterial({
-          color: crowdColors[Math.floor(Math.random() * crowdColors.length)],
-          roughness: 0.9
-        });
+        const personMat = new THREE.MeshStandardMaterial({ color: crowdColors[Math.floor(Math.random() * crowdColors.length)], roughness: 0.9 });
         const person = new THREE.Mesh(personGeo, personMat);
         const angle = Math.random() * Math.PI * 2;
         const radius = 5.5 + Math.random() * 4;
-        person.position.set(
-          Math.cos(angle) * radius,
-          0.8 + Math.random() * 2.5,
-          Math.sin(angle) * radius
-        );
+        person.position.set(Math.cos(angle) * radius, 0.8 + Math.random() * 2.5, Math.sin(angle) * radius);
         person.rotation.y = -angle;
         scene.add(person);
       }
 
-      // 顶部广告牌（四周）
-      const adTextures = ['红双喜', '蝴蝶', '奥运', 'ITTF', '中国联通', '伊利'];
+      // 广告牌
+      const adTexts = ['红双喜', '蝴蝶', '奥运', 'ITTF', '中国联通', '伊利'];
       for (let side = 0; side < 4; side++) {
         for (let i = 0; i < 3; i++) {
           const adGeo = new THREE.PlaneGeometry(2, 0.6);
           const adCanvas = document.createElement('canvas');
-          adCanvas.width = 256;
-          adCanvas.height = 64;
+          adCanvas.width = 256; adCanvas.height = 64;
           const adCtx = adCanvas.getContext('2d');
           adCtx.fillStyle = ['#c9a96e', '#7EB6D9', '#E8787A', '#009F3D'][side % 4];
           adCtx.fillRect(0, 0, 256, 64);
@@ -796,12 +587,12 @@
           adCtx.font = 'bold 28px sans-serif';
           adCtx.textAlign = 'center';
           adCtx.textBaseline = 'middle';
-          adCtx.fillText(adTextures[(side * 3 + i) % adTextures.length], 128, 32);
+          adCtx.fillText(adTexts[(side * 3 + i) % adTexts.length], 128, 32);
           const adTexture = new THREE.CanvasTexture(adCanvas);
           const adMat = new THREE.MeshBasicMaterial({ map: adTexture, side: THREE.DoubleSide });
           const ad = new THREE.Mesh(adGeo, adMat);
           const adRadius = 6.5;
-          if (side === 0) { ad.position.set((i - 1) * 2.2, 3.5, -adRadius); }
+          if (side === 0) ad.position.set((i - 1) * 2.2, 3.5, -adRadius);
           else if (side === 1) { ad.position.set((i - 1) * 2.2, 3.5, adRadius); ad.rotation.y = Math.PI; }
           else if (side === 2) { ad.position.set(-adRadius, 3.5, (i - 1) * 2.2); ad.rotation.y = Math.PI / 2; }
           else { ad.position.set(adRadius, 3.5, (i - 1) * 2.2); ad.rotation.y = -Math.PI / 2; }
@@ -809,22 +600,18 @@
         }
       }
 
-      // 奥运五环（悬挂在赛场上方）
+      // 奥运五环
       const ringColors = [0x0085C7, 0x000000, 0xDF0024, 0xF4C300, 0x009F3D];
       for (let i = 0; i < 5; i++) {
         const ringGeo = new THREE.TorusGeometry(0.3, 0.04, 8, 32);
-        const ringMat = new THREE.MeshStandardMaterial({
-          color: ringColors[i],
-          metalness: 0.6,
-          roughness: 0.3
-        });
+        const ringMat = new THREE.MeshStandardMaterial({ color: ringColors[i], metalness: 0.6, roughness: 0.3 });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.position.set((i - 2) * 0.55, 6.5, -2);
         if (i % 2 === 1) ring.position.y = 6.2;
         scene.add(ring);
       }
 
-      // 裁判椅（球网侧面）
+      // 裁判椅
       const chairGeo = new THREE.BoxGeometry(0.4, 0.8, 0.4);
       const chairMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7 });
       const chair = new THREE.Mesh(chairGeo, chairMat);
@@ -833,27 +620,18 @@
       scene.add(chair);
     }
 
-    // 创建球桌（真实比赛用球桌）
     function createTable() {
       const tableGroup = new THREE.Group();
-
-      // 桌面（深蓝色，标准比赛球桌颜色）
       const tableTopGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.05, CONFIG.table.length);
-      const tableTopMat = new THREE.MeshStandardMaterial({
-        color: 0x1a4a6a,
-        roughness: 0.35,
-        metalness: 0.05
-      });
+      const tableTopMat = new THREE.MeshStandardMaterial({ color: 0x1a4a6a, roughness: 0.35, metalness: 0.05 });
       const tableTop = new THREE.Mesh(tableTopGeo, tableTopMat);
       tableTop.position.y = CONFIG.table.height;
       tableTop.castShadow = true;
       tableTop.receiveShadow = true;
       tableGroup.add(tableTop);
 
-      // 白色边线
       const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const lineThickness = 0.02;
-
       const sideLineGeo = new THREE.BoxGeometry(lineThickness, 0.001, CONFIG.table.length);
       const leftLine = new THREE.Mesh(sideLineGeo, lineMat);
       leftLine.position.set(-CONFIG.table.width / 2 + lineThickness / 2, CONFIG.table.height + 0.026, 0);
@@ -861,7 +639,6 @@
       const rightLine = leftLine.clone();
       rightLine.position.x = CONFIG.table.width / 2 - lineThickness / 2;
       tableGroup.add(rightLine);
-
       const endLineGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.001, lineThickness);
       const farLine = new THREE.Mesh(endLineGeo, lineMat);
       farLine.position.set(0, CONFIG.table.height + 0.026, -CONFIG.table.length / 2 + lineThickness / 2);
@@ -869,43 +646,28 @@
       const nearLine = farLine.clone();
       nearLine.position.z = CONFIG.table.length / 2 - lineThickness / 2;
       tableGroup.add(nearLine);
-
-      // 中线
       const centerLineGeo = new THREE.BoxGeometry(lineThickness, 0.001, CONFIG.table.length);
       const centerLine = new THREE.Mesh(centerLineGeo, lineMat);
       centerLine.position.set(0, CONFIG.table.height + 0.026, 0);
       tableGroup.add(centerLine);
 
-      // 桌腿（金属可折叠式）
       const legGeo = new THREE.CylinderGeometry(0.025, 0.035, CONFIG.table.height, 12);
-      const legMat = new THREE.MeshStandardMaterial({
-        color: 0x5a6a7a,
-        roughness: 0.4,
-        metalness: 0.6
-      });
-      const legPositions = [
-        [-CONFIG.table.width / 2 + 0.08, CONFIG.table.height / 2, -CONFIG.table.length / 2 + 0.08],
-        [CONFIG.table.width / 2 - 0.08, CONFIG.table.height / 2, -CONFIG.table.length / 2 + 0.08],
-        [-CONFIG.table.width / 2 + 0.08, CONFIG.table.height / 2, CONFIG.table.length / 2 - 0.08],
-        [CONFIG.table.width / 2 - 0.08, CONFIG.table.height / 2, CONFIG.table.length / 2 - 0.08]
-      ];
-      legPositions.forEach(pos => {
+      const legMat = new THREE.MeshStandardMaterial({ color: 0x5a6a7a, roughness: 0.4, metalness: 0.6 });
+      [[-0.685, -1.29], [0.685, -1.29], [-0.685, 1.29], [0.685, 1.29]].forEach(pos => {
         const leg = new THREE.Mesh(legGeo, legMat);
-        leg.position.set(pos[0], pos[1], pos[2]);
+        leg.position.set(pos[0], CONFIG.table.height / 2, pos[1]);
         leg.castShadow = true;
         tableGroup.add(leg);
       });
 
-      // 球桌品牌标志（红双喜，在桌面侧面）
       const logoCanvas = document.createElement('canvas');
-      logoCanvas.width = 128;
-      logoCanvas.height = 32;
+      logoCanvas.width = 128; logoCanvas.height = 32;
       const logoCtx = logoCanvas.getContext('2d');
       logoCtx.fillStyle = '#c9a96e';
       logoCtx.font = 'bold 18px sans-serif';
       logoCtx.textAlign = 'center';
       logoCtx.textBaseline = 'middle';
-      logoCtx.fillText('红双喜 DHS', 64, 16);
+      logoCtx.fillText('DHS', 64, 16);
       const logoTexture = new THREE.CanvasTexture(logoCanvas);
       const logoMat = new THREE.MeshBasicMaterial({ map: logoTexture, transparent: true });
       const logoGeo = new THREE.PlaneGeometry(0.4, 0.1);
@@ -917,16 +679,10 @@
       scene.add(table);
     }
 
-    // 创建球网
     function createNet() {
       const netGroup = new THREE.Group();
-
       const postGeo = new THREE.CylinderGeometry(0.006, 0.006, CONFIG.table.netHeight + 0.04, 8);
-      const postMat = new THREE.MeshStandardMaterial({
-        color: 0xcccccc,
-        metalness: 0.7,
-        roughness: 0.2
-      });
+      const postMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.7, roughness: 0.2 });
       const leftPost = new THREE.Mesh(postGeo, postMat);
       leftPost.position.set(-CONFIG.table.width / 2, CONFIG.table.height + (CONFIG.table.netHeight + 0.04) / 2, 0);
       netGroup.add(leftPost);
@@ -934,39 +690,21 @@
       rightPost.position.x = CONFIG.table.width / 2;
       netGroup.add(rightPost);
 
-      // 球网（网格纹理）
       const netCanvas = document.createElement('canvas');
-      netCanvas.width = 256;
-      netCanvas.height = 32;
+      netCanvas.width = 256; netCanvas.height = 32;
       const netCtx = netCanvas.getContext('2d');
       netCtx.clearRect(0, 0, 256, 32);
       netCtx.strokeStyle = 'rgba(255,255,255,0.6)';
       netCtx.lineWidth = 0.5;
-      for (let x = 0; x < 256; x += 4) {
-        netCtx.beginPath();
-        netCtx.moveTo(x, 0);
-        netCtx.lineTo(x, 32);
-        netCtx.stroke();
-      }
-      for (let y = 0; y < 32; y += 4) {
-        netCtx.beginPath();
-        netCtx.moveTo(0, y);
-        netCtx.lineTo(256, y);
-        netCtx.stroke();
-      }
+      for (let x = 0; x < 256; x += 4) { netCtx.beginPath(); netCtx.moveTo(x, 0); netCtx.lineTo(x, 32); netCtx.stroke(); }
+      for (let y = 0; y < 32; y += 4) { netCtx.beginPath(); netCtx.moveTo(0, y); netCtx.lineTo(256, y); netCtx.stroke(); }
       const netTexture = new THREE.CanvasTexture(netCanvas);
       const netGeo = new THREE.PlaneGeometry(CONFIG.table.width, CONFIG.table.netHeight);
-      const netMat = new THREE.MeshStandardMaterial({
-        map: netTexture,
-        transparent: true,
-        opacity: 0.7,
-        side: THREE.DoubleSide
-      });
+      const netMat = new THREE.MeshStandardMaterial({ map: netTexture, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
       const netMesh = new THREE.Mesh(netGeo, netMat);
       netMesh.position.set(0, CONFIG.table.height + CONFIG.table.netHeight / 2, 0);
       netGroup.add(netMesh);
 
-      // 网顶白带
       const topBandGeo = new THREE.BoxGeometry(CONFIG.table.width, 0.012, 0.004);
       const topBandMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const topBand = new THREE.Mesh(topBandGeo, topBandMat);
@@ -977,27 +715,17 @@
       scene.add(net);
     }
 
-    // 创建乒乓球
     function createBall() {
       const ballGeo = new THREE.SphereGeometry(CONFIG.ball.radius, 32, 32);
-      const ballMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.25,
-        metalness: 0.02
-      });
+      const ballMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.02 });
       ball = new THREE.Mesh(ballGeo, ballMat);
       ball.castShadow = true;
       ball.position.set(0, CONFIG.table.height + 0.2, CONFIG.table.length / 2 - 0.2);
       scene.add(ball);
 
-      // 创建拖尾粒子
       for (let i = 0; i < TRAIL_LENGTH; i++) {
         const trailGeo = new THREE.SphereGeometry(CONFIG.ball.radius * (1 - i / TRAIL_LENGTH * 0.7), 12, 12);
-        const trailMat = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          transparent: true,
-          opacity: 0
-        });
+        const trailMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
         const trail = new THREE.Mesh(trailGeo, trailMat);
         trail.visible = false;
         scene.add(trail);
@@ -1005,56 +733,15 @@
       }
     }
 
-    // 更新拖尾
-    function updateTrail() {
-      if (!ball) return;
-
-      // 只有球在运动时才显示拖尾
-      const speed = ballVelocity.length();
-      if (speed > 0.5 && (gameState === 'playing' || gameState === 'serving')) {
-        // 记录当前位置
-        ballTrail.unshift(ball.position.clone());
-        if (ballTrail.length > TRAIL_LENGTH) {
-          ballTrail.pop();
-        }
-
-        // 更新拖尾粒子
-        for (let i = 0; i < TRAIL_LENGTH; i++) {
-          if (i < ballTrail.length) {
-            trailMeshes[i].position.copy(ballTrail[i]);
-            trailMeshes[i].visible = true;
-            // 越靠后的粒子越透明、越小
-            const alpha = (1 - i / TRAIL_LENGTH) * 0.5 * Math.min(1, speed / 5);
-            trailMeshes[i].material.opacity = alpha;
-            const scale = 1 - i / TRAIL_LENGTH * 0.6;
-            trailMeshes[i].scale.setScalar(scale);
-          } else {
-            trailMeshes[i].visible = false;
-          }
-        }
-      } else {
-        // 球静止时隐藏拖尾并清空
-        ballTrail = [];
-        trailMeshes.forEach(t => t.visible = false);
-      }
-    }
-
-    // 创建球拍（真实横握拍姿势）
     function createPaddles() {
-      // 玩家球拍 + 手臂（第一人称视角，横握拍，正手红色胶皮朝向镜头）
       playerPaddle = createRealPaddle(true);
       playerPaddle.position.set(0, CONFIG.table.height + 0.08, CONFIG.table.length / 2 - 0.1);
-      // 正手握拍姿势：拍面稍前倾，手柄向身体右下方（右手持拍）
       playerPaddle.rotation.x = -0.35;
       playerPaddle.rotation.y = -0.2;
       playerPaddle.rotation.z = 0.15;
       scene.add(playerPaddle);
-
-      // 玩家手臂（从镜头下方延伸出）
       playerArm = createPlayerArm();
       scene.add(playerArm);
-
-      // 电脑球拍（对面，横握拍）
       aiPaddle = createRealPaddle(false);
       aiPaddle.position.set(0, CONFIG.table.height + 0.08, -CONFIG.table.length / 2 + 0.1);
       aiPaddle.rotation.x = 0.35;
@@ -1063,61 +750,32 @@
       scene.add(aiPaddle);
     }
 
-    // 创建真实球拍（横拍）
     function createRealPaddle(isPlayer) {
       const group = new THREE.Group();
-
-      // 拍面底板（木质）
       const bladeShape = new THREE.Shape();
       const w = CONFIG.paddle.width / 2;
       const h = CONFIG.paddle.height / 2;
-      // 真实球拍形状：略圆的拍头，稍窄的拍肩
       bladeShape.moveTo(0, -h * 0.85);
       bladeShape.bezierCurveTo(w * 0.9, -h * 0.85, w, -h * 0.3, w, h * 0.2);
       bladeShape.bezierCurveTo(w, h * 0.8, w * 0.6, h, 0, h);
       bladeShape.bezierCurveTo(-w * 0.6, h, -w, h * 0.8, -w, h * 0.2);
       bladeShape.bezierCurveTo(-w, -h * 0.3, -w * 0.9, -h * 0.85, 0, -h * 0.85);
-
-      const extrudeSettings = {
-        depth: CONFIG.paddle.thickness,
-        bevelEnabled: true,
-        bevelThickness: 0.002,
-        bevelSize: 0.002,
-        bevelSegments: 2
-      };
+      const extrudeSettings = { depth: CONFIG.paddle.thickness, bevelEnabled: true, bevelThickness: 0.002, bevelSize: 0.002, bevelSegments: 2 };
       const bladeGeo = new THREE.ExtrudeGeometry(bladeShape, extrudeSettings);
-      const woodMat = new THREE.MeshStandardMaterial({
-        color: 0xD4A574,
-        roughness: 0.6,
-        metalness: 0.05
-      });
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0xD4A574, roughness: 0.6, metalness: 0.05 });
       const blade = new THREE.Mesh(bladeGeo, woodMat);
       blade.rotation.x = Math.PI / 2;
       blade.castShadow = true;
       group.add(blade);
 
-      // 正手胶皮（红色，朝向镜头/前方）
-      const rubberGeo = new THREE.ExtrudeGeometry(bladeShape, {
-        depth: 0.003,
-        bevelEnabled: false
-      });
-      const forehandMat = new THREE.MeshStandardMaterial({
-        color: 0xCC2222,
-        roughness: 0.8,
-        metalness: 0.0
-      });
+      const rubberGeo = new THREE.ExtrudeGeometry(bladeShape, { depth: 0.003, bevelEnabled: false });
+      const forehandMat = new THREE.MeshStandardMaterial({ color: 0xCC2222, roughness: 0.8, metalness: 0.0 });
       const forehandRubber = new THREE.Mesh(rubberGeo, forehandMat);
       forehandRubber.rotation.x = Math.PI / 2;
       forehandRubber.position.z = CONFIG.paddle.thickness / 2 + 0.001;
       forehandRubber.name = 'forehandRubber';
       group.add(forehandRubber);
-
-      // 反手胶皮（黑色，朝向后方）
-      const backhandMat = new THREE.MeshStandardMaterial({
-        color: 0x1a1a1a,
-        roughness: 0.85,
-        metalness: 0.0
-      });
+      const backhandMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.85, metalness: 0.0 });
       const backhandRubber = new THREE.Mesh(rubberGeo, backhandMat);
       backhandRubber.rotation.x = Math.PI / 2;
       backhandRubber.rotation.y = Math.PI;
@@ -1125,37 +783,25 @@
       backhandRubber.name = 'backhandRubber';
       group.add(backhandRubber);
 
-      // 拍面边缘（木质包边）
       const edgeGeo = new THREE.TorusGeometry(w * 0.85, 0.004, 8, 32);
-      const edgeMat = new THREE.MeshStandardMaterial({
-        color: 0x8B4513,
-        roughness: 0.7
-      });
+      const edgeMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.7 });
       const edge = new THREE.Mesh(edgeGeo, edgeMat);
       edge.rotation.x = Math.PI / 2;
       edge.scale.y = h / w * 0.9;
       group.add(edge);
 
-      // 手柄（横拍长手柄，FL收腰柄）
       const handleGeo = new THREE.CylinderGeometry(0.016, 0.024, 0.1, 12);
-      const handleMat = new THREE.MeshStandardMaterial({
-        color: 0x6B4423,
-        roughness: 0.75
-      });
+      const handleMat = new THREE.MeshStandardMaterial({ color: 0x6B4423, roughness: 0.75 });
       const handle = new THREE.Mesh(handleGeo, handleMat);
       handle.position.set(0, -0.09, 0);
       handle.rotation.x = Math.PI / 2;
       handle.castShadow = true;
       group.add(handle);
-
-      // 手柄底部收腰
       const handleEndGeo = new THREE.CylinderGeometry(0.02, 0.016, 0.02, 12);
       const handleEnd = new THREE.Mesh(handleEndGeo, handleMat);
       handleEnd.position.set(0, -0.145, 0);
       handleEnd.rotation.x = Math.PI / 2;
       group.add(handleEnd);
-
-      // 手柄防滑纹理（深色环）
       for (let i = 0; i < 4; i++) {
         const gripGeo = new THREE.TorusGeometry(0.019, 0.002, 6, 16);
         const gripMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a });
@@ -1165,50 +811,78 @@
         group.add(grip);
       }
 
-      // 拍肩标识（小标签）
-      const labelGeo = new THREE.PlaneGeometry(0.04, 0.015);
-      const labelCanvas = document.createElement('canvas');
-      labelCanvas.width = 64;
-      labelCanvas.height = 24;
-      const labelCtx = labelCanvas.getContext('2d');
-      labelCtx.fillStyle = '#c9a96e';
-      labelCtx.font = 'bold 10px sans-serif';
-      labelCtx.textAlign = 'center';
-      labelCtx.textBaseline = 'middle';
-      labelCtx.fillText('DHS', 32, 12);
-      const labelTexture = new THREE.CanvasTexture(labelCanvas);
-      const labelMat = new THREE.MeshBasicMaterial({ map: labelTexture, transparent: true });
-      const label = new THREE.Mesh(labelGeo, labelMat);
-      label.position.set(0, -0.02, CONFIG.paddle.thickness / 2 + 0.005);
-      label.rotation.x = -Math.PI / 2;
-      group.add(label);
-
       return group;
     }
 
-    // 创建玩家手臂（第一人称可见）
     function createPlayerArm() {
       const armGroup = new THREE.Group();
-
-      // 前臂
       const forearmGeo = new THREE.CylinderGeometry(0.04, 0.05, 0.5, 12);
-      const skinMat = new THREE.MeshStandardMaterial({
-        color: 0xE8C4A0,
-        roughness: 0.6
-      });
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xE8C4A0, roughness: 0.6 });
       const forearm = new THREE.Mesh(forearmGeo, skinMat);
       forearm.position.set(0, 0.5, 0.9);
       forearm.rotation.x = -0.5;
       forearm.castShadow = true;
       armGroup.add(forearm);
-
-      // 手腕
       const wristGeo = new THREE.SphereGeometry(0.045, 12, 12);
       const wrist = new THREE.Mesh(wristGeo, skinMat);
       wrist.position.set(0, 0.75, 0.7);
       armGroup.add(wrist);
-
       return armGroup;
+    }
+
+    // ===== 旋转系统 =====
+    function getSpinTypeFromVector(spin) {
+      const topspin = spin.y;
+      const sidespin = spin.x;
+      if (Math.abs(topspin) < 1 && Math.abs(sidespin) < 1) return 'none';
+      if (topspin > 2 && Math.abs(sidespin) < 2) return 'topspin';
+      if (topspin < -2 && Math.abs(sidespin) < 2) return 'backspin';
+      if (topspin > 2 && sidespin < -2) return 'topspin_left';
+      if (topspin > 2 && sidespin > 2) return 'topspin_right';
+      if (topspin < -2 && sidespin < -2) return 'backspin_left';
+      if (topspin < -2 && sidespin > 2) return 'backspin_right';
+      if (sidespin < -2) return 'sidespin_left';
+      if (sidespin > 2) return 'sidespin_right';
+      return 'none';
+    }
+
+    function applySpinPhysics(dt) {
+      // 马格努斯力：旋转影响球的轨迹
+      const magnus = new THREE.Vector3(
+        ballSpinVector.x * 0.15 * dt,
+        ballSpinVector.y * 0.1 * dt,
+        ballSpinVector.z * 0.05 * dt
+      );
+      ballVelocity.add(magnus);
+    }
+
+    function applySpinBounce() {
+      // 不同旋转不同弹跳
+      const spin = SPIN_TYPES[currentSpinType];
+      if (!spin) return;
+      // 上旋球弹跳后加速前冲，下旋球弹跳后减速
+      ballVelocity.z *= spin.bounceMult;
+      ballVelocity.x *= spin.bounceMult;
+      // 侧旋球弹跳后横向偏移
+      if (ballSpinVector.x !== 0) {
+        ballVelocity.x += ballSpinVector.x * 0.3;
+      }
+    }
+
+    function determineHitTiming() {
+      // 根据球的垂直速度和位置判定击球时机
+      const ballY = ball.position.y;
+      const tableY = CONFIG.table.height;
+      const relativeHeight = ballY - tableY;
+      if (ballVelocity.y > 0.5) {
+        return 'rising'; // 上升期
+      } else if (Math.abs(ballVelocity.y) < 0.5 && relativeHeight > 0.15) {
+        return 'peak'; // 高点期
+      } else if (ballVelocity.y < -0.5 && relativeHeight > 0.1) {
+        return 'falling_early'; // 下降前期
+      } else {
+        return 'falling_late'; // 下降后期
+      }
     }
 
     // ===== 物理模拟 =====
@@ -1216,18 +890,22 @@
       if (gameState !== 'playing' && gameState !== 'serving') return;
 
       ballVelocity.y -= CONFIG.ball.gravity * dt;
-
       const drag = Math.exp(-CONFIG.ball.airResistance * dt);
       ballVelocity.multiplyScalar(drag);
-
-      const magnus = ballSpin.clone().multiplyScalar(0.4 * dt);
-      ballVelocity.add(magnus);
-
+      applySpinPhysics(dt);
       ball.position.add(ballVelocity.clone().multiplyScalar(dt));
 
-      ball.rotation.x += ballSpin.z * dt * 15;
-      ball.rotation.y += ballSpin.y * dt * 15;
-      ball.rotation.z += ballSpin.x * dt * 15;
+      // 球旋转视觉
+      ball.rotation.x += ballSpinVector.z * dt * 15;
+      ball.rotation.y += ballSpinVector.y * dt * 15;
+      ball.rotation.z += ballSpinVector.x * dt * 15;
+
+      // 更新球的下降状态
+      isBallFalling = ballVelocity.y < 0;
+
+      // 更新旋转类型显示
+      currentSpinType = getSpinTypeFromVector(ballSpinVector);
+      updateSpinIndicator();
 
       checkTableCollision();
       checkNetCollision();
@@ -1235,43 +913,40 @@
       checkOutOfBounds();
     }
 
+    function updateSpinIndicator() {
+      const spinEl = document.getElementById('spinType');
+      const timingEl = document.getElementById('hitTiming');
+      const speedEl = document.getElementById('ballSpeed');
+      if (spinEl) spinEl.textContent = SPIN_TYPES[currentSpinType]?.name || '无旋转';
+      if (timingEl) timingEl.textContent = HIT_TIMING[lastHitTiming]?.name || '--';
+      if (speedEl) speedEl.textContent = ballVelocity.length().toFixed(1);
+    }
+
     function checkTableCollision() {
       const tableTop = CONFIG.table.height + 0.025;
       const ballBottom = ball.position.y - CONFIG.ball.radius;
-
       if (ballBottom <= tableTop && ballVelocity.y < 0) {
         if (Math.abs(ball.position.x) <= CONFIG.table.width / 2 &&
             Math.abs(ball.position.z) <= CONFIG.table.length / 2) {
-
-          // 判断球落在哪一方（z > 0 是玩家方，z < 0 是AI方）
           const side = ball.position.z > 0 ? 'player' : 'ai';
-
-          // 如果换到另一方，重置弹跳计数
           if (side !== currentTableSide) {
             currentTableSide = side;
-            bounceCountOnSide = 1;
+            ballBounceCountOnSide = 1;
           } else {
-            // 同一方再次弹跳
-            bounceCountOnSide++;
+            ballBounceCountOnSide++;
           }
-
-          // 某一方弹跳2次即判该方失分
-          if (bounceCountOnSide >= 2 && gameState === 'playing') {
+          // 弹跳2次判负
+          if (ballBounceCountOnSide >= 2 && gameState === 'playing') {
             const loser = side;
             const scorer = loser === 'player' ? 'ai' : 'player';
-            // 延迟一点再判分，让球的弹跳动画播完
-            setTimeout(() => {
-              if (gameState === 'playing') {
-                scorePoint(scorer);
-              }
-            }, 300);
+            setTimeout(() => { if (gameState === 'playing') scorePoint(scorer); }, 300);
           }
-
           ball.position.y = tableTop + CONFIG.ball.radius;
           ballVelocity.y = -ballVelocity.y * CONFIG.ball.restitution;
           ballVelocity.x *= 0.94;
           ballVelocity.z *= 0.94;
-          ballSpin.multiplyScalar(0.88);
+          ballSpinVector.multiplyScalar(0.88);
+          applySpinBounce(); // 应用旋转弹跳效果
           playBounceSound();
           ballBouncedOnTable = true;
         }
@@ -1281,20 +956,38 @@
     function checkNetCollision() {
       const netZ = 0;
       const netTop = CONFIG.table.height + CONFIG.table.netHeight;
-
       if (Math.abs(ball.position.z - netZ) < CONFIG.ball.radius + 0.005 &&
-          ball.position.y < netTop &&
-          ball.position.y > CONFIG.table.height) {
+          ball.position.y < netTop && ball.position.y > CONFIG.table.height) {
         if (Math.abs(ball.position.x) <= CONFIG.table.width / 2) {
-          ballVelocity.z = -ballVelocity.z * 0.4;
-          ball.position.z = netZ + (ballVelocity.z > 0 ? 1 : -1) * (CONFIG.ball.radius + 0.01);
+          // 判定是球网上沿还是球网侧面
+          const hitTop = ball.position.y > netTop - 0.02;
+          if (hitTop) {
+            // 球网上沿：球稍微弹起，速度衰减
+            ballVelocity.y = Math.abs(ballVelocity.y) * 0.3 + 1;
+            ballVelocity.z *= 0.6;
+            // 发球擦网 = let
+            if (gameState === 'serving' && !letBall) {
+              letBall = true;
+              playLetSound();
+              showMessage('擦网重发', 'LET');
+              setTimeout(() => {
+                if (gameState === 'serving' || gameState === 'playing') {
+                  prepareServe();
+                }
+              }, 1000);
+              return;
+            }
+          } else {
+            // 球网侧面：球弹回
+            ballVelocity.z = -ballVelocity.z * 0.4;
+            ball.position.z = netZ + (ballVelocity.z > 0 ? 1 : -1) * (CONFIG.ball.radius + 0.01);
+          }
           playBounceSound();
         }
       }
     }
 
     function checkPaddleCollision() {
-      // 玩家球拍碰撞范围放大，降低击中难度
       const playerHitRadius = CONFIG.paddle.width / 2 * 1.6 + CONFIG.ball.radius;
       if (lastHitBy !== 'player') {
         const dx = ball.position.x - playerPaddle.position.x;
@@ -1305,7 +998,6 @@
           hitBall('player');
         }
       }
-
       if (lastHitBy !== 'ai') {
         const dx = ball.position.x - aiPaddle.position.x;
         const dy = ball.position.y - aiPaddle.position.y;
@@ -1318,48 +1010,71 @@
     }
 
     function hitBall(hitter) {
-      const diff = DIFFICULTY[currentDifficulty];
+      const style = AI_STYLES[currentDifficulty];
       const paddle = hitter === 'player' ? playerPaddle : aiPaddle;
-
       const relX = (ball.position.x - paddle.position.x) / (CONFIG.paddle.width / 2);
       const relY = (ball.position.y - paddle.position.y) / (CONFIG.paddle.height / 2);
 
-      let speed = 3 * diff.ballSpeedMult;
-      if (hitter === 'player') {
-        // 玩家击球：根据蓄力力度
-        speed = 2 + currentPower * 5;
-      }
+      // 判定击球时机
+      lastHitTiming = determineHitTiming();
+      const timing = HIT_TIMING[lastHitTiming];
+
+      let speed = 3 * style.ballSpeedMult;
+      let spinVector = new THREE.Vector3();
 
       if (hitter === 'player') {
-        ballVelocity.set(
-          relX * 1.8,
-          1.8 + relY * 1.8 + currentPower * 1.5,
-          -speed
-        );
+        // 玩家击球：根据蓄力和击球时机
+        speed = (2 + currentPower * 5) * timing.speedMult;
+        // 玩家旋转：根据击球位置和正反手
+        const spinAmount = 6 * timing.spinMult;
+        if (isForehand) {
+          // 正手：上旋为主
+          spinVector.set(relX * 3, spinAmount, -2 - currentPower * 2);
+        } else {
+          // 反手：上旋+侧旋
+          spinVector.set(-relX * 3, spinAmount * 0.8, 2);
+        }
       } else {
+        // AI击球：根据风格选择旋转类型
+        const rand = Math.random();
+        let spinType;
+        if (rand < style.topspinProb) spinType = 'topspin';
+        else if (rand < style.topspinProb + style.backspinProb) spinType = 'backspin';
+        else if (rand < style.topspinProb + style.backspinProb + style.sidespinProb) {
+          spinType = Math.random() > 0.5 ? 'sidespin_left' : 'sidespin_right';
+        } else spinType = 'none';
+
+        const spin = SPIN_TYPES[spinType];
         const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.8;
-        const error = (Math.random() - 0.5) * diff.aiError * 2;
+        const error = (Math.random() - 0.5) * style.aiError * 2 * (2 - aiMood);
+        speed = (2.5 + Math.random() * 2) * style.ballSpeedMult * aiMood;
+
         ballVelocity.set(
           (targetX - ball.position.x) * 0.8 + error,
           1.8 + Math.random() * 1.2,
           speed
         );
+        spinVector.set(spin.sidespin, spin.topspin + spin.backspin, 3);
       }
 
-      ballSpin.set(
-        relY * 6,
-        relX * 4,
-        hitter === 'player' ? -3 - currentPower * 3 : 3
-      );
+      if (hitter === 'player') {
+        ballVelocity.set(
+          relX * 1.8 * timing.speedMult,
+          (1.8 + relY * 1.8 + currentPower * 1.5) * timing.speedMult,
+          -speed
+        );
+      }
 
+      ballSpinVector = spinVector;
+      currentSpinType = getSpinTypeFromVector(spinVector);
       lastHitBy = hitter;
       ballBouncedOnTable = false;
-      // 击球后重置弹跳计数，球飞向对方，下一次落地是对方的第一次弹跳
       currentTableSide = null;
-      bounceCountOnSide = 0;
+      ballBounceCountOnSide = 0;
+      letBall = false;
 
       const intensity = Math.min(1, speed / 6);
-      playHitSound(intensity);
+      playHitSound(intensity, currentSpinType);
       setCrowdIntensity(0.4);
       setTimeout(() => setCrowdIntensity(0.1), 500);
     }
@@ -1372,7 +1087,6 @@
         }
         resetBall();
       }
-
       if (Math.abs(ball.position.x) > 4 || Math.abs(ball.position.z) > 5) {
         if (gameState === 'playing') {
           if (lastHitBy === 'player') scorePoint('ai');
@@ -1382,108 +1096,78 @@
       }
     }
 
-    function scorePoint(scorer) {
-      if (scorer === 'player') {
-        playerScore++;
-        playCrowdCheer(true);
+    // ===== 发球系统 =====
+    function startToss() {
+      if (gameState !== 'serving' || !isPlayerServing) return;
+      isTossing = true;
+      tossStartTime = clock.getElapsedTime();
+      tossHeight = 0.16 + Math.random() * 0.1; // 抛球高度16-26cm
+    }
+
+    function updateToss(dt) {
+      if (!isTossing) return;
+      const elapsed = clock.getElapsedTime() - tossStartTime;
+      // 抛球物理：上抛然后下落
+      const tossDuration = 0.8;
+      if (elapsed < tossDuration / 2) {
+        // 上升
+        ball.position.y = CONFIG.table.height + 0.15 + tossHeight * Math.sin(elapsed / (tossDuration / 2) * Math.PI / 2);
+      } else if (elapsed < tossDuration) {
+        // 下降
+        ball.position.y = CONFIG.table.height + 0.15 + tossHeight * Math.cos((elapsed - tossDuration / 2) / (tossDuration / 2) * Math.PI / 2);
       } else {
-        aiScore++;
-        playCrowdCheer(false);
-      }
-      updateScoreDisplay();
-      serveCount++;
-
-      // 获胜判定：达到11分且领先2分
-      const isDeuce = playerScore >= CONFIG.game.deuceScore && aiScore >= CONFIG.game.deuceScore;
-      const playerWins = playerScore >= CONFIG.game.winScore && (playerScore - aiScore) >= 2;
-      const aiWins = aiScore >= CONFIG.game.winScore && (aiScore - playerScore) >= 2;
-
-      if (playerWins || aiWins) {
-        gameState = 'gameover';
-        const isWin = playerWins;
-        showMessage(
-          isWin ? '冠军！' : '惜败',
-          isWin ? `你以 ${playerScore}:${aiScore} 赢得了奥运金牌！` : `以 ${playerScore}:${aiScore} 获得银牌，再接再厉！`
-        );
-        if (isWin) {
-          startCelebration();
-        } else {
-          setCrowdIntensity(0.3);
+        // 抛球结束，如果还没击球判发球失误
+        isTossing = false;
+        if (gameState === 'serving') {
+          serveFault = true;
+          playFaultSound();
+          showMessage('发球失误', '未在抛球下降期击球');
+          setTimeout(() => {
+            serveFault = false;
+            scorePoint('ai');
+          }, 1000);
         }
-        return;
       }
-
-      // 换发球：10平后每1分换发，否则每2分换发
-      if (isDeuce) {
-        isPlayerServing = !isPlayerServing;
-      } else if (serveCount % CONFIG.game.serveInterval === 0) {
-        isPlayerServing = !isPlayerServing;
-      }
-
-      setTimeout(() => {
-        if (gameState !== 'gameover') prepareServe();
-      }, 1200);
-    }
-
-    function resetBall() {
-      ballVelocity.set(0, 0, 0);
-      ballSpin.set(0, 0, 0);
-      lastHitBy = null;
-      ballBouncedOnTable = false;
-      // 重置弹跳计数
-      currentTableSide = null;
-      bounceCountOnSide = 0;
-      // 清空拖尾
-      ballTrail = [];
-      if (trailMeshes.length) {
-        trailMeshes.forEach(t => t.visible = false);
-      }
-    }
-
-    function prepareServe() {
-      resetBall();
-      gameState = 'serving';
-      currentPower = 0;
-
-      if (isPlayerServing) {
-        ball.position.set(
-          playerPaddle.position.x,
-          CONFIG.table.height + 0.12,
-          CONFIG.table.length / 2 - 0.15
-        );
-        showMessage('准备发球', '按住鼠标蓄力，松开发球');
-      } else {
-        ball.position.set(
-          aiPaddle.position.x,
-          CONFIG.table.height + 0.12,
-          -CONFIG.table.length / 2 + 0.15
-        );
-        showMessage('对手发球', '准备接球');
-        setTimeout(() => {
-          if (gameState === 'serving') aiServe();
-        }, 1500);
-      }
+      ball.position.x = playerPaddle.position.x;
+      ball.position.z = CONFIG.table.length / 2 - 0.2;
     }
 
     function playerServe() {
       if (gameState !== 'serving' || !isPlayerServing) return;
+      if (isTossing) {
+        // 抛球下降期击球才有效
+        const elapsed = clock.getElapsedTime() - tossStartTime;
+        if (elapsed < 0.4) {
+          // 上升期击球 = 发球违例
+          playFaultSound();
+          showMessage('发球违例', '必须在抛球下降期击球');
+          setTimeout(() => scorePoint('ai'), 1000);
+          return;
+        }
+        isTossing = false;
+      }
       initAudio();
-
-      const diff = DIFFICULTY[currentDifficulty];
-      const speed = 2 + currentPower * 4;
+      const style = AI_STYLES[currentDifficulty];
+      const speed = (2 + currentPower * 3) * style.ballSpeedMult;
       ballVelocity.set(
         (Math.random() - 0.5) * 0.5,
-        2 + currentPower,
-        -speed * diff.ballSpeedMult
+        2 + currentPower * 0.5,
+        -speed
       );
-      ballSpin.set(0, 2 + currentPower * 2, -1 - currentPower);
+      // 发球旋转：上旋或侧旋
+      const serveSpin = Math.random();
+      if (serveSpin < 0.4) ballSpinVector.set(0, 5, -1); // 上旋
+      else if (serveSpin < 0.7) ballSpinVector.set(-3, 3, -1); // 左侧上旋
+      else ballSpinVector.set(3, 3, -1); // 右侧上旋
+      currentSpinType = getSpinTypeFromVector(ballSpinVector);
       lastHitBy = 'player';
       ballBouncedOnTable = false;
       currentTableSide = null;
-      bounceCountOnSide = 0;
+      ballBounceCountOnSide = 0;
+      letBall = false;
       gameState = 'playing';
       hideMessage();
-      playHitSound(0.3 + currentPower * 0.5);
+      playHitSound(0.3 + currentPower * 0.5, currentSpinType);
       setCrowdIntensity(0.3);
       setTimeout(() => setCrowdIntensity(0.1), 300);
     }
@@ -1491,53 +1175,182 @@
     function aiServe() {
       if (gameState !== 'serving' || isPlayerServing) return;
       initAudio();
-
-      const diff = DIFFICULTY[currentDifficulty];
+      const style = AI_STYLES[currentDifficulty];
       const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.4;
-      // 降低发球速度，让玩家更容易接
       ballVelocity.set(
         (targetX - ball.position.x) * 0.4,
         2.0,
-        2.0 * diff.ballSpeedMult
+        2.0 * style.ballSpeedMult
       );
-      ballSpin.set(0, -2, 1);
+      // AI发球旋转
+      const serveSpin = Math.random();
+      if (serveSpin < 0.4) ballSpinVector.set(0, -5, 1); // 下旋
+      else if (serveSpin < 0.7) ballSpinVector.set(-3, -3, 1); // 左侧下旋
+      else ballSpinVector.set(3, -3, 1); // 右侧下旋
+      currentSpinType = getSpinTypeFromVector(ballSpinVector);
       lastHitBy = 'ai';
       ballBouncedOnTable = false;
       currentTableSide = null;
-      bounceCountOnSide = 0;
+      ballBounceCountOnSide = 0;
+      letBall = false;
       gameState = 'playing';
       hideMessage();
-      playHitSound(0.4);
+      playHitSound(0.4, currentSpinType);
     }
 
-    // ===== AI =====
+    // ===== 得分与比赛系统 =====
+    function scorePoint(scorer) {
+      if (scorer === 'player') {
+        playerScore++;
+        playCrowdCheer(true);
+        aiMood = Math.max(0.7, aiMood - 0.05); // AI失分状态下降
+      } else {
+        aiScore++;
+        playCrowdCheer(false);
+        aiMood = Math.min(1.3, aiMood + 0.05); // AI得分状态上升
+      }
+      updateScoreDisplay();
+      serveCount++;
+
+      // 判定是否赢得本局
+      const playerWinsGame = playerScore >= CONFIG.game.winScore && (playerScore - aiScore) >= 2;
+      const aiWinsGame = aiScore >= CONFIG.game.winScore && (aiScore - playerScore) >= 2;
+
+      if (playerWinsGame || aiWinsGame) {
+        if (playerWinsGame) playerGames++;
+        else aiGames++;
+        updateGameScore();
+
+        // 判定是否赢得整场比赛
+        if (playerGames >= CONFIG.game.gamesToWin || aiGames >= CONFIG.game.gamesToWin) {
+          gameState = 'matchover';
+          const isWin = playerGames > aiGames;
+          showMessage(
+            isWin ? '冠军！' : '惜败',
+            isWin ? `你以 ${playerGames}:${aiGames} 赢得比赛！` : `以 ${playerGames}:${aiGames} 落败`
+          );
+          if (isWin) startCelebration();
+          return;
+        }
+
+        // 进入下一局
+        currentGame++;
+        document.getElementById('currentGame').textContent = currentGame;
+        playerScore = 0;
+        aiScore = 0;
+        serveCount = 0;
+        isPlayerServing = !isPlayerServing; // 下一局换发球
+        isDeuce = false;
+        aiMood = 1.0; // 新一局AI状态重置
+        updateScoreDisplay();
+        showMessage(`第 ${currentGame} 局`, playerGames + ':' + aiGames);
+        setTimeout(() => { if (gameState !== 'matchover') prepareServe(); }, 2000);
+        return;
+      }
+
+      // 换发球
+      isDeuce = playerScore >= CONFIG.game.deuceScore && aiScore >= CONFIG.game.deuceScore;
+      if (isDeuce) {
+        isPlayerServing = !isPlayerServing; // 10平后每分换发
+      } else if (serveCount % CONFIG.game.serveInterval === 0) {
+        isPlayerServing = !isPlayerServing;
+      }
+      updateServeIndicator();
+
+      setTimeout(() => { if (gameState !== 'matchover') prepareServe(); }, 1200);
+    }
+
+    function updateScoreDisplay() {
+      document.getElementById('playerScore').textContent = playerScore;
+      document.getElementById('aiScore').textContent = aiScore;
+    }
+
+    function updateGameScore() {
+      document.getElementById('playerGames').textContent = '局 ' + playerGames;
+      document.getElementById('aiGames').textContent = '局 ' + aiGames;
+    }
+
+    function updateServeIndicator() {
+      document.getElementById('playerServeDot').style.display = isPlayerServing ? 'inline-block' : 'none';
+      document.getElementById('aiServeDot').style.display = !isPlayerServing ? 'inline-block' : 'none';
+    }
+
+    function resetBall() {
+      ballVelocity.set(0, 0, 0);
+      ballSpinVector.set(0, 0, 0);
+      currentSpinType = 'none';
+      lastHitBy = null;
+      ballBouncedOnTable = false;
+      currentTableSide = null;
+      ballBounceCountOnSide = 0;
+      isTossing = false;
+      letBall = false;
+      ballTrail = [];
+      if (trailMeshes.length) trailMeshes.forEach(t => t.visible = false);
+    }
+
+    function prepareServe() {
+      resetBall();
+      gameState = 'serving';
+      currentPower = 0;
+      updateServeIndicator();
+      if (isPlayerServing) {
+        ball.position.set(playerPaddle.position.x, CONFIG.table.height + 0.12, CONFIG.table.length / 2 - 0.15);
+        showMessage('准备发球', '按住左键蓄力，松开抛球击球');
+      } else {
+        ball.position.set(aiPaddle.position.x, CONFIG.table.height + 0.12, -CONFIG.table.length / 2 + 0.15);
+        showMessage('对手发球', '准备接球');
+        setTimeout(() => { if (gameState === 'serving') aiServe(); }, 1500);
+      }
+    }
+
+    // ===== AI系统 =====
     function updateAI(dt) {
       if (gameState !== 'playing') return;
+      const style = AI_STYLES[currentDifficulty];
 
-      const diff = DIFFICULTY[currentDifficulty];
-      let targetX = ball.position.x;
-      let targetY = ball.position.y;
+      // AI反应时间延迟
+      aiReactionTimer += dt;
+      if (aiReactionTimer < style.reactionTime) return;
 
-      targetX += (Math.random() - 0.5) * diff.aiError;
-      targetY += (Math.random() - 0.5) * diff.aiError * 0.5;
+      // AI预测球的落点
+      let predictedX = ball.position.x + ballVelocity.x * 0.3;
+      let predictedY = ball.position.y + ballVelocity.y * 0.2;
 
-      targetX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetX));
-      targetY = Math.max(CONFIG.table.height + 0.05, Math.min(CONFIG.table.height + 0.35, targetY));
+      // 根据战术调整
+      if (style.tactic === 'chop') {
+        // 削球型：站位远，防守为主
+        predictedY = Math.max(predictedY, CONFIG.table.height + 0.15);
+      } else if (style.tactic === 'fast_attack') {
+        // 快攻型：站位近，抢上升期
+        predictedY = Math.min(predictedY, CONFIG.table.height + 0.2);
+      }
 
-      const speed = diff.aiSpeed * 3;
-      aiPaddle.position.x += (targetX - aiPaddle.position.x) * Math.min(1, speed * dt);
-      aiPaddle.position.y += (targetY - aiPaddle.position.y) * Math.min(1, speed * dt);
+      // 加入AI误差和状态波动
+      predictedX += (Math.random() - 0.5) * style.aiError * (2 - aiMood);
+      predictedY += (Math.random() - 0.5) * style.aiError * 0.5;
 
+      // 限制范围
+      predictedX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, predictedX));
+      predictedY = Math.max(CONFIG.table.height + 0.05, Math.min(CONFIG.table.height + 0.35, predictedY));
+
+      aiTargetX = predictedX;
+      aiTargetY = predictedY;
+
+      // 平滑移动
+      const speed = style.aiSpeed * aiMood;
+      aiPaddle.position.x += (aiTargetX - aiPaddle.position.x) * Math.min(1, speed * dt * 3);
+      aiPaddle.position.y += (aiTargetY - aiPaddle.position.y) * Math.min(1, speed * dt * 3);
+
+      // AI拍面角度
       aiPaddle.rotation.y = Math.atan2(ball.position.x - aiPaddle.position.x, 1) * 0.25;
-      aiPaddle.rotation.x = 0.25 + (ball.position.y - aiPaddle.position.y) * 0.3;
+      aiPaddle.rotation.x = 0.35 + (ball.position.y - aiPaddle.position.y) * 0.3;
     }
 
     // ===== 玩家控制 =====
     function updatePlayerPaddle(dt) {
-      // 庆祝动画优先
       if (isCelebrating) {
         celebrateTime += dt;
-        // 球拍上举挥动庆祝
         const celebrateY = CONFIG.table.height + 0.3 + Math.sin(celebrateTime * 8) * 0.1;
         const celebrateX = Math.sin(celebrateTime * 4) * 0.15;
         playerPaddle.position.x += (celebrateX - playerPaddle.position.x) * Math.min(1, 8 * dt);
@@ -1548,59 +1361,40 @@
         return;
       }
 
-      // 球拍中心跟随鼠标（鼠标位置即球拍中心）
-      // 限制鼠标范围在球桌内，不会拉出屏幕
       const clampedMouseX = Math.max(-0.85, Math.min(0.85, mouseX));
       const clampedMouseY = Math.max(-0.7, Math.min(0.7, mouseY));
-
-      // 正反手位置偏移：正手偏右，反手偏左（右手持拍）
       const handOffsetX = isForehand ? 0.05 : -0.05;
       const handOffsetY = isForehand ? 0 : 0.02;
-
       targetPaddleX = clampedMouseX * CONFIG.table.width * 0.5 + handOffsetX;
       targetPaddleY = CONFIG.table.height + 0.08 + clampedMouseY * 0.22 + handOffsetY;
-
-      // 严格限制球拍范围（不拉出屏幕/球桌）
       targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.12, Math.min(CONFIG.table.width / 2 - 0.12, targetPaddleX));
       targetPaddleY = Math.max(CONFIG.table.height + 0.04, Math.min(CONFIG.table.height + 0.35, targetPaddleY));
-
-      // 平滑跟随（更快的响应，球拍中心紧跟鼠标）
       playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, 25 * dt);
       playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, 25 * dt);
 
-      // 正反手切换过渡动画
       const targetTransition = isForehand ? 1 : 0;
       paddleTransition += (targetTransition - paddleTransition) * Math.min(1, 10 * dt);
-
-      // 真实握拍角度
-      // 正手：拍面前倾，手腕外展，球拍稍向右
-      // 反手：拍面后仰，手腕内收，球拍稍向左
-      const forehandRotX = -0.35;
-      const backhandRotX = -0.15;
-      const forehandRotY = -0.25;
-      const backhandRotY = 0.35;
-      const forehandRotZ = 0.2;
-      const backhandRotZ = -0.15;
-
+      const forehandRotX = -0.35, backhandRotX = -0.15;
+      const forehandRotY = -0.25, backhandRotY = 0.35;
+      const forehandRotZ = 0.2, backhandRotZ = -0.15;
       const chargeTilt = isCharging ? currentPower * 0.25 : 0;
-
       playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - mouseY * 0.1 - chargeTilt;
       playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + mouseX * 0.15;
       playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + mouseX * 0.08;
 
-      // 手臂跟随（正反手手臂位置不同）
       if (playerArm) {
         const armOffsetX = isForehand ? 0.1 : -0.1;
         playerArm.position.x = playerPaddle.position.x * 0.4 + armOffsetX;
         playerArm.rotation.y = playerPaddle.position.x * 0.15;
         playerArm.rotation.z = isForehand ? -0.1 : 0.1;
       }
+
+      // 发球抛球更新
+      updateToss(dt);
     }
 
-    // 切换正反手
     function toggleForehand() {
       isForehand = !isForehand;
-      // 切换时播放轻微音效
       if (audioCtx) {
         try {
           const osc = audioCtx.createOscillator();
@@ -1617,15 +1411,11 @@
       }
     }
 
-    // 开始庆祝动画
     function startCelebration() {
       isCelebrating = true;
       celebrateTime = 0;
       setCrowdIntensity(1);
-      // 5秒后结束庆祝
-      setTimeout(() => {
-        isCelebrating = false;
-      }, 5000);
+      setTimeout(() => { isCelebrating = false; }, 5000);
     }
 
     // ===== 蓄力控制 =====
@@ -1634,8 +1424,9 @@
         isCharging = true;
         chargeStartTime = clock.getElapsedTime();
         document.getElementById('powerBarContainer').classList.add('active');
+        // 开始抛球
+        setTimeout(() => { if (isCharging) startToss(); }, 200);
       } else if (gameState === 'playing' && lastHitBy !== 'player') {
-        // 回合中也可以蓄力准备击球
         isCharging = true;
         chargeStartTime = clock.getElapsedTime();
         document.getElementById('powerBarContainer').classList.add('active');
@@ -1646,14 +1437,11 @@
       if (!isCharging) return;
       isCharging = false;
       document.getElementById('powerBarContainer').classList.remove('active');
-
       const chargeTime = Math.min(clock.getElapsedTime() - chargeStartTime, CONFIG.game.maxChargeTime);
       currentPower = chargeTime / CONFIG.game.maxChargeTime;
-
       if (gameState === 'serving' && isPlayerServing) {
         playerServe();
       }
-      // 回合中的蓄力在实际碰撞时使用 currentPower
     }
 
     function updatePowerBar() {
@@ -1664,10 +1452,29 @@
       }
     }
 
-    // ===== UI =====
-    function updateScoreDisplay() {
-      document.getElementById('playerScore').textContent = playerScore;
-      document.getElementById('aiScore').textContent = aiScore;
+    // ===== 拖尾更新 =====
+    function updateTrail() {
+      if (!ball) return;
+      const speed = ballVelocity.length();
+      if (speed > 0.5 && (gameState === 'playing' || gameState === 'serving')) {
+        ballTrail.unshift(ball.position.clone());
+        if (ballTrail.length > TRAIL_LENGTH) ballTrail.pop();
+        for (let i = 0; i < TRAIL_LENGTH; i++) {
+          if (i < ballTrail.length) {
+            trailMeshes[i].position.copy(ballTrail[i]);
+            trailMeshes[i].visible = true;
+            const alpha = (1 - i / TRAIL_LENGTH) * 0.5 * Math.min(1, speed / 5);
+            trailMeshes[i].material.opacity = alpha;
+            const scale = 1 - i / TRAIL_LENGTH * 0.6;
+            trailMeshes[i].scale.setScalar(scale);
+          } else {
+            trailMeshes[i].visible = false;
+          }
+        }
+      } else {
+        ballTrail = [];
+        trailMeshes.forEach(t => t.visible = false);
+      }
     }
 
     function showMessage(title, sub) {
@@ -1684,22 +1491,18 @@
     function animate() {
       animationId = requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.05);
-
       if (gameState === 'playing' || gameState === 'serving') {
         updatePhysics(dt);
         updateAI(dt);
       }
-
       updatePlayerPaddle(dt);
       updatePowerBar();
       updateTrail();
-
-      if (gameState === 'serving' && isPlayerServing) {
+      if (gameState === 'serving' && isPlayerServing && !isTossing && !isCharging) {
         ball.position.x = playerPaddle.position.x;
         ball.position.y = playerPaddle.position.y + 0.06;
         ball.position.z = CONFIG.table.length / 2 - 0.12;
       }
-
       renderer.render(scene, camera);
     }
 
@@ -1709,36 +1512,16 @@
         mouseX = (e.clientX / window.innerWidth) * 2 - 1;
         mouseY = -((e.clientY / window.innerHeight) * 2 - 1);
       });
-
-      // 鼠标按下开始蓄力
       document.addEventListener('mousedown', (e) => {
-        if (e.button === 0) {
-          initAudio();
-          startCharge();
-        }
+        if (e.button === 0) { initAudio(); startCharge(); }
       });
-
-      // 鼠标松开击球
       document.addEventListener('mouseup', (e) => {
-        if (e.button === 0) {
-          releaseCharge();
-        }
+        if (e.button === 0) { releaseCharge(); }
       });
-
-      // 右键切换正反手
       document.addEventListener('mousedown', (e) => {
-        if (e.button === 2) {
-          e.preventDefault();
-          initAudio();
-          toggleForehand();
-        }
+        if (e.button === 2) { e.preventDefault(); initAudio(); toggleForehand(); }
       });
-
-      // 禁用右键菜单
-      document.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-      });
-
+      document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           if (gameState === 'playing') {
@@ -1751,19 +1534,16 @@
             setCrowdIntensity(0.15);
           }
         }
-        if (e.key === ' ' && gameState === 'gameover') {
-          restartGame();
+        if (e.key === ' ' && (gameState === 'gameover' || gameState === 'matchover')) {
+          restartMatch();
         }
       });
-
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
-
-      document.getElementById('startBtn').addEventListener('click', startGame);
-
+      document.getElementById('startBtn').addEventListener('click', startMatch);
       document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(b => b.classList.remove('active'));
@@ -1772,7 +1552,6 @@
           updateDifficultyButtons();
         });
       });
-
       document.querySelectorAll('#difficulty .diff-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           currentDifficulty = btn.dataset.diff;
@@ -1790,11 +1569,12 @@
       });
     }
 
-    function startGame() {
+    function startMatch() {
       initAudio();
       document.getElementById('startScreen').classList.add('hidden');
-      playerScore = 0;
-      aiScore = 0;
+      playerScore = 0; aiScore = 0;
+      playerGames = 0; aiGames = 0;
+      currentGame = 1;
       serveCount = 0;
       isPlayerServing = true;
       currentPower = 0;
@@ -1802,25 +1582,18 @@
       celebrateTime = 0;
       isForehand = true;
       paddleTransition = 1;
+      isDeuce = false;
+      aiMood = 1.0;
+      document.getElementById('currentGame').textContent = 1;
       updateScoreDisplay();
+      updateGameScore();
+      updateServeIndicator();
       setCrowdIntensity(0.2);
       prepareServe();
     }
 
-    function restartGame() {
-      playerScore = 0;
-      aiScore = 0;
-      serveCount = 0;
-      isPlayerServing = true;
-      currentPower = 0;
-      isCelebrating = false;
-      celebrateTime = 0;
-      isForehand = true;
-      paddleTransition = 1;
-      updateScoreDisplay();
-      hideMessage();
-      setCrowdIntensity(0.2);
-      prepareServe();
+    function restartMatch() {
+      startMatch();
     }
 
     function init() {
