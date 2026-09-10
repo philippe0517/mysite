@@ -138,6 +138,7 @@
     .section__header {
       text-align: center;
       margin-bottom: 48px;
+      position: relative;
     }
 
     .section__eyebrow {
@@ -153,6 +154,23 @@
     .section__title {
       font-size: 36px;
       margin-bottom: 12px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .section__title::before {
+      content: attr(data-number);
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 56px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: rgba(91, 141, 239, 0.1);
+      line-height: 1;
+      letter-spacing: -2px;
+      z-index: -1;
     }
 
     .section__subtitle {
@@ -256,6 +274,19 @@
     .chip--blue {
       background-color: rgba(91, 141, 239, 0.08);
       color: var(--color-primary);
+    }
+
+    /* ===== 页面滚动进度条 ===== */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      z-index: 101;
+      transition: width 0.1s ease-out;
+      pointer-events: none;
     }
 
     /* ===== 顶部导航 ===== */
@@ -483,6 +514,22 @@
       line-height: 1.8;
       padding-left: 16px;
       border-left: 3px solid var(--color-accent);
+      min-height: 62px;
+    }
+
+    .hero__subtitle .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background-color: var(--color-primary);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: cursorBlink 0.8s step-end infinite;
+    }
+
+    @keyframes cursorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
 
     /* 乒乓球轨迹装饰 */
@@ -595,6 +642,33 @@
 
     .about-card--featured .about-card__title {
       font-size: 22px;
+    }
+
+    .about-card__stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(91, 141, 239, 0.15);
+    }
+
+    .about-card__stat {
+      flex: 1;
+    }
+
+    .about-card__stat-number {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: var(--font-display);
+      color: var(--color-primary);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .about-card__stat-label {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.4;
     }
 
     .about-card__badge {
@@ -1350,6 +1424,10 @@
       color: var(--color-white);
     }
 
+    .digital-twin .section__title::before {
+      color: rgba(255, 255, 255, 0.12);
+    }
+
     .digital-twin .section__eyebrow {
       color: #E8F0FE;
     }
@@ -1620,11 +1698,11 @@
       position: fixed;
       bottom: 32px;
       right: 32px;
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background-color: var(--color-primary);
-      color: var(--color-white);
+      background-color: var(--color-white);
+      color: var(--color-primary);
       border: none;
       cursor: pointer;
       display: flex;
@@ -1636,6 +1714,7 @@
       transform: translateY(20px) scale(0.9);
       transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease, background-color 0.3s ease;
       z-index: 99;
+      padding: 0;
     }
 
     .to-top.visible {
@@ -1645,13 +1724,49 @@
     }
 
     .to-top:hover {
-      background-color: var(--color-accent);
+      background-color: var(--color-primary);
+      color: var(--color-white);
       transform: translateY(-3px) scale(1.05);
     }
 
+    .to-top__ring {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .to-top__ring-bg {
+      fill: none;
+      stroke: rgba(91, 141, 239, 0.15);
+      stroke-width: 2;
+    }
+
+    .to-top__ring-progress {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 138.23;
+      stroke-dashoffset: 138.23;
+      transition: stroke-dashoffset 0.1s ease-out;
+    }
+
+    .to-top:hover .to-top__ring-progress {
+      stroke: var(--color-white);
+    }
+
+    .to-top:hover .to-top__ring-bg {
+      stroke: rgba(255, 255, 255, 0.2);
+    }
+
     .to-top svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== 数字分身悬浮按钮 ===== */
@@ -2241,6 +2356,9 @@
 </head>
 <body>
 
+  <!-- ===== 页面滚动进度条 ===== -->
+  <div class="scroll-progress" id="scrollProgress"></div>
+
   <!-- ===== 顶部导航 ===== -->
   <header class="site-header">
     <div class="container site-header__inner">
@@ -2291,7 +2409,7 @@
             HELLO, NICE TO MEET YOU
           </div>
           <h1 class="hero__title page-load page-load-delay-1">你好，我是<span class="hero__title-name">于哲</span></h1>
-          <p class="hero__subtitle page-load page-load-delay-2">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者，在学业与运动中探索成长的更多可能。</p>
+          <p class="hero__subtitle page-load page-load-delay-2" id="heroTyping"><span class="typing-text"></span><span class="typing-cursor"></span></p>
           <div class="hero__tags page-load page-load-delay-3">
             <span class="chip">#大一</span>
             <span class="chip chip--blue">#智能医学工程</span>
@@ -2318,7 +2436,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">ABOUT ME</span>
-          <h2 class="section__title">关于我</h2>
+          <h2 class="section__title" data-number="01">关于我</h2>
           <p class="section__subtitle">用几张卡片，快速了解我是谁、在做什么、来自哪里</p>
         </div>
         <div class="about__grid">
@@ -2332,6 +2450,20 @@
             </div>
             <h3 class="about-card__title">我的身份</h3>
             <p class="about-card__text">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生。目前正在适应大学生活的节奏，对前沿科技充满好奇，喜欢把想法一步步变成真实的作品，在实践中学习和成长。</p>
+            <div class="about-card__stats">
+              <div class="about-card__stat">
+                <div class="about-card__stat-number">2</div>
+                <div class="about-card__stat-label">已发布作品</div>
+              </div>
+              <div class="about-card__stat">
+                <div class="about-card__stat-number">7+</div>
+                <div class="about-card__stat-label">设计迭代轮次</div>
+              </div>
+              <div class="about-card__stat">
+                <div class="about-card__stat-number">1</div>
+                <div class="about-card__stat-label">未来方向</div>
+              </div>
+            </div>
           </article>
           <article class="about-card reveal reveal-delay-2">
             <span class="about-card__badge">未来</span>
@@ -2375,7 +2507,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">PERSONALITY</span>
-          <h2 class="section__title">性格趣味卡</h2>
+          <h2 class="section__title" data-number="02">性格趣味卡</h2>
           <p class="section__subtitle">用一些有趣的假设和自嘲，更立体地了解我是谁</p>
         </div>
         <div class="personality__grid">
@@ -2502,7 +2634,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">SELECTED WORKS</span>
-          <h2 class="section__title">项目与作品</h2>
+          <h2 class="section__title" data-number="03">项目与作品</h2>
           <p class="section__subtitle">这里记录我的项目和作品，有真实可玩的，也有正在计划中的</p>
         </div>
         <div class="works__tabs reveal">
@@ -2603,7 +2735,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">INTERESTS & SKILLS</span>
-          <h2 class="section__title">兴趣与技能</h2>
+          <h2 class="section__title" data-number="04">兴趣与技能</h2>
           <p class="section__subtitle">学习中的技能，和生活里的热爱</p>
         </div>
         <div class="skills__bento">
@@ -2753,7 +2885,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">DIGITAL TWIN</span>
-          <h2 class="section__title">数字分身</h2>
+          <h2 class="section__title" data-number="05">数字分身</h2>
           <p class="section__subtitle">和「数字版的我」聊聊天，问问关于我的事情</p>
         </div>
         <div class="twin-card reveal reveal-delay-2">
@@ -2793,7 +2925,7 @@
         <div class="contact__inner">
           <div class="reveal">
             <span class="section__eyebrow">GET IN TOUCH</span>
-            <h2 class="section__title">联系我</h2>
+            <h2 class="section__title" data-number="06">联系我</h2>
             <p class="section__subtitle">欢迎交流学习、乒乓球、大学生活，或任何有趣的话题</p>
           </div>
           <div class="contact__methods">
@@ -2875,6 +3007,10 @@
 
   <!-- ===== 回到顶部 ===== -->
   <button class="to-top" id="toTop" type="button" aria-label="回到顶部">
+    <svg class="to-top__ring" viewBox="0 0 48 48" aria-hidden="true">
+      <circle class="to-top__ring-bg" cx="24" cy="24" r="22"></circle>
+      <circle class="to-top__ring-progress" id="toTopProgress" cx="24" cy="24" r="22"></circle>
+    </svg>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 15 12 9 6 15"></polyline>
     </svg>
@@ -2984,6 +3120,64 @@
     window.addEventListener('scroll', updateHeaderScroll);
     updateHeaderScroll();
 
+    // ===== 页面滚动进度条 =====
+    const scrollProgress = document.getElementById('scrollProgress');
+    function updateScrollProgress() {
+      if (!scrollProgress) return;
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      scrollProgress.style.width = progress + '%';
+    }
+    window.addEventListener('scroll', updateScrollProgress);
+    updateScrollProgress();
+
+    // ===== Hero 副标题打字机效果 =====
+    (function () {
+      var typingEl = document.querySelector('#heroTyping .typing-text');
+      if (!typingEl) return;
+      var phrases = [
+        '天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者，在学业与运动中探索成长的更多可能。',
+        '热爱乒乓球，打了挺多年，最喜欢拉弧圈球，在球台前学会专注和坚持。',
+        '对智能医学领域的脑机接口方向特别着迷，希望未来能用技术手段帮助更多人。',
+        '来自天津，现居深圳，在津深两地的碰撞中寻找自己的方向，保持好奇，持续创造。'
+      ];
+      var phraseIndex = 0;
+      var charIndex = 0;
+      var isDeleting = false;
+      var typingSpeed = 50;
+      var deletingSpeed = 30;
+      var pauseAfterType = 2500;
+      var pauseAfterDelete = 500;
+
+      function type() {
+        var currentPhrase = phrases[phraseIndex];
+        if (isDeleting) {
+          typingEl.textContent = currentPhrase.substring(0, charIndex - 1);
+          charIndex--;
+          if (charIndex === 0) {
+            isDeleting = false;
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            setTimeout(type, pauseAfterDelete);
+            return;
+          }
+          setTimeout(type, deletingSpeed);
+        } else {
+          typingEl.textContent = currentPhrase.substring(0, charIndex + 1);
+          charIndex++;
+          if (charIndex === currentPhrase.length) {
+            isDeleting = true;
+            setTimeout(type, pauseAfterType);
+            return;
+          }
+          setTimeout(type, typingSpeed);
+        }
+      }
+
+      // 等页面加载动画完成后开始打字
+      setTimeout(type, 1200);
+    })();
+
     // ===== 导航高亮（滚动监听） =====
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.site-nav__link');
@@ -3020,16 +3214,26 @@
     window.addEventListener('scroll', updateActiveNav);
     updateActiveNav();
 
-    // ===== 回到顶部按钮 =====
+    // ===== 回到顶部按钮 + 进度环 =====
     const toTopBtn = document.getElementById('toTop');
+    const toTopProgress = document.getElementById('toTopProgress');
+    const circumference = 2 * Math.PI * 22; // r=22
 
-    window.addEventListener('scroll', function () {
+    function updateToTop() {
       if (window.scrollY > 400) {
         toTopBtn.classList.add('visible');
       } else {
         toTopBtn.classList.remove('visible');
       }
-    });
+      if (toTopProgress) {
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? window.scrollY / docHeight : 0;
+        toTopProgress.style.strokeDashoffset = circumference * (1 - progress);
+      }
+    }
+
+    window.addEventListener('scroll', updateToTop);
+    updateToTop();
 
     toTopBtn.addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
