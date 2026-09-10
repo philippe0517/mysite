@@ -1362,18 +1362,20 @@
       box-shadow: var(--shadow-md);
       opacity: 0;
       visibility: hidden;
-      transition: var(--transition);
+      transform: translateY(20px) scale(0.9);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease, background-color 0.3s ease;
       z-index: 99;
     }
 
     .to-top.visible {
       opacity: 1;
       visibility: visible;
+      transform: translateY(0) scale(1);
     }
 
     .to-top:hover {
       background-color: var(--color-accent);
-      transform: translateY(-3px);
+      transform: translateY(-3px) scale(1.05);
     }
 
     .to-top svg {
@@ -2627,23 +2629,37 @@
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.site-nav__link');
 
+    // section id 到导航 href 的映射（无对应导航的 section 映射到最近的主导航）
+    const sectionNavMap = {
+      'top': 'top',
+      'about': 'about',
+      'personality': 'about',
+      'works': 'works',
+      'skills': 'skills',
+      'digital-twin': 'skills',
+      'contact': 'contact'
+    };
+
     function updateActiveNav() {
-      const scrollPos = window.scrollY + 100;
+      const scrollPos = window.scrollY + 120;
       let current = '';
       sections.forEach(function (section) {
         if (scrollPos >= section.offsetTop) {
           current = section.getAttribute('id');
         }
       });
+      // 映射到导航链接
+      const navTarget = sectionNavMap[current] || current;
       navLinks.forEach(function (link) {
         link.classList.remove('active');
-        if (link.getAttribute('href') === '#' + current) {
+        if (link.getAttribute('href') === '#' + navTarget) {
           link.classList.add('active');
         }
       });
     }
 
     window.addEventListener('scroll', updateActiveNav);
+    updateActiveNav();
 
     // ===== 回到顶部按钮 =====
     const toTopBtn = document.getElementById('toTop');
