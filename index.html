@@ -39,8 +39,41 @@
       padding: 0;
     }
 
+    /* 选中文字样式 */
+    ::selection {
+      background-color: rgba(91, 141, 239, 0.15);
+      color: var(--color-text);
+    }
+
+    ::-moz-selection {
+      background-color: rgba(91, 141, 239, 0.15);
+      color: var(--color-text);
+    }
+
+    /* 滚动条样式 */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background-color: var(--color-bg-alt);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--color-accent);
+      border-radius: 100px;
+      border: 2px solid var(--color-bg-alt);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--color-primary);
+    }
+
     html {
       scroll-behavior: smooth;
+      scrollbar-color: var(--color-accent) var(--color-bg-alt);
+      scrollbar-width: thin;
     }
 
     body {
@@ -368,6 +401,23 @@
       width: 16px;
       height: 16px;
     }
+
+    /* 页面加载入场动画 */
+    .page-load {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .page-load.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .page-load-delay-1 { transition-delay: 0.1s; }
+    .page-load-delay-2 { transition-delay: 0.25s; }
+    .page-load-delay-3 { transition-delay: 0.4s; }
+    .page-load-delay-4 { transition-delay: 0.55s; }
 
     .hero__title {
       font-size: 48px;
@@ -1526,6 +1576,46 @@
       }
     }
 
+    /* ===== 减少动画偏好支持 ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .page-load {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .work-card:hover {
+        transform: none !important;
+      }
+
+      .work-card:hover .work-card__cover svg {
+        transform: none !important;
+      }
+
+      .work-card:hover .work-card__cover::after {
+        left: -100% !important;
+      }
+
+      .bento-card:hover {
+        transform: none !important;
+      }
+
+      .btn:active {
+        transform: none !important;
+      }
+    }
+
     @media (max-width: 768px) {
       .section {
         padding: 64px 0;
@@ -1703,22 +1793,22 @@
       </svg>
       <div class="container hero__inner">
         <div class="hero__content">
-          <div class="hero__greeting">
+          <div class="hero__greeting page-load">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
             HELLO, NICE TO MEET YOU
           </div>
-          <h1 class="hero__title">你好，我是<span class="hero__title-name">于哲</span></h1>
-          <p class="hero__subtitle">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者，在学业与运动中探索成长的更多可能。</p>
-          <div class="hero__tags">
+          <h1 class="hero__title page-load page-load-delay-1">你好，我是<span class="hero__title-name">于哲</span></h1>
+          <p class="hero__subtitle page-load page-load-delay-2">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者，在学业与运动中探索成长的更多可能。</p>
+          <div class="hero__tags page-load page-load-delay-3">
             <span class="chip">#大一</span>
             <span class="chip chip--blue">#智能医学工程</span>
             <span class="chip">#乒乓球</span>
             <span class="chip chip--blue">#深圳</span>
           </div>
-          <div class="hero__actions">
+          <div class="hero__actions page-load page-load-delay-4">
             <a class="btn btn--primary" href="#works">
               查看我的作品
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
@@ -1729,7 +1819,7 @@
             <a class="btn btn--ghost" href="#contact">联系我</a>
           </div>
         </div>
-        <div class="hero__avatar" aria-label="于哲的头像占位">YZ</div>
+        <div class="hero__avatar page-load page-load-delay-2" aria-label="于哲的头像占位">YZ</div>
       </div>
     </section>
 
@@ -1751,7 +1841,7 @@
               </svg>
             </div>
             <h3 class="about-card__title">我的身份</h3>
-            <p class="about-card__text">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生。对前沿科技充满好奇，喜欢把想法一步步变成真实的作品，在实践中学习和成长。</p>
+            <p class="about-card__text">天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生。目前正在适应大学生活的节奏，对前沿科技充满好奇，喜欢把想法一步步变成真实的作品，在实践中学习和成长。</p>
           </article>
           <article class="about-card reveal reveal-delay-2">
             <span class="about-card__badge">未来</span>
@@ -1762,7 +1852,7 @@
               </svg>
             </div>
             <h3 class="about-card__title">我的方向</h3>
-            <p class="about-card__text">对产品设计和数字创作有浓厚兴趣，喜欢把想法快速变成可运行的原型。相信「先做出来，再逐步改」的做事方式，正在从一个能看的个人主页开始，一步步做出可发布的真实作品。</p>
+            <p class="about-card__text">对智能医学领域的脑机接口方向特别着迷，觉得用思维控制设备这件事太酷了。同时也喜欢产品设计和数字创作，相信「先做出来，再逐步改」的做事方式，正在从一个能看的个人主页开始，一步步做出可发布的真实作品。</p>
           </article>
           <article class="about-card reveal reveal-delay-3">
             <span class="about-card__badge">热爱</span>
@@ -1773,7 +1863,7 @@
               </svg>
             </div>
             <h3 class="about-card__title">我的记忆点</h3>
-            <p class="about-card__text">乒乓球是我最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
+            <p class="about-card__text">乒乓球是我最大的爱好，打了挺多年了，业余水平，最喜欢拉弧圈球。享受在球台前挥拍的每一刻，这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
           </article>
           <article class="about-card reveal reveal-delay-4">
             <span class="about-card__badge">天津→深圳</span>
@@ -1784,7 +1874,7 @@
               </svg>
             </div>
             <h3 class="about-card__title">我的城市</h3>
-            <p class="about-card__text">来自天津，一座有着海河穿城而过、充满烟火气的城市。如今在深圳求学，在这座创新之都开启大学生活，也在津深两地的碰撞中寻找自己的方向。</p>
+            <p class="about-card__text">来自天津，一座有着海河穿城而过、充满烟火气的城市，最想念天津的早点——煎饼果子和锅巴菜。如今在深圳求学，在这座创新之都开启大学生活，最常去的地方是图书馆和海边，也在津深两地的碰撞中寻找自己的方向。</p>
           </article>
         </div>
       </div>
@@ -2174,6 +2264,14 @@
     // ===== 年份自动更新 =====
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
+    // ===== 页面加载入场动画 =====
+    window.addEventListener('load', function () {
+      const pageLoadElements = document.querySelectorAll('.page-load');
+      pageLoadElements.forEach(function (el) {
+        el.classList.add('visible');
+      });
+    });
+
     // ===== 移动端菜单切换 =====
     const menuToggle = document.getElementById('menuToggle');
     const siteNav = document.getElementById('siteNav');
@@ -2337,6 +2435,36 @@
             question: '你未来想做什么？',
             keywords: ['未来', '想做', '打算', '规划', '方向', '脑机接口', '以后', '梦想'],
             answer: '我对智能医学领域的脑机接口方向特别感兴趣，希望未来能在这个前沿领域有所发展，用技术帮助更多人。当然，路还很长，先从大一的基础打扎实！'
+          },
+          {
+            id: 8,
+            question: '你的乒乓球水平怎么样？',
+            keywords: ['乒乓球水平', '打得怎么样', '水平如何', '球技', '乒乓球打得'],
+            answer: '打了挺多年了，水平嘛……业余里还算能打吧！最喜欢拉弧圈球，不过接发球还是经常失误哈哈。打球主要是为了开心和锻炼身体，输赢倒是其次。'
+          },
+          {
+            id: 9,
+            question: '你为什么选择智能医学工程？',
+            keywords: ['为什么选', '选择', '智能医学', '为什么这个专业', '专业', '为什么学'],
+            answer: '因为我对医学和工程的交叉领域特别感兴趣，觉得用技术手段解决医学问题是一件很有意义的事。而且脑机接口这个方向太酷了，让人觉得未来充满可能性！'
+          },
+          {
+            id: 10,
+            question: '你平时怎么安排时间？',
+            keywords: ['时间', '安排', '作息', '平时干嘛', '怎么平衡', '一天'],
+            answer: '大一嘛，主要还是上课为主，课余时间会打打乒乓球、做做网页、看看书。时间管理还在摸索中，尽量做到学习和娱乐平衡吧。偶尔也会拖延，但大部分时候还是挺自律的～'
+          },
+          {
+            id: 11,
+            question: '你最喜欢的课程是什么？',
+            keywords: ['课程', '最喜欢', '喜欢哪门', '学科', '科目'],
+            answer: '目前刚大一，主要还是基础课。比较喜欢和编程、数学相关的课程，因为觉得解决问题的过程很有成就感。后面专业课程开了之后，应该会更喜欢脑机接口相关的内容！'
+          },
+          {
+            id: 12,
+            question: '你有什么推荐的书或电影吗？',
+            keywords: ['推荐', '书', '电影', '看什么', '有什么推荐', '喜欢看'],
+            answer: '书的话最近在看一些科普类的，比如讲脑科学和人工智能的，都挺有意思。电影嘛……科幻类的都喜欢，尤其是涉及脑机接口、虚拟现实题材的，看完会让人对未来充满想象。'
           }
         ];
 
