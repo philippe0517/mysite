@@ -260,6 +260,96 @@
     body.touch .snd-btn { top: 48px; right: 10px; width: 34px; height: 34px; font-size: 15px; }
     body.touch .kp-banner { top: 86px; font-size: 11px; padding: 4px 16px; letter-spacing: 2px; }
 
+    /* ===== 球员档案 / 生涯 / 成就 / 皮肤 / 分享 ===== */
+    .player-chip {
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+      padding: 7px 16px; border-radius: 20px; cursor: pointer; pointer-events: auto;
+      background: rgba(13,26,48,.85); border: 1px solid rgba(201,169,110,.5);
+      font-size: 13px; font-weight: 700; color: #e8d5a8; transition: all .2s;
+    }
+    .player-chip:hover { border-color: #c9a96e; background: rgba(201,169,110,.12); }
+    .player-chip .pc-dot { width: 12px; height: 12px; border-radius: 50%; background: #c9a96e; flex: none; }
+    .player-chip .pc-hint { font-size: 10px; color: #7288a3; font-weight: 400; }
+    .start-btnrow { display: flex; gap: 10px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .mini-btn {
+      background: rgba(13,26,48,.85); border: 1px solid rgba(201,169,110,.45); color: #e8d5a8;
+      font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 9px; cursor: pointer;
+      transition: all .2s; letter-spacing: 1px; font-family: inherit;
+    }
+    .mini-btn:hover { background: rgba(201,169,110,.18); border-color: #c9a96e; }
+    .mini-btn.gold { background: linear-gradient(135deg,#c9a96e,#b8985e); color: #16345c; border: none; }
+    .mini-btn.danger { border-color: rgba(239,68,68,.6); color: #ff8a8a; }
+    .mini-btn.danger:hover { background: rgba(239,68,68,.15); }
+    .vol-row {
+      display: flex; align-items: center; gap: 10px; justify-content: center;
+      margin-top: 12px; font-size: 14px; color: #7288a3;
+    }
+    .vol-row input[type=range] { width: 130px; accent-color: #c9a96e; cursor: pointer; }
+    .vol-row .vol-val { font-size: 11px; min-width: 34px; text-align: left; color: #46607e; }
+    .pmodal {
+      position: fixed; inset: 0; background: rgba(4,10,20,.74); display: none;
+      align-items: center; justify-content: center; z-index: 220; padding: 16px;
+    }
+    .pmodal.open { display: flex; }
+    .pmodal-box {
+      background: linear-gradient(165deg,#152f54,#0d1d38); border: 1px solid rgba(201,169,110,.5);
+      border-radius: 14px; width: 100%; max-width: 520px; max-height: 86vh; overflow: auto;
+      padding: 20px 22px; color: #dce6f2; box-shadow: 0 18px 60px rgba(0,0,0,.65);
+    }
+    .pmodal-box h3 { margin: 0 0 4px; font-size: 18px; color: #e8c98a; letter-spacing: 2px; }
+    .pmodal-sub { font-size: 11px; color: #7288a3; margin-bottom: 14px; line-height: 1.7; }
+    .pf-input {
+      width: 100%; box-sizing: border-box; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18);
+      border-radius: 9px; padding: 11px 13px; color: #fff; font-size: 15px; outline: none; margin-bottom: 12px; font-family: inherit;
+    }
+    .pf-input:focus { border-color: #c9a96e; }
+    .sw-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .swatch { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s; }
+    .swatch:hover { transform: scale(1.15); }
+    .swatch.sel { border-color: #fff; box-shadow: 0 0 8px rgba(255,255,255,.5); }
+    .prof-item {
+      display: flex; align-items: center; gap: 10px; padding: 11px 13px; border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s;
+    }
+    .prof-item:hover { border-color: rgba(201,169,110,.7); }
+    .prof-item.cur { border-color: #c9a96e; background: rgba(201,169,110,.09); }
+    .prof-item .pc-dot { width: 14px; height: 14px; border-radius: 50%; flex: none; }
+    .prof-item b { font-size: 14px; }
+    .prof-item .prof-rec { margin-left: auto; font-size: 11px; color: #8ba0b9; }
+    .prof-item .prof-badge { font-size: 10px; color: #16345c; background: #c9a96e; border-radius: 8px; padding: 2px 8px; font-weight: 700; }
+    .pm-btnrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .settings-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a8b8cc; margin-top: 6px; cursor: pointer; }
+    .settings-row input { accent-color: #c9a96e; }
+    .stat-line { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 2px; border-bottom: 1px dashed rgba(255,255,255,.09); }
+    .stat-line b { color: #e8c98a; }
+    .stat-sec { font-size: 12px; color: #c9a96e; letter-spacing: 2px; margin: 14px 0 4px; font-weight: 700; }
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(148px,1fr)); gap: 8px; margin-top: 8px; }
+    .ach { padding: 8px 10px; border-radius: 9px; border: 1px solid rgba(255,255,255,.1); font-size: 11px; line-height: 1.5; }
+    .ach b { display: block; font-size: 12px; }
+    .ach.on { border-color: #c9a96e; background: rgba(201,169,110,.12); color: #e8d5a8; }
+    .ach.off { opacity: .42; }
+    .skin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .skin-card {
+      border: 1px solid rgba(255,255,255,.12); border-radius: 11px; padding: 12px;
+      cursor: pointer; transition: border-color .15s; position: relative;
+    }
+    .skin-card:hover { border-color: rgba(201,169,110,.7); }
+    .skin-card.cur { border-color: #c9a96e; background: rgba(201,169,110,.09); }
+    .skin-card.locked { opacity: .5; cursor: not-allowed; }
+    .skin-dots { display: flex; gap: 6px; margin-bottom: 7px; }
+    .skin-dots i { width: 20px; height: 20px; border-radius: 50%; display: block; border: 1px solid rgba(255,255,255,.25); }
+    .skin-card b { font-size: 13px; display: block; }
+    .skin-card small { font-size: 10px; color: #8ba0b9; }
+    .skin-state { position: absolute; top: 10px; right: 10px; font-size: 10px; color: #c9a96e; }
+    .msg-share {
+      display: none; margin: 12px auto 0; background: linear-gradient(135deg,#c9a96e,#b8985e);
+      color: #16345c; border: none; font-weight: 900; font-size: 13px; letter-spacing: 2px;
+      padding: 9px 22px; border-radius: 20px; cursor: pointer; font-family: inherit;
+    }
+    .msg-share.show { display: inline-block; }
+    .share-img { max-width: 100%; border-radius: 10px; border: 1px solid rgba(201,169,110,.4); }
+    .share-btns { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+
     /* ===== 移动端触控 ===== */
     body { touch-action: none; }
     .touch-ui { display: none; }
@@ -393,6 +483,7 @@
 <body>
   <div class="start-screen" id="startScreen">
     <div class="start-inner">
+      <div class="player-chip" id="playerChip"><span class="pc-dot" id="pcDot"></span><span id="pcName">创建球员档案</span><span class="pc-hint">点击管理</span></div>
       <div class="olympic-rings" aria-hidden="true">
         <span class="ring r-blue"></span><span class="ring r-black"></span><span class="ring r-red"></span><span class="ring r-yellow"></span><span class="ring r-green"></span>
       </div>
@@ -442,6 +533,11 @@
         </div>
       </div>
       <button class="start-btn" id="startBtn">开赛</button>
+      <div class="start-btnrow">
+        <button class="mini-btn" id="statsBtn">📊 生涯数据</button>
+        <button class="mini-btn" id="skinBtn">🏓 球拍皮肤</button>
+      </div>
+      <div class="vol-row"><span id="volIcon">🔊</span><input type="range" id="volSlider" min="0" max="100" value="80"><span class="vol-val" id="volVal">80%</span></div>
       <div class="start-tips">
         <b>鼠标 / 方向键(↑↓←→ / WASD)</b> 左右上下移动 · <b>滚轮 / Q·E</b> 前后站位(Z轴)<br>
         <b>按住左键 / 空格</b> 蓄力，松开挥拍击球（挥拍越快球越冲）· <b>右键 / Shift</b> 切换正反手 · <b>Esc</b> 暂停<br>
@@ -501,6 +597,7 @@
     <div class="center-msg" id="centerMessage">
       <h1 id="messageTitle">准备</h1>
       <p id="messageSub"></p>
+      <button class="msg-share" id="shareBtn">📸 生成战绩图</button>
     </div>
 
     <div class="toast-layer" id="toastLayer"></div>
@@ -524,6 +621,11 @@
       <br><button id="portraitGo">竖屏继续游玩</button>
     </div>
   </div>
+
+  <div class="pmodal" id="profileModal" data-closable="0"><div class="pmodal-box" id="profileBox"></div></div>
+  <div class="pmodal" id="statsModal" data-closable="1"><div class="pmodal-box" id="statsBox"></div></div>
+  <div class="pmodal" id="skinModal" data-closable="1"><div class="pmodal-box" id="skinBox"></div></div>
+  <div class="pmodal" id="shareModal" data-closable="1"><div class="pmodal-box" id="shareBox" style="text-align:center"></div></div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script>
@@ -604,12 +706,11 @@
     let celebrating = false, celebT = 0;
 
     // ===== 新增：音效开关 / 战绩持久化 / 本局统计 / 训练模式 / 关键分 =====
-    const LS_STATS = 'pp3d_stats_v1', LS_MUTE = 'pp3d_mute_v1';
+    const LS_MUTE = 'pp3d_mute_v1';
     let muted = (() => { try { return localStorage.getItem(LS_MUTE) === '1'; } catch (e) { return false; } })();
     let serveBy = null, aiTouched = false, playerTouched = false;   // 发球方 & 本回合接发方是否触球（用于 ACE 判定）
     let statLongRally = 0, statWinners = 0, statAce = 0, statAceAgainst = 0; // 本局数据小结
     let playerLastSmash = false;    // 本回合玩家最后一板是否爆冲（制胜一击反馈用）
-    let prevDeuce = false;          // DEUCE 提示一次性触发
     let sessionBestRally = 0;       // 训练模式本次会话最长回合
 
     // 三轴控制：z 轴前后站位（滚轮/Q·E/滑条）+ 虚拟摇杆 + 球拍速度
@@ -647,17 +748,18 @@
         crowdSrc = actx.createBufferSource(); crowdSrc.buffer = buf; crowdSrc.loop = true;
         const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = .6;
         const lp = actx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
-        crowdGain = actx.createGain(); crowdGain.gain.value = .035;
+        crowdGain = actx.createGain(); crowdGain.gain.value = .035 * volScale;
         crowdSrc.connect(bp); bp.connect(lp); lp.connect(crowdGain); crowdGain.connect(actx.destination);
         crowdSrc.start();
       } catch (e) {}
     }
     function crowd(v) {
       if (!crowdGain || !actx) return;
-      crowdGain.gain.setTargetAtTime(muted ? 0 : (.025 + v * .13), actx.currentTime, .3);
+      crowdGain.gain.setTargetAtTime(muted ? 0 : (.025 + v * .13) * volScale, actx.currentTime, .3);
     }
     function tone(f0, f1, dur, type, vol, filterFreq) {
-      if (!actx || muted) return;
+      if (!actx || muted || volScale<=0) return;
+      vol = (vol||0)*volScale;
       try {
         const o = actx.createOscillator(), g = actx.createGain();
         o.connect(g);
@@ -679,36 +781,15 @@
     const sCheer  = (win) => { crowd(1); setTimeout(()=>crowd(.3),1800); setTimeout(()=>crowd(.12),3800); tone(win?420:280, win?640:220, .5, 'sawtooth', .018); };
 
     /* ============================================================
-       新增功能：战绩持久化 / 音效开关 / 关键分横幅 / 制胜闪光 / 训练模式
+       新增功能：音效开关 / 关键分横幅 / 制胜闪光
+       （战绩持久化/训练模式已升级为球员档案系统，见下方"球员档案与生涯"区块）
     ============================================================ */
-    function loadStats() { try { return JSON.parse(localStorage.getItem(LS_STATS)) || {}; } catch (e) { return {}; } }
-    function saveStats(s) { try { localStorage.setItem(LS_STATS, JSON.stringify(s)); } catch (e) {} }
-    function recordMatch(win) {
-      if (diff === 'train') return;
-      const s = loadStats();
-      const d = s[diff] || (s[diff] = { w: 0, l: 0, streak: 0, best: 0 });
-      if (win) { d.w++; d.streak++; d.best = Math.max(d.best, d.streak); }
-      else { d.l++; d.streak = 0; }
-      saveStats(s); renderRecords();
-    }
-    function renderRecords() {
-      const s = loadStats();
-      document.querySelectorAll('.diff-card').forEach(c => {
-        const el = c.querySelector('.diff-record');
-        if (!el) return;
-        if (c.dataset.diff === 'train') { el.textContent = s.trainBest ? `最长回合 ${s.trainBest} 板` : '未挑战'; return; }
-        const d = s[c.dataset.diff];
-        el.textContent = d && (d.w || d.l)
-          ? `战绩 ${d.w}胜${d.l}负${d.streak > 1 ? ` · ${d.streak}连胜` : ''}`
-          : '尚无战绩';
-      });
-    }
     function setMute(m) {
       muted = m;
       try { localStorage.setItem(LS_MUTE, m ? '1' : '0'); } catch (e) {}
       const b = document.getElementById('sndBtn');
       if (b) { b.textContent = m ? '🔇' : '🔊'; b.classList.toggle('off', m); }
-      if (crowdGain && actx) crowdGain.gain.setTargetAtTime(m ? 0 : .035, actx.currentTime, .05);
+      if (crowdGain && actx) crowdGain.gain.setTargetAtTime(m ? 0 : .035*volScale, actx.currentTime, .05);
     }
     function flash() {
       const f = document.getElementById('flash');
@@ -733,18 +814,6 @@
       }
       if (txt) { b.textContent = txt; b.classList.toggle('danger', danger); b.classList.add('show'); }
       else b.classList.remove('show');
-    }
-    function trainPointEnd(w) {
-      sessionBestRally = Math.max(sessionBestRally, rally);
-      if (rally >= 5) {
-        const s = loadStats();
-        if (rally > (s.trainBest || 0)) { s.trainBest = rally; saveStats(s); toast(`新纪录 · 连续 ${rally} 板！`, 'good'); }
-        else toast(`本回合 ${rally} 板`, 'info');
-      } else toast(w === 'player' ? '好球 · 保持节奏' : '球断了 · 重新发球', 'info');
-      renderRecords();
-      crowd(.2); if (w === 'player') sCheer(true);
-      pServes = true;
-      setTimeout(() => { if (state !== 'paused') prepareServe(); }, 900);
     }
 
 
@@ -923,6 +992,7 @@
       rubFront.rotation.x=Math.PI/2; rubFront.position.y=CFG.paddle.T/2+.001; g.add(rubFront);
       const rubBack = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x1B1B20, roughness:.55}));
       rubBack.rotation.x=Math.PI/2; rubBack.rotation.y=Math.PI; rubBack.position.y=-CFG.paddle.T-.002; g.add(rubBack);
+      g.userData.rubF = rubFront.material; g.userData.rubB = rubBack.material; // 皮肤系统：可替换拍面胶皮颜色
       // 白色护边替代棕色环（对齐拍厚中心）
       const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
       edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; edge.position.y=-CFG.paddle.T/2; g.add(edge);
@@ -946,6 +1016,7 @@
       pPaddle.position.set(0, CFG.table.H+.1, CFG.table.L/2-.22);
       pPaddle.rotation.set(-.3, Math.PI/2+.12, Math.PI/2+.3);  // 拍面竖立正对玩家（正手红面朝玩家）、拍头朝右、拍柄朝左
       scene.add(pPaddle);
+      pFaceMatF = pPaddle.userData.rubF; pFaceMatB = pPaddle.userData.rubB;
 
       aPaddle = makePaddle();
       aPaddle.position.set(0, CFG.table.H+.1, -CFG.table.L/2+.22);
@@ -1241,7 +1312,7 @@
     const TIMING_SH = { rising:1.06, peak:1.0, falling_early:.96, falling_late:.9 };
 
     function hitBall(who) {
-      const st = AI_STYLES[diff];
+      const st = aiStyle();
       const paddle = who==='player' ? pPaddle : aPaddle;
       const relX = (ball.position.x-paddle.position.x)/(CFG.paddle.W/2);
       timingNow = judgeTiming();
@@ -1278,6 +1349,9 @@
         statLongRally = Math.max(statLongRally, rally);
         playerTouched = true;
         playerLastSmash = pw > .75;
+        buzz(25); if (pw > .75) buzz(45);   // 击球震动：爆冲更强
+        if (rally >= 10) unlock('rally10');
+        if (rally >= 15) unlock('rally15');
         if (timingNow==='peak' && (power>.7 || sw>.5)) qualityToast(fh?'正手爆冲！':'反手拧拉！','good');
         else if (sw>.35 && power<.25) qualityToast(fh?'正手快带':'反手弹击','info');
         else if (timingNow==='rising') qualityToast('借力快带','info');
@@ -1306,6 +1380,7 @@
         sHit(.45, spt);
         spawnParticles(ball.position, 0xffffff, 5);
         aiTouched = true; playerLastSmash = false;
+        buzz(20); tutTip(2);
       }
 
       spinV.copy(sv); spinType = spinFromVector(sv);
@@ -1364,7 +1439,7 @@
     function aiServe() {
       if (state!=='serving'||pServes) return;
       audioInit();
-      const st = AI_STYLES[diff];
+      const st = aiStyle();
       ball.position.set((Math.random()-.5)*.3, CFG.table.H+.14, -CFG.table.L/2+.05);
       const tz1 = -(.35-Math.random()*.2); // AI 己方第一跳（z<0）
       const tx = (Math.random()-.5)*.22;
@@ -1386,7 +1461,7 @@
       pointScored = true;
       if (diff==='train') { trainPointEnd(w); return; } // 训练模式：不计比分，仅统计回合
       // 本局数据统计：ACE / 制胜分
-      if (serveBy==='player' && w==='player' && !aiTouched) statAce++;
+      if (serveBy==='player' && w==='player' && !aiTouched) { statAce++; unlock('ace_first'); buzz(50); }
       if (serveBy==='ai' && w==='ai' && !playerTouched) statAceAgainst++;
       if (w==='player' && lastHit==='player') statWinners++;
       // 制胜一击反馈：本回合最后一板是玩家爆冲 → 强震屏 + 白闪 + 火花
@@ -1394,10 +1469,22 @@
         shakeAmt = Math.max(shakeAmt,.16); flash();
         spawnParticles(ball.position, 0xffd86b, 18);
         qualityToast('制胜分！','good');
+        unlock('smash_win'); buzz(60);
       }
-      if (w==='player'){ pScore++; sCheer(true); aiMood=Math.max(.7,aiMood-.05); bump('playerScore'); }
-      else { aScore++; sCheer(false); aiMood=Math.min(1.3,aiMood+.05); bump('aiScore'); }
+      if (w==='player'){ pScore++; sCheer(true); aiMood=Math.max(.7,aiMood-.05); bump('playerScore'); buzz([30,50,30]); }
+      else { aScore++; sCheer(false); aiMood=Math.min(1.3,aiMood+.05); bump('aiScore'); buzz(60); }
       serveCnt++;
+      // 动态难度守护：连败 4 分对手放水 / 连胜 4 分对手收紧
+      if (w==='player'){ pPtStreak++; aPtStreak=0; } else { aPtStreak++; pPtStreak=0; }
+      const ddaP = curProfile();
+      if (ddaP ? ddaP.settings.dda!==false : true) {
+        const tgt = pPtStreak>=4 ? -1 : (aPtStreak>=4 ? 1 : 0);
+        if (tgt!==ddaState) {
+          ddaState=tgt;
+          if(tgt===-1) toast('对手体力下滑 · 状态出现波动','info');
+          else if(tgt===1) toast('对手进入专注模式 · 小心！','bad');
+        }
+      }
       const pw = pScore>=CFG.game.win && pScore-aScore>=2;
       const aw = aScore>=CFG.game.win && aScore-pScore>=2;
       if (pw||aw) {
@@ -1409,11 +1496,22 @@
           spawnFirework(new THREE.Vector3((Math.random()-.5)*3, 3, (Math.random()-.5)*2), 0xffd86b, 14+lv*6);
           spawnFirework(new THREE.Vector3((Math.random()-.5)*3, 3.4, (Math.random()-.5)*2), 0x7EB6D9, 12+lv*5);
         }
+        if (pw && deuce) unlock('deuce_win');   // 10 平后赢下整局
         if (pGames>=CFG.game.gamesToWin || aGames>=CFG.game.gamesToWin) {
           state='matchover';
           const win = pGames>aGames;
           const lv = AI_STYLES[diff].celeb;
-          recordMatch(win); hideKeyPoint();
+          recordMatch(win, aGames); hideKeyPoint();
+          const mp = curProfile();
+          if (mp) {
+            mp.career.totalAces += statAce;
+            mp.career.bestRally = Math.max(mp.career.bestRally, statLongRally);
+            if (statAce >= 3) unlock('ace3');
+            saveProfiles();
+          }
+          lastResult = { win, diff, pGames, aGames, longRally:statLongRally, winners:statWinners, ace:statAce, aceAgainst:statAceAgainst };
+          buzz(win?[80,60,80,60,180]:[120]);
+          const sbE = document.getElementById('shareBtn'); if (sbE) sbE.classList.add('show');
           showMsg(win ? (lv>=3?'传奇加冕！':'夺冠！') : '惜败',
             `大比分 ${pGames} : ${aGames} · 最长回合 ${statLongRally} 板 · 制胜分 ${statWinners} · ACE ${statAce}${statAceAgainst?` · 被ACE ${statAceAgainst}`:''} · 空格重新开赛`);
           if (win) celebrate(lv);   // 难度越高夺冠庆典越盛大
@@ -1421,6 +1519,7 @@
         }
         gameNo++; setText('currentGame',gameNo);
         pScore=0; aScore=0; serveCnt=0; deuce=false; aiMood=1;
+        pPtStreak=0; aPtStreak=0; ddaState=0;   // 新的一局，守护状态重置
         // 现今规则：发球权按局号交替（第1局A先发→第2局B先发），与局末分无关
         pServes = (gameNo % 2 === 1);
         updateScore();
@@ -1439,7 +1538,7 @@
         toast('决胜局交换场地','info');
       }
       updateServeDot(); updateScore(); updateKeyPoint();
-      setTimeout(()=>{ if(state!=='matchover') prepareServe(); }, 1100);
+      afterPoint(w);
     }
     function updateScore(){ setText('playerScore',pScore); setText('aiScore',aScore); }
     function bump(id){ const el=document.getElementById(id); el.classList.add('bump'); setTimeout(()=>el.classList.remove('bump'),180); updateScore(); }
@@ -1461,6 +1560,7 @@
       if (pServes) {
         ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05);
         showMsg(diff==='train'?'训练发球':'你的发球','按住左键/空格蓄力，松开发球 · 发球时左右移动可加侧旋');
+        tutTip(1);
       } else {
         ball.position.set(0, CFG.table.H+.14, -CFG.table.L/2+.05);
         showMsg('对手发球','注意落点光圈，准备接球');
@@ -1473,7 +1573,7 @@
     ============================================================ */
     function updateAI(dt) {
       if (state!=='playing') return;
-      const st = AI_STYLES[diff];
+      const st = aiStyle();
       aiReactT += dt;
       if (aiReactT < st.react) return;
       // 综合型：更远的落点预判 + 快速贴球
@@ -1695,6 +1795,18 @@
       const dt=Math.min(clock.getDelta(),.05);
       updatePlayer(dt);
       if(state==='playing'||state==='serving'){ updateAI(dt); updatePhysics(dt); }
+      // 回放：记录球轨迹环形缓冲（约 2.5 秒）+ 慢放状态推进
+      if(state==='playing'||state==='serving'){ rbuf.push(ball.position.clone()); if(rbuf.length>150) rbuf.shift(); }
+      if(state==='replay'&&replay){
+        replay.idx += dt*60*.35;
+        const i = Math.min(replay.frames.length-1, Math.floor(replay.idx));
+        ball.position.copy(replay.frames[i]);
+        if(replay.idx >= replay.frames.length+8){
+          replay=null;
+          document.getElementById('kpBanner').classList.remove('show');
+          setTimeout(()=>{ if(state!=='matchover') prepareServe(); },250);
+        }
+      }
       predictLanding();
       updateParticles(dt);
       powerBarUpdate(); updateTrail(); updateCamera();
@@ -1736,7 +1848,7 @@
         if(k==='q'||k==='Q'){keys.zb=true;useKb=true;}  // 后退（远台）
         if(k==='e'||k==='E'){keys.zf=true;useKb=true;}  // 前进（近网）
         if(k===' '){
-          if(state==='gameover'||state==='matchover') startMatch();
+          if(state==='matchover') startMatch();
           else { audioInit(); if(!charging) chargeStart(); }
         }
         if(k==='Shift'){audioInit();toggleGrip();}
@@ -1783,7 +1895,33 @@
       // 竖屏兜底：用户可选择忽略横屏提示直接游玩
       const pg = document.getElementById('portraitGo');
       if (pg) pg.addEventListener('click',e=>{ e.stopPropagation(); document.getElementById('rotateHint').style.display='none'; });
-      document.getElementById('startBtn').addEventListener('click',startMatch);
+      document.getElementById('startBtn').addEventListener('click',()=>{
+        if(!curProfile()){ openProfile(true); return; }   // 无档案先创建
+        startMatch();
+      });
+      // 球员档案 / 生涯数据 / 皮肤 / 战绩分享
+      document.getElementById('playerChip').addEventListener('click',e=>{ e.stopPropagation(); openProfile(); });
+      document.getElementById('statsBtn').addEventListener('click',e=>{ e.stopPropagation(); openStats(); });
+      document.getElementById('skinBtn').addEventListener('click',e=>{ e.stopPropagation(); openSkin(); });
+      const shBtn = document.getElementById('shareBtn');
+      if (shBtn) shBtn.addEventListener('click',e=>{ e.stopPropagation(); showShareCard(lastResult?'match':'career'); });
+      // 模态框：点击遮罩关闭（仅当该弹窗可关闭）
+      ['profileModal','statsModal','skinModal','shareModal'].forEach(id=>{
+        const m=document.getElementById(id);
+        m.addEventListener('click',e=>{ if(e.target===m && m.dataset.closable==='1') m.classList.remove('open'); });
+      });
+      // 音量滑条（0-100，记忆到 localStorage）
+      const vs=document.getElementById('volSlider'), vv=document.getElementById('volVal'), vi=document.getElementById('volIcon');
+      if (vs) {
+        vs.value = Math.round(volScale*100);
+        vv.textContent = vs.value+'%'; vi.textContent = vs.value==0?'🔇':'🔊';
+        vs.addEventListener('input',()=>{
+          volScale = vs.value/100;
+          try{ localStorage.setItem('pp3d_vol_v1', String(vs.value)); }catch(e){}
+          vv.textContent = vs.value+'%'; vi.textContent = vs.value==0?'🔇':'🔊';
+          if (crowdGain && actx) crowdGain.gain.setTargetAtTime(muted?0:(.035*volScale), actx.currentTime, .05);
+        });
+      }
       setMute(muted);        // 初始化音效按钮图标（含历史静音状态）
       renderRecords();       // 初始化难度卡上的历史战绩显示
       bindTouchUI();
@@ -1855,10 +1993,13 @@
       power=0;celebrating=false;celebT=0;forehand=true;gripT=1;aiGripT=1;deuce=false;aiMood=1;rally=0;
       padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
       finalSwitch=false; pointDone=false; pointScored=false;
-      // 新增：本局数据 & 关键分横幅重置
+      // 新增：本局数据 & 关键分横幅 & DDA 重置
       statLongRally=0; statWinners=0; statAce=0; statAceAgainst=0;
-      playerLastSmash=false; prevDeuce=false; serveBy=null; aiTouched=false; playerTouched=false;
+      playerLastSmash=false; serveBy=null; aiTouched=false; playerTouched=false;
+      pPtStreak=0; aPtStreak=0; ddaState=0;
       hideKeyPoint();
+      const sbE = document.getElementById('shareBtn'); if (sbE) sbE.classList.remove('show');
+      reqWake();
       const zk=document.getElementById('zknob'); if(zk) zk.style.top='50%';
       if (diff==='train') { setText('currentGame','∞'); setText('modeTag','训练模式 · 不计比分'); }
       else { setText('currentGame',1); setText('modeTag','七局四胜'); }
@@ -1872,7 +2013,426 @@
       const el=document.getElementById('gripName'); el.textContent='正手'; el.className='grip-name fh';
     }
 
+    /* ============================================================
+       球员档案与生涯系统（本得多档案，跟浏览器走）
+       - pp3d_profiles_v1: {currentId, list:[{id,name,color,stats,career,achievements,settings,tutorial}]}
+       - 旧版 pp3d_stats_v1 自动迁移为默认档案
+    ============================================================ */
+    const LS_PROFILES = 'pp3d_profiles_v1';
+    const PCOLORS = ['#c9a96e','#e04747','#e0912f','#2e7d52','#1f6f9c','#7c5cbf','#c2497a','#5b6770'];
+    let profiles = null, deleteArm = false, swSel = 0, lastResult = null, tutStep = 0;
+    let pPtStreak = 0, aPtStreak = 0, ddaState = 0;   // DDA：玩家/对手连续得分 & 守护状态
+    const rbuf = [];                                   // 回放环形缓冲（球轨迹）
+    let replay = null;                                 // {frames,idx}
+    let wakeLock = null;
+    let pFaceMatF = null, pFaceMatB = null;            // 玩家拍面材质（皮肤）
+    let volScale = .8;                                 // 主音量 0..1（音量滑条）
+    try { const _vs = parseFloat(localStorage.getItem('pp3d_vol_v1')); if (!isNaN(_vs)) volScale = Math.max(0, Math.min(1, _vs)); } catch (e) {}
+
+    function newProfile(name, color, oldStats) {
+      const st = oldStats || {};
+      const mk = k => ({ w:(st[k]&&st[k].w)||0, l:(st[k]&&st[k].l)||0, streak:(st[k]&&st[k].streak)||0, best:(st[k]&&st[k].best)||0 });
+      return {
+        id: 'p' + Date.now() + Math.floor(Math.random()*999),
+        name: (name || '球员').slice(0, 8), color: color || '#c9a96e', created: Date.now(),
+        stats: { rookie: mk('rookie'), pro: mk('pro'), champion: mk('champion'), trainBest: st.trainBest || 0 },
+        career: { matches:0, wins:0, losses:0, streak:0, bestStreak:0, totalAces:0, bestRally:0 },
+        achievements: [], settings: { skin:0, dda:true }, tutorial: false
+      };
+    }
+    function loadProfiles() {
+      try { profiles = JSON.parse(localStorage.getItem(LS_PROFILES)) || null; } catch (e) { profiles = null; }
+      if (!profiles || !Array.isArray(profiles.list)) {
+        let old = null; try { old = JSON.parse(localStorage.getItem('pp3d_stats_v1')); } catch (e) {}
+        profiles = { currentId: null, list: [] };
+        if (old && (old.rookie || old.pro || old.champion || old.trainBest)) {
+          profiles.list.push(newProfile('球员', '#c9a96e', old));   // 老战绩自动迁移
+          profiles.currentId = profiles.list[0].id;
+        }
+      }
+      if (!curProfile() && profiles.list.length) profiles.currentId = profiles.list[0].id;
+      saveProfiles();
+    }
+    function saveProfiles() { try { localStorage.setItem(LS_PROFILES, JSON.stringify(profiles)); } catch (e) {} }
+    function curProfile() { return profiles ? profiles.list.find(p => p.id === profiles.currentId) || null : null; }
+
+    /* ---------- 成就系统 ---------- */
+    const ACH = [
+      { id:'first_win',  name:'开门红',     desc:'赢下第一场比赛' },
+      { id:'rookie_win', name:'新秀杀手',   desc:'击败青训新秀' },
+      { id:'pro_win',    name:'力克主力',   desc:'击败国家队主力' },
+      { id:'champ_win',  name:'传奇加冕',   desc:'击败奥运冠军' },
+      { id:'streak3',    name:'三连胜',     desc:'生涯累计 3 连胜' },
+      { id:'streak5',    name:'五虎上将',   desc:'生涯累计 5 连胜' },
+      { id:'rally10',    name:'十板大战',   desc:'单回合 10 板以上' },
+      { id:'rally15',    name:'马拉松回合', desc:'单回合 15 板以上' },
+      { id:'ace_first',  name:'一发入魂',   desc:'发出第一个 ACE' },
+      { id:'ace3',       name:'ACE 雨',     desc:'单场比赛 3 个 ACE' },
+      { id:'smash_win',  name:'重炮手',     desc:'爆冲直接得分' },
+      { id:'deuce_win',  name:'大心脏',     desc:'10 平后赢下整局' },
+      { id:'comeback',   name:'绝地逆转',   desc:'先失两局后翻盘夺冠' },
+      { id:'shutout',    name:'零封对手',   desc:'局分 4:0 横扫' },
+      { id:'train20',    name:'发球机之友', desc:'训练模式单回合 20 板' }
+    ];
+    function unlock(id) {
+      const p = curProfile();
+      if (!p || p.achievements.includes(id)) return;
+      p.achievements.push(id); saveProfiles();
+      const a = ACH.find(x => x.id === id);
+      if (a) { toast('🏅 成就解锁：' + a.name, 'good'); buzz([40,60,40]); }
+    }
+
+    /* ---------- 手机震动 ---------- */
+    function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+
+    /* ---------- Wake Lock：游戏时保持屏幕常亮 ---------- */
+    async function reqWake() {
+      try {
+        if ('wakeLock' in navigator && !wakeLock) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } catch (e) {}
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && (state === 'playing' || state === 'serving')) reqWake();
+    });
+
+    /* ---------- 动态难度守护（DDA） ---------- */
+    function aiStyle() {
+      const base = AI_STYLES[diff];
+      if (diff === 'train' || !ddaState) return base;
+      const s = Object.assign({}, base);
+      if (ddaState === -1) { s.err = base.err*1.9; s.speed = base.speed*.85; s.mult = base.mult*.92; }
+      else { s.err = Math.max(.005, base.err*.55); s.speed = base.speed*1.08; s.mult = base.mult*1.06; }
+      return s;
+    }
+
+    /* ---------- 慢动作回放 ---------- */
+    function shouldReplay(w) {
+      return diff !== 'train' && state === 'playing' && !celebrating &&
+        ((netTouched && w === 'player') || (w === 'player' && playerLastSmash) || rally >= 10);
+    }
+    function startReplay() {
+      const frames = rbuf.slice(-70);
+      if (frames.length < 10) { setTimeout(() => { if (state !== 'matchover') prepareServe(); }, 600); return; }
+      state = 'replay'; hideMsg(); hideKeyPoint();
+      replay = { frames, idx: 0 };
+      vel.set(0,0,0);
+      const b = document.getElementById('kpBanner');
+      b.textContent = '⏱ 慢动作回放'; b.classList.remove('danger'); b.classList.add('show');
+    }
+    function afterPoint(w) {
+      const p = curProfile();
+      if (p && !p.tutorial && tutStep >= 1) { p.tutorial = true; tutStep = 3; saveProfiles(); toast('新手教学完成 · 祝你夺冠！', 'good'); }
+      if (shouldReplay(w)) { startReplay(); return; }
+      setTimeout(() => { if (state !== 'matchover') prepareServe(); }, 1100);
+    }
+
+    /* ---------- 新手引导 ---------- */
+    function tutTip(step) {
+      const p = curProfile(); if (!p || p.tutorial) return;
+      if (step === 1 && tutStep < 1) { tutStep = 1; toast('新手提示 · 发球：按住蓄力越久球越冲，松开即发球', 'info'); }
+      else if (step === 2 && tutStep < 2) { tutStep = 2; toast('新手提示 · 接球：球进入白色光圈时挥拍，凌空也能还击', 'info'); }
+    }
+
+    /* ---------- 战绩（挂档案） ---------- */
+    function recordMatch(win, endGames) {
+      const p = curProfile(); if (!p || diff === 'train') return;
+      const d = p.stats[diff] || (p.stats[diff] = { w:0, l:0, streak:0, best:0 });
+      if (win) {
+        d.w++; d.streak++; d.best = Math.max(d.best, d.streak);
+        p.career.wins++; p.career.streak++; p.career.bestStreak = Math.max(p.career.bestStreak, p.career.streak);
+        unlock('first_win');
+        if (diff === 'rookie') unlock('rookie_win');
+        else if (diff === 'pro') unlock('pro_win');
+        else if (diff === 'champion') unlock('champ_win');
+        if (p.career.streak >= 3) unlock('streak3');
+        if (p.career.streak >= 5) unlock('streak5');
+        if (endGames === 0) unlock('shutout');
+        if (endGames >= 2) unlock('comeback');
+      } else { d.l++; d.streak = 0; p.career.losses++; p.career.streak = 0; }
+      p.career.matches++;
+      saveProfiles(); renderRecords();
+    }
+    function renderRecords() {
+      const p = curProfile();
+      document.querySelectorAll('.diff-card').forEach(c => {
+        const el = c.querySelector('.diff-record'); if (!el) return;
+        if (!p) { el.textContent = '—'; return; }
+        if (c.dataset.diff === 'train') { el.textContent = p.stats.trainBest ? `最长回合 ${p.stats.trainBest} 板` : '未挑战'; return; }
+        const d = p.stats[c.dataset.diff];
+        el.textContent = (d && (d.w || d.l)) ? `战绩 ${d.w}胜${d.l}负${d.streak > 1 ? ` · ${d.streak}连胜` : ''}` : '尚无战绩';
+      });
+    }
+    function trainPointEnd(w) {
+      sessionBestRally = Math.max(sessionBestRally, rally);
+      const p = curProfile();
+      if (p) {
+        p.career.bestRally = Math.max(p.career.bestRally, rally);
+        if (rally >= 5) {
+          if (rally > (p.stats.trainBest || 0)) { p.stats.trainBest = rally; saveProfiles(); toast(`新纪录 · 连续 ${rally} 板！`, 'good'); }
+          else toast(`本回合 ${rally} 板`, 'info');
+        } else toast(w === 'player' ? '好球 · 保持节奏' : '球断了 · 重新发球', 'info');
+        if (rally >= 20) unlock('train20');
+        saveProfiles(); renderRecords();
+      }
+      crowd(.2); if (w === 'player') sCheer(true);
+      pServes = true;
+      setTimeout(() => { if (state !== 'paused') prepareServe(); }, 900);
+    }
+
+    /* ---------- 皮肤 ---------- */
+    const SKINS = [
+      { name:'经典红黑', fh:0xD93B3B, bh:0x1B1B20, req:0,  desc:'默认装备' },
+      { name:'黑檀木',   fh:0x8A5A33, bh:0x3B2A1A, req:3,  desc:'生涯胜 3 场解锁' },
+      { name:'碳纤维',   fh:0x4A5158, bh:0x191E24, req:6,  desc:'生涯胜 6 场解锁' },
+      { name:'海洋之心', fh:0x1F6F9C, bh:0x0D2F45, req:10, desc:'生涯胜 10 场解锁' },
+      { name:'鎏金典藏', fh:0xD9A94E, bh:0x6E531F, req:15, desc:'生涯胜 15 场解锁' }
+    ];
+    function applySkin() {
+      const p = curProfile();
+      const s = SKINS[(p && p.settings.skin) || 0];
+      if (pFaceMatF && pFaceMatB) { pFaceMatF.color.setHex(s.fh); pFaceMatB.color.setHex(s.bh); }
+    }
+
+    /* ---------- 球员档案界面 ---------- */
+    function renderPlayerChip() {
+      const p = curProfile();
+      document.getElementById('pcDot').style.background = p ? p.color : '#5b6770';
+      document.getElementById('pcName').textContent = p ? p.name : '创建球员档案';
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function openProfile(forceCreate) {
+      const pm = document.getElementById('profileModal');
+      if (!profiles.list.length || forceCreate === 'create') renderProfileCreate(pm, !profiles.list.length);
+      else renderProfileList(pm);
+      openModal('profileModal');
+    }
+    function renderProfileCreate(pm, mandatory) {
+      pm.dataset.closable = mandatory ? '0' : '1';
+      document.getElementById('profileBox').innerHTML = `
+        <h3>${mandatory ? '创建你的球员档案' : '新建球员'}</h3>
+        <div class="pmodal-sub">档案保存在此浏览器中 · 每位球员拥有独立的生涯战绩、成就与皮肤<br>同一台电脑多人游玩互不干扰</div>
+        <input class="pf-input" id="pfName" maxlength="8" placeholder="输入你的名字（最多 8 字）">
+        <div class="sw-row" id="swRow">${PCOLORS.map((c,i)=>`<span class="swatch${i===swSel?' sel':''}" data-i="${i}" style="background:${c}"></span>`).join('')}</div>
+        <button class="mini-btn gold" id="pfCreate">创建并进入</button>
+        ${mandatory ? '' : '<button class="mini-btn" id="pfBack" style="margin-left:8px">返回列表</button>'}`;
+      document.querySelectorAll('#swRow .swatch').forEach(s => s.addEventListener('click', () => {
+        swSel = +s.dataset.i;
+        document.querySelectorAll('#swRow .swatch').forEach(x => x.classList.toggle('sel', +x.dataset.i === swSel));
+      }));
+      document.getElementById('pfCreate').addEventListener('click', () => {
+        const name = (document.getElementById('pfName').value || '').trim() || '球员';
+        const p = newProfile(name, PCOLORS[swSel]);
+        profiles.list.push(p); profiles.currentId = p.id; saveProfiles();
+        tutStep = 0; swSel = 0;
+        renderPlayerChip(); renderRecords(); applySkin(); closeModal('profileModal');
+        toast(`欢迎，${p.name}！开启你的乒乓生涯`, 'good');
+      });
+      const back = document.getElementById('pfBack');
+      if (back) back.addEventListener('click', () => renderProfileList(pm));
+      setTimeout(() => { const inp = document.getElementById('pfName'); if (inp) inp.focus(); }, 50);
+    }
+    function renderProfileList(pm) {
+      pm.dataset.closable = '1'; deleteArm = false;
+      document.getElementById('profileBox').innerHTML = `
+        <h3>球员档案</h3>
+        <div class="pmodal-sub">点击选择球员 · 战绩/成就/皮肤跟随所选档案</div>
+        ${profiles.list.map(p => {
+          const c = p.career;
+          return `<div class="prof-item${p.id===profiles.currentId?' cur':''}" data-id="${p.id}">
+            <span class="pc-dot" style="background:${p.color}"></span><b>${escapeHtml(p.name)}</b>
+            ${p.id===profiles.currentId?'<span class="prof-badge">使用中</span>':''}
+            <span class="prof-rec">${c.matches?`${c.wins}胜${c.losses}负`:''}${c.streak>1?` · ${c.streak}连胜`:''}</span>
+          </div>`;
+        }).join('')}
+        <label class="settings-row"><input type="checkbox" id="ddaChk" ${curProfile()&&curProfile().settings.dda!==false?'checked':''}> 动态难度守护（连败时对手放水，连胜时对手更凶）</label>
+        <div class="pm-btnrow">
+          <button class="mini-btn gold" id="pfNew">＋ 新建球员</button>
+          <button class="mini-btn danger" id="pfDel">🗑 删除当前球员</button>
+          <button class="mini-btn" id="pfClose">✕ 关闭</button>
+        </div>`;
+      document.querySelectorAll('.prof-item').forEach(el => el.addEventListener('click', () => {
+        if (profiles.currentId === el.dataset.id) return;
+        profiles.currentId = el.dataset.id; saveProfiles();
+        renderPlayerChip(); renderRecords(); applySkin(); closeModal('profileModal');
+        toast('已切换球员：' + curProfile().name, 'info');
+      }));
+      document.getElementById('pfNew').addEventListener('click', () => renderProfileCreate(pm, false));
+      document.getElementById('pfClose').addEventListener('click', () => closeModal('profileModal'));
+      document.getElementById('ddaChk').addEventListener('change', e => {
+        const p = curProfile(); if (!p) return;
+        p.settings.dda = e.target.checked; saveProfiles();
+        toast(e.target.checked ? '动态难度守护已开启' : '竞技模式 · 对手全程全力', 'info');
+      });
+      const del = document.getElementById('pfDel');
+      del.addEventListener('click', () => {
+        if (!deleteArm) { deleteArm = true; del.textContent = '⚠ 确认删除？（战绩不可恢复）'; return; }
+        profiles.list = profiles.list.filter(p => p.id !== profiles.currentId);
+        profiles.currentId = profiles.list.length ? profiles.list[0].id : null;
+        saveProfiles(); renderPlayerChip(); renderRecords();
+        if (!profiles.list.length) renderProfileCreate(pm, true); else renderProfileList(pm);
+      });
+    }
+    function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    /* ---------- 生涯数据面板 ---------- */
+    function openStats() {
+      const p = curProfile();
+      if (!p) { toast('请先创建球员档案', 'info'); openProfile(); return; }
+      const c = p.career, wr = c.matches ? Math.round(c.wins / c.matches * 100) : 0;
+      const drow = k => {
+        const d = p.stats[k]; if (!d || (!d.w && !d.l)) return '';
+        return `<div class="stat-line"><span>${AI_STYLES[k].name}</span><b>${d.w}胜 ${d.l}负 · 最佳${d.best}连胜</b></div>`;
+      };
+      document.getElementById('statsBox').innerHTML = `
+        <h3>生涯数据 · ${escapeHtml(p.name)}</h3>
+        <div class="pmodal-sub">数据保存在此浏览器的当前球员档案中</div>
+        <div class="stat-line"><span>总场次</span><b>${c.matches}</b></div>
+        <div class="stat-line"><span>总胜负</span><b>${c.wins}胜 ${c.losses}负（胜率 ${wr}%）</b></div>
+        <div class="stat-line"><span>当前 / 最长连胜</span><b>${c.streak} / ${c.bestStreak}</b></div>
+        <div class="stat-line"><span>生涯总 ACE</span><b>${c.totalAces}</b></div>
+        <div class="stat-line"><span>最长回合</span><b>${c.bestRally ? c.bestRally + ' 板' : '—'}</b></div>
+        <div class="stat-line"><span>训练模式纪录</span><b>${p.stats.trainBest ? p.stats.trainBest + ' 板' : '未挑战'}</b></div>
+        <div class="stat-sec">分难度战绩</div>
+        ${drow('rookie')}${drow('pro')}${drow('champion') || '<div class="stat-line"><span>奥运冠军</span><b>尚未击败</b></div>'}
+        <div class="stat-sec">成就墙 · ${p.achievements.length}/${ACH.length}</div>
+        <div class="ach-grid">${ACH.map(a => `<div class="ach ${p.achievements.includes(a.id)?'on':'off'}"><b>${p.achievements.includes(a.id)?'🏅':'🔒'} ${a.name}</b>${a.desc}</div>`).join('')}</div>
+        <div class="pm-btnrow">
+          <button class="mini-btn gold" id="stShare">📸 生成生涯战绩卡</button>
+          <button class="mini-btn" id="stClose">✕ 关闭</button>
+        </div>`;
+      document.getElementById('stClose').addEventListener('click', () => closeModal('statsModal'));
+      document.getElementById('stShare').addEventListener('click', () => showShareCard('career'));
+      openModal('statsModal');
+    }
+
+    /* ---------- 皮肤选择器 ---------- */
+    function openSkin() {
+      const p = curProfile();
+      if (!p) { toast('请先创建球员档案', 'info'); openProfile(); return; }
+      const wins = p.career.wins;
+      document.getElementById('skinBox').innerHTML = `
+        <h3>球拍皮肤</h3>
+        <div class="pmodal-sub">用生涯胜场解锁新拍面 · 当前：${escapeHtml(p.name)} 已胜 ${wins} 场</div>
+        <div class="skin-grid">${SKINS.map((s,i) => {
+          const unlocked = wins >= s.req, cur = (p.settings.skin||0) === i;
+          return `<div class="skin-card${unlocked?'':' locked'}${cur?' cur':''}" data-i="${i}">
+            <span class="skin-state">${cur?'使用中':(unlocked?'可更换':'🔒')}</span>
+            <div class="skin-dots"><i style="background:#${s.fh.toString(16).padStart(6,'0')}"></i><i style="background:#${s.bh.toString(16).padStart(6,'0')}"></i></div>
+            <b>${s.name}</b><small>${unlocked ? (cur?'当前装备中':'点击更换') : s.desc}</small>
+          </div>`;
+        }).join('')}</div>
+        <div class="pm-btnrow"><button class="mini-btn" id="skClose">✕ 关闭</button></div>`;
+      document.getElementById('skClose').addEventListener('click', () => closeModal('skinModal'));
+      document.querySelectorAll('.skin-card').forEach(el => el.addEventListener('click', () => {
+        const i = +el.dataset.i;
+        if (wins < SKINS[i].req) { toast('还未解锁 · ' + SKINS[i].desc, 'info'); return; }
+        p.settings.skin = i; saveProfiles(); applySkin(); openSkin();
+        toast('已换上「' + SKINS[i].name + '」拍面', 'good');
+      }));
+      openModal('skinModal');
+    }
+
+    /* ---------- 晒战绩卡片 ---------- */
+    function dataURLtoBlob(u) {
+      const b = atob(u.split(',')[1]), arr = new Uint8Array(b.length);
+      for (let i = 0; i < b.length; i++) arr[i] = b.charCodeAt(i);
+      return new Blob([arr], { type: 'image/png' });
+    }
+    function drawShare(mode) {
+      const p = curProfile(); if (!p) return null;
+      const isMatch = mode === 'match' && lastResult;
+      const c = document.createElement('canvas'); c.width = 600; c.height = 780;
+      const x = c.getContext('2d');
+      const g = x.createLinearGradient(0, 0, 0, c.height);
+      g.addColorStop(0, '#16345c'); g.addColorStop(1, '#0a1628');
+      x.fillStyle = g; x.fillRect(0, 0, 600, 780);
+      x.strokeStyle = '#c9a96e'; x.lineWidth = 3; x.strokeRect(18, 18, 564, 744);
+      x.textAlign = 'center';
+      x.fillStyle = '#e8c98a'; x.font = '900 34px "Noto Sans SC",sans-serif';
+      x.fillText(isMatch ? '乒 坛 战 绩 卡' : '我 的 乒 乓 生 涯', 300, 88);
+      x.fillStyle = p.color; x.beginPath(); x.arc(252, 138, 11, 0, 7); x.fill();
+      x.fillStyle = '#fff'; x.font = '700 26px "Noto Sans SC",sans-serif';
+      x.fillText(p.name, 320, 148);
+      const line = (y, label, val, big) => {
+        x.fillStyle = '#8ba0b9'; x.font = '400 17px "Noto Sans SC",sans-serif'; x.textAlign = 'left';
+        x.fillText(label, 70, y);
+        x.fillStyle = '#e8c98a'; x.font = (big ? '900 30px' : '700 22px') + ' "Noto Sans SC",sans-serif'; x.textAlign = 'right';
+        x.fillText(val, 530, y); x.textAlign = 'center';
+      };
+      if (isMatch) {
+        const r = lastResult;
+        x.fillStyle = r.win ? '#4ade80' : '#ff8a8a'; x.font = '900 52px "Noto Sans SC",sans-serif';
+        x.fillText(r.win ? '胜 利' : '憾 败', 300, 235);
+        x.fillStyle = '#fff'; x.font = '700 40px "Noto Sans SC",sans-serif';
+        x.fillText(`${r.pGames} : ${r.aGames}`, 300, 300);
+        x.fillStyle = '#8ba0b9'; x.font = '400 16px "Noto Sans SC",sans-serif';
+        x.fillText('对手 · ' + AI_STYLES[r.diff].name, 300, 336);
+        line(420, '最长回合', r.longRally + ' 板');
+        line(470, '制胜分', String(r.winners));
+        line(520, 'ACE', String(r.ace) + (r.aceAgainst ? `（被 ACE ${r.aceAgainst}）` : ''));
+      } else {
+        const cc = p.career, wr = cc.matches ? Math.round(cc.wins / cc.matches * 100) : 0;
+        line(230, '总场次', String(cc.matches), true);
+        line(300, '胜率', wr + '%', true);
+        line(370, '最长连胜', cc.bestStreak + ' 连胜');
+        line(420, '生涯总 ACE', String(cc.totalAces));
+        line(470, '最长回合', cc.bestRally ? cc.bestRally + ' 板' : '—');
+        line(520, '训练模式纪录', p.stats.trainBest ? p.stats.trainBest + ' 板' : '未挑战');
+      }
+      line(590, '成就解锁', p.achievements.length + ' / ' + ACH.length);
+      x.fillStyle = '#46607e'; x.font = '400 15px "Noto Sans SC",sans-serif';
+      x.fillText('philippe0517.github.io/mysite', 300, 680);
+      x.fillText(new Date().toLocaleDateString('zh-CN'), 300, 708);
+      return c.toDataURL('image/png');
+    }
+    function showShareCard(mode) {
+      const p = curProfile();
+      if (!p) { toast('请先创建球员档案', 'info'); openProfile(); return; }
+      if (mode === 'match' && !lastResult) mode = 'career';
+      const url = drawShare(mode); if (!url) return;
+      const isMatch = mode === 'match';
+      const text = isMatch
+        ? `我在《奥运会乒乓球比赛》${lastResult.win?'夺冠':'惜败'}！${lastResult.diff==='train'?'':AI_STYLES[lastResult.diff].name+' · '}大比分 ${lastResult.pGames}:${lastResult.aGames}，最长回合 ${lastResult.longRally} 板，ACE ${lastResult.ace}。来挑战我！`
+        : `我的乒乓生涯：${p.career.matches} 场 ${p.career.wins} 胜，最长 ${p.career.bestStreak} 连胜，解锁成就 ${p.achievements.length}/${ACH.length}。来挑战我！`;
+      document.getElementById('shareBox').innerHTML = `
+        <h3>战绩卡已生成</h3>
+        <div class="pmodal-sub">${isMatch ? '本场比赛' : '生涯总览'} · 手机可长按图片保存或分享</div>
+        <img class="share-img" src="${url}">
+        <div class="share-btns">
+          <button class="mini-btn gold" id="shDl">⬇ 保存 PNG</button>
+          <button class="mini-btn" id="shNative">📤 分享</button>
+          <button class="mini-btn" id="shCopy">📋 复制文字</button>
+          <button class="mini-btn" id="shClose">✕ 关闭</button>
+        </div>`;
+      document.getElementById('shClose').addEventListener('click', () => closeModal('shareModal'));
+      document.getElementById('shDl').addEventListener('click', () => {
+        const a = document.createElement('a'); a.href = url; a.download = '乒乓球战绩卡.png'; a.click();
+      });
+      document.getElementById('shCopy').addEventListener('click', () => {
+        const done = () => toast('文字已复制 · 去粘贴给好友吧', 'good');
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => toast('复制失败，请手动截图', 'info'));
+        else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} document.body.removeChild(ta); }
+      });
+      document.getElementById('shNative').addEventListener('click', () => {
+        try {
+          const file = new File([dataURLtoBlob(url)], '乒乓球战绩卡.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) navigator.share({ files: [file], title: '乒乓球战绩卡' });
+          else toast('此浏览器不支持直接分享 · 请保存图片后发送', 'info');
+        } catch (e) { toast('分享未成功 · 请保存图片后发送', 'info'); }
+      });
+      openModal('shareModal');
+    }
+
+    loadProfiles();
+    tutStep = (curProfile() && curProfile().tutorial) ? 3 : 0;
+
     initScene(); events(); loop();
+    applySkin(); renderPlayerChip(); renderRecords();
+    if (!profiles.list.length) openProfile(true);
   })();
   </script>
 </body>
