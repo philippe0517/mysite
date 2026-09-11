@@ -20,6 +20,26 @@
     #gameCanvas { display: block; width: 100vw; height: 100vh; cursor: none; }
     .overlay { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 
+    /* 自定义光标：始终贴合球拍中心投影点 */
+    #paddleCursor {
+      position: absolute; left: 0; top: 0; width: 38px; height: 38px; margin: -19px 0 0 -19px;
+      pointer-events: none; z-index: 60; display: none;
+      transition: border-color .18s, background .18s;
+    }
+    #paddleCursor::before {
+      content: ''; position: absolute; inset: 4px; border-radius: 50%;
+      border: 2px solid rgba(232,201,138,.95); box-shadow: 0 0 12px rgba(232,201,138,.45), inset 0 0 8px rgba(232,201,138,.2);
+      transition: border-color .18s, box-shadow .18s;
+    }
+    #paddleCursor::after {
+      content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
+      margin: -3px 0 0 -3px; border-radius: 50%; background: #fff;
+      box-shadow: 0 0 6px rgba(255,255,255,.8);
+    }
+    #paddleCursor.fh::before { border-color: #ff8a8a; box-shadow: 0 0 12px rgba(255,138,138,.5), inset 0 0 8px rgba(255,138,138,.25); }
+    #paddleCursor.bh::before { border-color: #7EB6D9; box-shadow: 0 0 12px rgba(126,182,217,.5), inset 0 0 8px rgba(126,182,217,.25); }
+    body.touch #paddleCursor { display: none !important; }
+
     /* ===== 记分牌 ===== */
     .scoreboard {
       position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
@@ -51,24 +71,14 @@
     .game-info p { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 3px; }
     .game-info .style-name { color: var(--blue); font-weight: 600; }
 
-    .difficulty { position: absolute; top: 18px; right: 18px; display: flex; gap: 6px; pointer-events: auto; }
-    .diff-btn {
-      padding: 8px 16px; border: 1px solid rgba(201,169,110,.4);
-      background: rgba(29,47,82,.85); color: rgba(255,255,255,.6);
-      border-radius: 9px; cursor: pointer; font-size: 12px; font-weight: 600;
-      transition: all .25s; font-family: inherit;
-    }
-    .diff-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .diff-btn.active { background: var(--gold); color: var(--ink); border-color: var(--gold); }
-
-    /* 球状态 */
-    .spin-panel { position: absolute; top: 92px; left: 18px; padding: 12px 16px; font-size: 11px; color: rgba(255,255,255,.75); line-height: 1.9; min-width: 158px; }
+    /* 球状态（下移，避免与左上信息卡重叠） */
+    .spin-panel { position: absolute; top: 132px; left: 18px; padding: 12px 16px; font-size: 11px; color: rgba(255,255,255,.75); line-height: 1.9; min-width: 158px; }
     .spin-panel .title { color: var(--gold); font-weight: 700; font-size: 12px; margin-bottom: 4px; letter-spacing: 1px; }
     .spin-panel .row { display: flex; justify-content: space-between; gap: 12px; }
     .spin-panel .v { color: var(--green); font-weight: 600; }
 
     /* 正反手指示 */
-    .grip-panel { position: absolute; top: 92px; right: 18px; padding: 11px 16px; text-align: center; min-width: 96px; }
+    .grip-panel { position: absolute; top: 132px; right: 18px; padding: 11px 16px; text-align: center; min-width: 96px; }
     .grip-panel .label { font-size: 10px; color: var(--gold); letter-spacing: 1px; }
     .grip-panel .grip-name { font-size: 20px; font-weight: 900; margin-top: 2px; }
     .grip-panel .grip-name.fh { color: #e8787a; }
@@ -88,8 +98,8 @@
       text-align: center; opacity: 0; transition: opacity .4s, transform .4s; pointer-events: none;
     }
     .center-msg.show { opacity: 1; transform: translate(-50%,-50%) scale(1); }
-    .center-msg h1 { font-size: 56px; color: var(--gold); font-weight: 900; letter-spacing: 6px; text-shadow: 0 6px 40px rgba(201,169,110,.55); }
-    .center-msg p { font-size: 18px; color: rgba(255,255,255,.85); letter-spacing: 2px; margin-top: 8px; }
+    .center-msg h1 { font-size: 56px; color: #16345c; font-weight: 900; letter-spacing: 6px; text-shadow: 0 4px 26px rgba(255,255,255,.85), 0 2px 10px rgba(22,52,92,.35); }
+    .center-msg p { font-size: 18px; color: #33507a; letter-spacing: 2px; margin-top: 8px; font-weight: 600; text-shadow: 0 1px 8px rgba(255,255,255,.8); }
 
     /* 判分飘字 toast */
     .toast-layer { position: absolute; inset: 0; overflow: hidden; }
@@ -132,42 +142,59 @@
     }
     .back-link:hover { background: var(--gold); color: var(--ink); }
 
-    /* ===== 开始界面 ===== */
+    /* ===== 开始界面（明亮体育海报风） ===== */
     .start-screen {
       position: fixed; inset: 0; z-index: 100;
-      background: radial-gradient(ellipse at 50% 35%, #1d2f52 0%, #0a1628 65%, #050d1a 100%);
+      background: radial-gradient(ellipse at 50% 28%, #f4f8fc 0%, #dde9f4 52%, #b9d0e4 100%);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      transition: opacity .6s, visibility .6s;
+      transition: opacity .6s, visibility .6s; overflow-y: auto; padding: 24px 16px;
     }
     .start-screen.hidden { opacity: 0; visibility: hidden; }
-    .rings { display: flex; margin-bottom: 26px; filter: drop-shadow(0 4px 16px rgba(0,0,0,.4)); }
-    .ring { width: 46px; height: 46px; border: 4px solid; border-radius: 50%; margin: 0 -7px; }
-    .ring:nth-child(1){border-color:#0085C7} .ring:nth-child(2){border-color:#111;margin-top:23px}
-    .ring:nth-child(3){border-color:#DF0024} .ring:nth-child(4){border-color:#F4C300;margin-top:23px}
-    .ring:nth-child(5){border-color:#009F3D}
-    .start-screen h1 { font-size: 52px; color: var(--gold); font-weight: 900; letter-spacing: 8px; text-shadow: 0 6px 40px rgba(201,169,110,.4); }
-    .subtitle { font-size: 15px; color: rgba(255,255,255,.55); letter-spacing: 5px; margin: 10px 0 26px; }
-    .feat-grid { display: grid; grid-template-columns: repeat(2, auto); gap: 8px 28px; margin-bottom: 28px; font-size: 12px; color: rgba(255,255,255,.6); }
-    .feat-grid span::before { content: '◆ '; color: var(--gold); }
-    .start-difficulty { display: flex; gap: 12px; margin-bottom: 28px; }
-    .start-diff-btn {
-      padding: 13px 26px; font-size: 13px; font-weight: 600; font-family: inherit;
-      color: rgba(255,255,255,.65); background: rgba(29,47,82,.6);
-      border: 2px solid rgba(201,169,110,.35); border-radius: 12px; cursor: pointer; transition: all .25s;
-      text-align: center;
+    .start-badge {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      color: #fff; background: linear-gradient(90deg, #c9a96e, #e0bd83);
+      padding: 6px 20px; border-radius: 30px; margin-bottom: 16px;
+      box-shadow: 0 4px 18px rgba(201,169,110,.4);
     }
-    .start-diff-btn small { display: block; font-size: 10px; opacity: .6; margin-top: 3px; font-weight: 400; }
-    .start-diff-btn:hover { border-color: var(--gold); color: var(--gold); }
-    .start-diff-btn.active { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+    .start-screen h1 { font-size: 50px; color: #16345c; font-weight: 900; letter-spacing: 8px; text-shadow: 0 3px 0 rgba(255,255,255,.8); }
+    .subtitle { font-size: 14px; color: #5a7392; letter-spacing: 5px; margin: 10px 0 24px; font-weight: 600; }
+    .feat-grid { display: grid; grid-template-columns: repeat(2, auto); gap: 8px 30px; margin-bottom: 24px; font-size: 12px; color: #46607e; font-weight: 500; }
+    .feat-grid span::before { content: '◆ '; color: #c9a96e; }
+    .rival-card {
+      display: flex; align-items: center; gap: 16px; text-align: left;
+      background: rgba(255,255,255,.85); border: 1px solid rgba(201,169,110,.5);
+      border-radius: 16px; padding: 14px 26px 14px 14px; margin-bottom: 26px;
+      box-shadow: 0 10px 34px rgba(22,52,92,.12);
+      backdrop-filter: blur(4px);
+    }
+    .rival-avatar {
+      width: 54px; height: 54px; border-radius: 14px; flex: none;
+      background: linear-gradient(145deg, #d83a3a, #a82222);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 2px 6px rgba(255,255,255,.35), 0 4px 12px rgba(168,34,34,.35);
+    }
+    .rival-avatar::before {
+      content: ''; width: 30px; height: 30px; border-radius: 50%;
+      background: radial-gradient(circle at 32% 30%, #fff 55%, #e9e9ee 58%, #c9ccd4);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.55);
+    }
+    .rival-name { font-size: 16px; font-weight: 800; color: #16345c; letter-spacing: 1px; }
+    .rival-name small { font-size: 10px; color: #c9a96e; font-weight: 700; letter-spacing: 2px; margin-left: 6px; vertical-align: 2px; }
+    .rival-desc { font-size: 12px; color: #5a7392; margin-top: 4px; }
+    .rival-tags { display: flex; gap: 6px; margin-top: 7px; }
+    .rival-tags span {
+      font-size: 10px; color: #46607e; background: rgba(126,182,217,.18);
+      border: 1px solid rgba(126,182,217,.45); padding: 2px 10px; border-radius: 20px; font-weight: 600;
+    }
     .start-btn {
-      padding: 16px 66px; font-size: 20px; font-weight: 900; color: var(--ink); font-family: inherit;
-      background: linear-gradient(180deg, var(--gold-light), var(--gold) 50%, #a8894e);
+      padding: 16px 66px; font-size: 20px; font-weight: 900; color: #fff; font-family: inherit;
+      background: linear-gradient(180deg, #2a5a94, #16345c);
       border: none; border-radius: 50px; cursor: pointer; letter-spacing: 8px;
-      box-shadow: 0 10px 44px rgba(201,169,110,.4); transition: all .25s;
+      box-shadow: 0 10px 34px rgba(22,52,92,.35), inset 0 1px 0 rgba(255,255,255,.25); transition: all .25s;
     }
-    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 54px rgba(201,169,110,.6); }
-    .start-tips { margin-top: 28px; font-size: 12px; color: rgba(255,255,255,.42); text-align: center; line-height: 2.1; }
-    .start-tips b { color: rgba(255,255,255,.65); font-weight: 600; }
+    .start-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 46px rgba(22,52,92,.45); }
+    .start-tips { margin-top: 26px; font-size: 12px; color: #7288a3; text-align: center; line-height: 2.1; }
+    .start-tips b { color: #35507a; font-weight: 600; }
 
     /* 结束界面 */
     .end-stats { margin: 18px 0 26px; font-size: 14px; color: rgba(255,255,255,.75); text-align: center; line-height: 2; }
@@ -180,10 +207,9 @@
     body.touch .controls-hint { display: none; }
     body.touch #gameCanvas { cursor: default; }
     body.touch .spin-panel { display: none; }
-    body.touch .difficulty { display: none; }
     body.touch .scoreboard { transform: translateX(-50%) scale(.78); transform-origin: top center; }
     body.touch .game-info { transform: scale(.8); transform-origin: top left; }
-    body.touch .grip-panel { top: 74px; right: 10px; padding: 7px 12px; }
+    body.touch .grip-panel { top: 110px; right: 10px; padding: 7px 12px; }
     body.touch .grip-panel .grip-name { font-size: 16px; }
     body.touch .back-link { top: 14px; right: 10px; bottom: auto; padding: 5px 11px; font-size: 11px; }
     body.touch .power-wrap { bottom: 14px; width: 180px; }
@@ -243,20 +269,21 @@
 </head>
 <body>
   <div class="start-screen" id="startScreen">
-    <div class="rings">
-      <div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="ring"></div>
-    </div>
+    <div class="start-badge">OLYMPIC FINAL · 奥运决赛</div>
     <h1>乒乓球决赛</h1>
-    <p class="subtitle">OLYMPIC FINAL · 七局四胜</p>
+    <p class="subtitle">七局四胜 · 11 分制 · 真实规则</p>
     <div class="feat-grid">
       <span>球拍 X/Y/Z 三维操控 · 真实步法</span><span>真实旋转物理（马格努斯效应）</span>
       <span>挥拍速度加成 · 三维触球判定</span><span>双落点预测 · 四个击球时机</span>
-      <span>端线抛球发球规则 · 擦网重发</span><span>手机触屏操控 · 七局四胜 11分制</span>
+      <span>端线抛球发球规则 · 擦网重发</span><span>手机触屏操控 · 正反手手感差异</span>
     </div>
-    <div class="start-difficulty" id="startDifficulty">
-      <button class="start-diff-btn" data-diff="easy">快攻型<small>近台快攻 · 较易</small></button>
-      <button class="start-diff-btn active" data-diff="normal">弧圈型<small>均衡相持 · 标准</small></button>
-      <button class="start-diff-btn" data-diff="hard">削球型<small>远台防守 · 困难</small></button>
+    <div class="rival-card">
+      <div class="rival-avatar"></div>
+      <div class="rival-info">
+        <div class="rival-name">综合型电脑选手<small>PRO</small></div>
+        <div class="rival-desc">攻守均衡 · 相持稳健 · 积极调动走位</div>
+        <div class="rival-tags"><span>快攻</span><span>弧圈</span><span>防守</span></div>
+      </div>
     </div>
     <button class="start-btn" id="startBtn">开赛</button>
     <div class="start-tips">
@@ -269,6 +296,7 @@
   <canvas id="gameCanvas"></canvas>
 
   <div class="overlay">
+    <div id="paddleCursor"></div>
     <div class="scoreboard">
       <div class="score-side" id="playerSide">
         <div class="score-label"><span class="serve-dot" id="playerServeDot" style="display:none"></span>你</div>
@@ -288,13 +316,7 @@
     <div class="panel game-info">
       <h2>奥运乒乓球决赛</h2>
       <p>第 <span id="currentGame">1</span> 局 · 七局四胜</p>
-      <p>对手打法：<span class="style-name" id="styleName">弧圈型</span></p>
-    </div>
-
-    <div class="difficulty" id="difficulty">
-      <button class="diff-btn" data-diff="easy">快攻</button>
-      <button class="diff-btn active" data-diff="normal">弧圈</button>
-      <button class="diff-btn" data-diff="hard">削球</button>
+      <p>对手打法：<span class="style-name" id="styleName">综合型</span></p>
     </div>
 
     <div class="panel spin-panel">
@@ -357,9 +379,7 @@
     };
 
     const AI_STYLES = {
-      easy:   { name:'快攻型', speed:.4,  err:.28, mult:.72, top:.35, back:.1,  side:.12, react:.24, tactic:'fast' },
-      normal: { name:'弧圈型', speed:.58, err:.13, mult:.95, top:.6,  back:.15, side:.2,  react:.17, tactic:'loop' },
-      hard:   { name:'削球型', speed:.72, err:.06, mult:1.08, top:.25, back:.5,  side:.25, react:.11, tactic:'chop' }
+      pro: { name:'综合型', speed:.92, err:.05, mult:1.1, top:.45, back:.2, side:.25, react:.07, tactic:'all' }
     };
 
     const SPIN = {
@@ -383,7 +403,7 @@
     /* ============================================================
        全局状态
     ============================================================ */
-    let diff = 'normal';
+    let diff = 'pro';
     let state = 'waiting';
     let pScore = 0, aScore = 0, pGames = 0, aGames = 0, gameNo = 1;
     let pServes = true, serveCnt = 0, deuce = false, rally = 0;
@@ -395,6 +415,7 @@
     const spinV = new THREE.Vector3();
     let spinType = 'none', lastHit = null, timingNow = 'peak';
     let side = null, bounceOnSide = 0, pointLocked = false, lastBounceT = 0;
+    let pointDone = false, pointScored = false, finalSwitch = false; // pointDone: 回合结束锁(防重复触发判分路径); pointScored: winPoint最终防重(一球只计一次分); finalSwitch: 决胜局换边提示已发
     let tossing = false, tossT0 = 0, letBall = false, serveShot = false;
 
     // 拖尾
@@ -477,8 +498,8 @@
     function initScene() {
       if (touchMode) document.body.classList.add('touch');
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x0a1628);
-      scene.fog = new THREE.Fog(0x0a1628, 9, 26);
+      scene.background = new THREE.Color(0xdfeaf5);
+      scene.fog = new THREE.Fog(0xdfeaf5, 10, 30);
 
       camera = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, .01, 100);
       camBase = new THREE.Vector3(0, 1.78, CFG.table.L / 2 + 1.05);
@@ -491,39 +512,41 @@
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.15;
+      renderer.toneMappingExposure = 1.3;
 
-      scene.add(new THREE.AmbientLight(0xffffff, .4));
-      const key = new THREE.SpotLight(0xffffff, 1.6, 16, Math.PI / 4.2, .45, 1);
-      key.position.set(0, 5.2, 0); key.target.position.set(0, CFG.table.H, 0);
+      // 明亮赛场布光：高环境光 + 顶光 + 冷暖补光
+      scene.add(new THREE.AmbientLight(0xffffff, .8));
+      const hemi = new THREE.HemisphereLight(0xffffff, 0xc8d8e8, .45); scene.add(hemi);
+      const key = new THREE.SpotLight(0xffffff, 1.9, 18, Math.PI / 4.2, .5, 1);
+      key.position.set(0, 5.6, 0); key.target.position.set(0, CFG.table.H, 0);
       key.castShadow = true; key.shadow.mapSize.set(touchMode ? 1024 : 2048, touchMode ? 1024 : 2048);
       scene.add(key, key.target);
-      const fill1 = new THREE.PointLight(0x7EB6D9, .5, 12); fill1.position.set(-4, 3.2, 1); scene.add(fill1);
-      const fill2 = new THREE.PointLight(0xe8a07a, .35, 12); fill2.position.set(4, 3.2, -1); scene.add(fill2);
+      const fill1 = new THREE.PointLight(0xbfd8ee, .75, 14); fill1.position.set(-4.5, 3.4, 1.5); scene.add(fill1);
+      const fill2 = new THREE.PointLight(0xffe2c4, .55, 14); fill2.position.set(4.5, 3.4, -1.5); scene.add(fill2);
 
       buildVenue(); buildTable(); buildNet(); buildBall(); buildPaddles(); buildLandingMarker();
       prevPaddlePos.copy(pPaddle.position);
     }
 
     function buildVenue() {
-      // 地面
+      // 地面：国际赛场红地板
       const floor = new THREE.Mesh(
         new THREE.PlaneGeometry(14, 14),
-        new THREE.MeshStandardMaterial({ color: 0x16324f, roughness: .85 })
+        new THREE.MeshStandardMaterial({ color: 0xa63a3a, roughness: .82 })
       );
       floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 
       // 场地白线
-      const lm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .5 });
+      const lm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .65 });
       [[0,-4],[0,4]].forEach(z=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(9,.004,.05),lm); m.position.set(z[0],.003,z[1]); scene.add(m); });
       [[-4.5,0],[4.5,0]].forEach(x=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(.05,.004,8),lm); m.position.set(x[0],.003,x[1]); scene.add(m); });
 
-      // 阶梯观赛台（无观众，干净）
-      const seatCols = [0x23436a, 0x2c4f78, 0x1d3a5e, 0x34598a];
+      // 阶梯观赛台（浅色调，明亮干净）
+      const seatCols = [0x8fa9c4, 0xa3b9d0, 0x7b97b5, 0xb3c6da];
       for (let s = 0; s < 4; s++) for (let row = 0; row < 7; row++) {
         const horiz = s < 2;
         const g = new THREE.BoxGeometry(horiz ? 11 + row * .6 : .42, .32, horiz ? .42 : 11 + row * .6);
-        const seat = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: seatCols[(s+row)%4], roughness: .9 }));
+        const seat = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: seatCols[(s+row)%4], roughness: .88 }));
         const r = 5.2 + row * .62, h = .45 + row * .34;
         seat.position.set(horiz ? 0 : (s===2?-r:r), h, horiz ? (s===0?-r:r) : 0);
         scene.add(seat);
@@ -557,7 +580,7 @@
       });
 
       // 裁判椅
-      const chair = new THREE.Mesh(new THREE.BoxGeometry(.42,.9,.42), new THREE.MeshStandardMaterial({ color:0x2a2a2a, roughness:.7 }));
+      const chair = new THREE.Mesh(new THREE.BoxGeometry(.42,.9,.42), new THREE.MeshStandardMaterial({ color:0x3d4c5e, roughness:.65 }));
       chair.position.set(CFG.table.W/2 + .85, .45, 0); chair.castShadow = true; scene.add(chair);
     }
 
@@ -565,7 +588,7 @@
       tableGroup = new THREE.Group();
       const top = new THREE.Mesh(
         new THREE.BoxGeometry(CFG.table.W, .05, CFG.table.L),
-        new THREE.MeshStandardMaterial({ color: 0x16507a, roughness: .32, metalness: .08 })
+        new THREE.MeshStandardMaterial({ color: 0x1a6fb5, roughness: .3, metalness: .06 })
       );
       top.position.y = CFG.table.H; top.castShadow = true; top.receiveShadow = true; tableGroup.add(top);
 
@@ -579,7 +602,7 @@
       add(.02, CFG.table.L, 0, 0); // 中线
 
       // 桌腿
-      const legM = new THREE.MeshStandardMaterial({ color:0x556677, metalness:.65, roughness:.35 });
+      const legM = new THREE.MeshStandardMaterial({ color:0x9aa7b5, metalness:.6, roughness:.38 });
       [[-.68,-1.28],[.68,-1.28],[-.68,1.28],[.68,1.28]].forEach(p=>{
         const leg = new THREE.Mesh(new THREE.CylinderGeometry(.024,.034,CFG.table.H,12), legM);
         leg.position.set(p[0], CFG.table.H/2, p[1]); leg.castShadow = true; tableGroup.add(leg);
@@ -628,35 +651,49 @@
 
     function makePaddle() {
       const g = new THREE.Group(), w = CFG.paddle.W/2, h = CFG.paddle.H/2;
+      // 拍形：上圆下方收颈，接近真实横拍轮廓
       const shape = new THREE.Shape();
       shape.moveTo(0,-h*.85);
       shape.bezierCurveTo(w*.9,-h*.85,w,-h*.3,w,h*.2);
       shape.bezierCurveTo(w,h*.8,w*.6,h,0,h);
       shape.bezierCurveTo(-w*.6,h,-w,h*.8,-w,h*.2);
       shape.bezierCurveTo(-w,-h*.3,-w*.9,-h*.85,0,-h*.85);
+      // 底板：亮木纹色
       const blade = new THREE.Mesh(
         new THREE.ExtrudeGeometry(shape,{depth:CFG.paddle.T, bevelEnabled:true, bevelThickness:.002, bevelSize:.002, bevelSegments:2}),
-        new THREE.MeshStandardMaterial({ color:0xD4A574, roughness:.6 })
+        new THREE.MeshStandardMaterial({ color:0xF0C88A, roughness:.5, metalness:.02 })
       );
       blade.rotation.x = Math.PI/2; blade.castShadow = true; g.add(blade);
+      // 胶皮：正手亮红 / 反手哑黑
       const rg = new THREE.ExtrudeGeometry(shape,{depth:.003, bevelEnabled:false});
-      const fh = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xCC2222, roughness:.82}));
+      const fh = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD83A3A, roughness:.42, metalness:.04}));
       fh.rotation.x=Math.PI/2; fh.position.z=CFG.paddle.T/2+.001; g.add(fh);
-      const bh = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x181818, roughness:.85}));
+      const bh = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x26262B, roughness:.8}));
       bh.rotation.x=Math.PI/2; bh.rotation.y=Math.PI; bh.position.z=-CFG.paddle.T/2-.001; g.add(bh);
-      const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0x8B4513,roughness:.7}));
+      // 白色护边替代棕色环
+      const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
       edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; g.add(edge);
-      const handle = new THREE.Mesh(new THREE.CylinderGeometry(.016,.024,.1,12), new THREE.MeshStandardMaterial({color:0x6B4423,roughness:.75}));
-      handle.position.set(0,-.09,0); handle.rotation.x=Math.PI/2; g.add(handle);
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry(.02,.016,.02,12), new THREE.MeshStandardMaterial({color:0x6B4423}));
-      cap.position.set(0,-.145,0); cap.rotation.x=Math.PI/2; g.add(cap);
+      // 一体化扁平拍柄（贴合拍颈收窄的锥形板，与胶皮同色系）
+      const gripShape = new THREE.Shape();
+      gripShape.moveTo(-.028,-h*.8);
+      gripShape.lineTo(.028,-h*.8);
+      gripShape.lineTo(.02,-h*.8-.1);
+      gripShape.lineTo(-.02,-h*.8-.1);
+      gripShape.closePath();
+      const grip = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(gripShape,{depth:.013, bevelEnabled:true, bevelThickness:.0015, bevelSize:.0015, bevelSegments:1}),
+        new THREE.MeshStandardMaterial({color:0xD83A3A, roughness:.55})
+      );
+      grip.rotation.x = Math.PI/2; grip.position.z = -.0065; grip.castShadow = true; g.add(grip);
+      const gripEnd = new THREE.Mesh(new THREE.BoxGeometry(.042,.012,.015), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
+      gripEnd.position.set(0,-h*.8-.105,0); g.add(gripEnd);
       return g;
     }
 
     function buildPaddles() {
       pPaddle = makePaddle();
       pPaddle.position.set(0, CFG.table.H+.1, CFG.table.L/2-.22);
-      pPaddle.rotation.set(-.35,-.2,.15);
+      pPaddle.rotation.set(-.27,-.2,.42);
       scene.add(pPaddle);
       pArm = new THREE.Group();
       const arm = new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,.5,12), new THREE.MeshStandardMaterial({color:0xE8C4A0,roughness:.6}));
@@ -820,7 +857,8 @@
           lastBounceT = now;
           const s = ball.position.z > 0 ? 'player' : 'ai';
           if (s !== side){ side = s; bounceOnSide = 1; } else bounceOnSide++;
-          if (bounceOnSide >= 2 && state==='playing') {
+          if (bounceOnSide >= 2 && state==='playing' && !pointDone) {
+            pointDone = true;  // 本回合已判分，之后任何路径不得再计分
             pointLocked = true; vel.set(0,0,0); spinV.set(0,0,0);
             const loser = s, winner = loser==='player'?'ai':'player';
             toast(loser==='player' ? '两跳失分' : '对手两跳', loser==='player'?'bad':'good');
@@ -847,12 +885,14 @@
         if (ball.position.y > netTop-.02) {
           vel.y = Math.abs(vel.y)*.3 + 1; vel.z*=.6;
           if (serveShot && !letBall) {
-            letBall = true; serveShot=false; sLet(); toast('擦网重发 LET','info');
+            letBall = true; serveShot=false; pointDone = true; // 擦网重发：本回合立即作废，球落地不再判分
+            sLet(); toast('擦网重发 LET','info');
             setTimeout(()=>prepareServe(), 1000);
           }
         } else {
           // 下网
-          if (state==='playing' && !pointLocked) {
+          if (state==='playing' && !pointLocked && !pointDone) {
+            pointDone = true;  // 本回合已判分
             pointLocked = true;
             const winner = lastHit==='player' ? 'ai':'player';
             toast('下网','bad'); sFault();
@@ -881,7 +921,7 @@
     }
 
     function checkOut() {
-      if (pointLocked || state!=='playing') return;
+      if (pointLocked || pointDone || state!=='playing') return;
       const fell = ball.position.y < .12;
       const far = Math.abs(ball.position.x) > 3.5 || Math.abs(ball.position.z) > 4.5;
       if (!fell && !far) return;
@@ -894,6 +934,7 @@
       let reason;
       if (landedOnOpp) reason = playerWon ? '对手未接住' : '你未接住';
       else reason = fell ? (playerWon ? '对手下网' : '下网') : (playerWon ? '对手出界' : '出界');
+      pointDone = true;  // 本回合已判分，防止球落地后反复触发
       pointLocked = true;
       toast(reason, playerWon?'good':'bad');
       if (!playerWon) sFault();
@@ -929,26 +970,32 @@
         const swingSpd = Math.max(0, -paddleV.z);      // 向前挥拍速度 m/s
         const sw = Math.min(swingSpd/2.5, 1);          // 归一化挥拍加成
         const pw = Math.min(1, power*.75 + sw*.35);    // 合成力量
-        // 力度决定落点深浅与球速：轻=近网短球，重=端线长球，全部保证上台
-        const tz = -.25 - pw*.62;
-        const tx = Math.max(-.66, Math.min(.66, relX*.55 + (Math.random()-.5)*.14));
-        const sh = ((2.8 + pw*.8) * (TIMING_SH[timingNow]||1)) + sw*.5;
-        aimed = aimSolve(ball.position, tx, tz, sh, .36);
+        // 正反手手感差异（需求：加大差异度）
+        // 正手：大力弧圈——落点深、球速快、上旋强，弧线略高保证上台
+        // 反手：快撕/弹击——落点浅平、出手更快、线路更直、侧旋更足、弧线低平
+        const fh = forehand;
+        const tz = fh ? -.32 - pw*.74 : -.16 - pw*.5;
+        const lift = fh ? .37 : .29;
+        const sh = ((fh ? 3.05+pw*.95 : 2.75+pw*.65) * (TIMING_SH[timingNow]||1)) + sw*.5;
+        // 反手线路偏直线且横向散布更大（弹击变线快）
+        const txBase = fh ? relX*.55 : relX*.42 + (relX>0?-.14:.14);
+        const tx = Math.max(-.68, Math.min(.68, txBase + (Math.random()-.5)*(fh?.14:.2)));
+        aimed = aimSolve(ball.position, tx, tz, sh, lift);
         vel.set(aimed.vx, aimed.vy, aimed.vz);
-        // 旋转：越大力/越晚击球/挥拍越快越转，接触位置带侧旋，契合爆冲与弧圈
-        const spinAmt = 6*tm.spMult;
-        sv.set(relX*3.2, spinAmt + sw*1.5, forehand ? -2-power*2 : 2);
+        // 旋转：正手上旋强、反手侧旋强；越大力/越晚击球/挥拍越快越转
+        const spinAmt = (fh ? 6.6 : 4.8)*tm.spMult;
+        sv.set(relX*3.2 + (fh ? 0 : (Math.random()-.5)*3.4), spinAmt + sw*1.5, fh ? -2-power*2 : 2.6);
         // 击球反馈
         swingT = .22; sSwing();
         sHit(Math.min(1,sh/4.4), spinType);
-        spawnParticles(ball.position, forehand?0xff9a9a:0x9ad4ff, 8);
+        spawnParticles(ball.position, fh?0xff9a9a:0x9ad4ff, 8);
         shakeAmt = .04 + pw*.1;
         crowd(.35); setTimeout(()=>crowd(.12),400);
         rally++; document.getElementById('rallyCount').textContent = rally;
-        if (timingNow==='peak' && (power>.7 || sw>.5)) qualityToast('爆冲！','good');
-        else if (sw>.35 && power<.25) qualityToast('借力快打','info');
+        if (timingNow==='peak' && (power>.7 || sw>.5)) qualityToast(fh?'正手爆冲！':'反手拧拉！','good');
+        else if (sw>.35 && power<.25) qualityToast(fh?'正手快带':'反手弹击','info');
         else if (timingNow==='rising') qualityToast('借力快带','info');
-        else if (timingNow==='falling_early'||timingNow==='falling_late') qualityToast('拉弧圈','info');
+        else if (timingNow==='falling_early'||timingNow==='falling_late') qualityToast(fh?'拉弧圈':'反手撕','info');
       } else {
         const r = Math.random();
         let spt;
@@ -961,7 +1008,12 @@
         const miss = Math.random() < st.err*(2-aiMood);
         let tz = .2 + Math.random()*.72, tx = (Math.random()-.5)*CFG.table.W*.85;
         if (miss) { if (Math.random()>.5) tz = 1.45+Math.random()*.4; else tx = (Math.random()>.5?1:-1)*(.85+Math.random()*.3); }
-        const sh = (2.7+Math.random()*.8)*st.mult*aiMood;
+        else if (Math.random()<.6) {
+          // 综合型主动调动：六成球打到玩家拍位远离侧，逼迫移动救球
+          const away = pPaddle.position.x > 0 ? -1 : 1;
+          tx = away*(.15 + Math.random()*.5);
+        }
+        const sh = (2.9+Math.random()*.9)*st.mult*aiMood;
         aimed = aimSolve(ball.position, tx, tz, sh, .34);
         vel.set(aimed.vx, aimed.vy, aimed.vz);
         sv.set(sp.ss, sp.ts+sp.bs, 3);
@@ -987,22 +1039,25 @@
       else if (e<dur) ball.position.y = CFG.table.H+.15 + h*Math.cos((e-dur/2)/(dur/2)*Math.PI/2);
       else {
         tossing=false;
-        if (state==='serving') { sFault(); toast('发球失误','bad'); setTimeout(()=>winPoint('ai'),800); }
+        if (state==='serving' && !pointDone) {
+          pointDone=true; // 抛球未击失误判分，之后不再重复判
+          sFault(); toast('发球失误','bad'); setTimeout(()=>winPoint('ai'),800);
+        }
       }
       ball.position.x = pPaddle.position.x;
-      ball.position.z = Math.max(1.0, Math.min(CFG.table.L/2+.05, pPaddle.position.z)); // 发球站位：端线附近
+      ball.position.z = Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)); // 发球时球始终随拍（任意站位）
     }
     function playerServe() {
       if (state!=='serving'||!pServes) return;
       if (tossing) {
         const e = clock.elapsedTime-tossT0;
-        if (e<.4){ sFault(); toast('发球违例：抛球上升期击球','bad'); setTimeout(()=>winPoint('ai'),900); return; }
+        if (e<.4){ sFault(); toast('发球违例：抛球上升期击球','bad'); pointDone=true; setTimeout(()=>winPoint('ai'),900); return; }
         tossing=false;
       }
       audioInit();
       // 发球第一跳落在己方近网（反解保证），弹起后过网落对方；力度决定第二落点深浅
       // 真实规则：发球须在端线附近完成
-      ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(1.0, Math.min(CFG.table.L/2+.05, pPaddle.position.z)));
+      ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)));
       const tz1 = .35 - power*.2;
       const tx = (Math.random()-.5)*.22;
       const a = aimSolve(ball.position, tx, tz1, 1.5, .35);
@@ -1034,14 +1089,17 @@
        比赛系统
     ============================================================ */
     function winPoint(w) {
+      if (pointScored) return; // 最终防线：无论哪条路径触发，本回合只计一次分
+      pointScored = true;
       if (w==='player'){ pScore++; sCheer(true); aiMood=Math.max(.7,aiMood-.05); bump('playerScore'); }
       else { aScore++; sCheer(false); aiMood=Math.min(1.3,aiMood+.05); bump('aiScore'); }
       serveCnt++;
       const pw = pScore>=CFG.game.win && pScore-aScore>=2;
       const aw = aScore>=CFG.game.win && aScore-pScore>=2;
       if (pw||aw) {
-        if (pw) pGames++; else aGames++;
+        if (pw) pGames++; else aGames++;   // 现今规则：赢一局 = 大比分只加 1 分
         setText('playerGames','局 '+pGames); setText('aiGames','局 '+aGames);
+        toast((pw?'你':'对手')+'胜此局 · 大比分 '+pGames+':'+aGames, pw?'good':'bad');
         if (pGames>=CFG.game.gamesToWin || aGames>=CFG.game.gamesToWin) {
           state='matchover';
           const win = pGames>aGames;
@@ -1050,7 +1108,9 @@
           return;
         }
         gameNo++; setText('currentGame',gameNo);
-        pScore=0; aScore=0; serveCnt=0; pServes=!pServes; deuce=false; aiMood=1;
+        pScore=0; aScore=0; serveCnt=0; deuce=false; aiMood=1;
+        // 现今规则：发球权按局号交替（第1局A先发→第2局B先发），与局末分无关
+        pServes = (gameNo % 2 === 1);
         updateScore();
         showMsg(`第 ${gameNo-1} 局 · ${pw?'你':'对手'}胜`, `大比分 ${pGames} : ${aGames}　第${gameNo}局即将开始`);
         setTimeout(()=>{ if(state!=='matchover') prepareServe(); }, 4000);
@@ -1059,6 +1119,11 @@
       deuce = pScore>=CFG.game.deuce && aScore>=CFG.game.deuce;
       if (deuce) pServes=!pServes;
       else if (serveCnt%CFG.game.serveEvery===0) pServes=!pServes;
+      // 现今规则：决胜局(第7局)一方先得5分交换场地
+      if (gameNo===CFG.game.gamesToWin*2-1 && (pScore===5||aScore===5) && !finalSwitch) {
+        finalSwitch = true;
+        toast('决胜局交换场地','info');
+      }
       updateServeDot(); updateScore();
       setTimeout(()=>{ if(state!=='matchover') prepareServe(); }, 1100);
     }
@@ -1073,10 +1138,12 @@
     function resetBall() {
       vel.set(0,0,0); spinV.set(0,0,0); spinType='none'; lastHit=null;
       side=null; bounceOnSide=0; tossing=false; letBall=false; serveShot=false;
+      // 注意：pointDone 不在此重置——判分瞬间调用本函数，若重置会导致球落地期间被反复判分
       trail.length=0; trailMesh.forEach(m=>m.visible=false);
     }
     function prepareServe() {
-      resetBall(); state='serving'; power=0; updateServeDot();
+      resetBall(); pointDone=false; pointScored=false; // 新回合开始，解锁判分（一球只判一次）
+      state='serving'; power=0; updateServeDot();
       if (pServes) {
         ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05);
         showMsg('你的发球','按住左键/空格蓄力，松开抛球发球');
@@ -1095,9 +1162,8 @@
       const st = AI_STYLES[diff];
       aiReactT += dt;
       if (aiReactT < st.react) return;
-      let px = ball.position.x + vel.x*.3, py = ball.position.y + vel.y*.2;
-      if (st.tactic==='chop') py=Math.max(py, CFG.table.H+.14);
-      else if (st.tactic==='fast') py=Math.min(py, CFG.table.H+.2);
+      // 综合型：更远的落点预判 + 快速贴球
+      let px = ball.position.x + vel.x*.38, py = ball.position.y + vel.y*.26;
       px += (Math.random()-.5)*st.err*(2-aiMood);
       py += (Math.random()-.5)*st.err*.5;
       px = Math.max(-CFG.table.W/2+.1, Math.min(CFG.table.W/2-.1, px));
@@ -1108,7 +1174,7 @@
       aPaddle.position.y += (aiTY-aPaddle.position.y)*Math.min(1,k*dt*3);
       let tz = -CFG.table.L/2+.22;
       if (vel.z<0 && ball.position.z<0) tz = Math.max(-CFG.table.L/2-.1, Math.min(-.3, ball.position.z-.12));
-      aPaddle.position.z += (tz-aPaddle.position.z)*Math.min(1,10*dt);
+      aPaddle.position.z += (tz-aPaddle.position.z)*Math.min(1,12*dt);
       aPaddle.rotation.y = Math.atan2(ball.position.x-aPaddle.position.x,1)*.25;
       aPaddle.rotation.x = .35+(ball.position.y-aPaddle.position.y)*.3;
     }
@@ -1133,10 +1199,11 @@
       padZ=Math.max(-1,Math.min(1,padZ));
       const cx=joyActive?joyX:(useKb?kbX:mouseX), cy=joyActive?joyY:(useKb?kbY:mouseY);
 
-      const px = cx*CFG.table.W*.55;
-      const py = CFG.table.H+.1+cy*.4;
-      pPaddle.position.x = Math.max(-CFG.table.W/2-.15, Math.min(CFG.table.W/2+.15, px));
-      pPaddle.position.y = Math.max(CFG.table.H+.02, Math.min(CFG.table.H+.55, py));
+      // 移动范围加大：x 可覆盖全场+台外救球，y 覆盖低点防守到高点进攻
+      const px = cx*CFG.table.W*.78;
+      const py = CFG.table.H+.12+cy*.52;
+      pPaddle.position.x = Math.max(-1.05, Math.min(1.05, px));
+      pPaddle.position.y = Math.max(CFG.table.H+.02, Math.min(CFG.table.H+.66, py));
 
       // z 轴：玩家手动前后移动（真实步法），仅保留轻微迎球辅助
       let tz = CFG.table.L/2-.22 + padZ;   // 0.15(近网) ~ 2.15(远台)
@@ -1158,14 +1225,31 @@
       if (swingT>0) swingT-=dt;
       const swing = swingT>0 ? Math.sin((.22-swingT)/.22*Math.PI)*.35 : 0;
 
+      // 现实击球拍形：正手拍面前倾约15°，反手更立；蓄力拉弧圈拍面后仰引拍，挥拍瞬间前压
+      // 拍头倾角：正手横拍约25°侧倾，反手反向；拍面朝向随站位水平角偏转
       gripT += ((forehand?1:0)-gripT)*Math.min(1,12*dt);
       const tilt = charging ? power*.25 : 0;
-      pPaddle.rotation.x = (-.35*gripT-.15*(1-gripT)) - cy*.08 - tilt - swing;
-      pPaddle.rotation.y = (-.25*gripT+.35*(1-gripT)) + cx*.12;
-      pPaddle.rotation.z = (.2*gripT-.15*(1-gripT)) + cx*.06;
+      pPaddle.rotation.x = (-.27*gripT-.12*(1-gripT)) - cy*.06 - tilt - swing*.85;
+      pPaddle.rotation.y = (-.2*gripT+.3*(1-gripT)) + cx*.22;
+      pPaddle.rotation.z = (.42*gripT-.32*(1-gripT)) + cx*.05;
 
       if (pArm){ pArm.position.x = pPaddle.position.x*.4+(forehand?.1:-.1); }
       updateToss();
+    }
+
+    // 自定义光标：投影球拍中心到屏幕，保证光标与拍心始终重合
+    const _projV = new THREE.Vector3();
+    function updateCursor(){
+      const el = document.getElementById('paddleCursor');
+      if (!el) return;
+      if (touchMode){ el.style.display='none'; return; }
+      _projV.copy(pPaddle.position).project(camera);
+      if (_projV.z < 1){
+        el.style.display='block';
+        el.style.left = ((_projV.x+1)/2*100)+'%';
+        el.style.top = ((1-_projV.y)/2*100)+'%';
+        el.className = forehand ? 'fh' : 'bh';
+      } else el.style.display='none';
     }
 
     function toggleGrip() {
@@ -1272,8 +1356,9 @@
       powerBarUpdate(); updateTrail(); updateCamera();
       if(state==='serving'&&pServes&&!tossing){
         ball.position.x=pPaddle.position.x; ball.position.y=pPaddle.position.y+.06;
-        ball.position.z=Math.max(1.0, Math.min(CFG.table.L/2+.05, pPaddle.position.z));
+        ball.position.z=Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z));
       }
+      updateCursor();
       renderer.render(scene,camera);
     }
 
@@ -1330,11 +1415,6 @@
         camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);
       });
       document.getElementById('startBtn').addEventListener('click',startMatch);
-      document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(b=>b.addEventListener('click',()=>{
-        document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active'); diff=b.dataset.diff; syncDiff();
-      }));
-      document.querySelectorAll('#difficulty .diff-btn').forEach(b=>b.addEventListener('click',()=>{diff=b.dataset.diff;syncDiff();}));
       bindTouchUI();
     }
 
@@ -1394,8 +1474,6 @@
       addEventListener('touchstart',()=>{ touchMode=true; document.body.classList.add('touch'); },{once:true,passive:true});
     }
     function syncDiff(){
-      document.querySelectorAll('#difficulty .diff-btn').forEach(b=>b.classList.toggle('active',b.dataset.diff===diff));
-      document.querySelectorAll('#startDifficulty .start-diff-btn').forEach(b=>b.classList.toggle('active',b.dataset.diff===diff));
       setText('styleName', AI_STYLES[diff].name);
     }
 
@@ -1405,6 +1483,7 @@
       pScore=0;aScore=0;pGames=0;aGames=0;gameNo=1;serveCnt=0;pServes=true;
       power=0;celebrating=false;celebT=0;forehand=true;gripT=1;deuce=false;aiMood=1;rally=0;
       padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
+      finalSwitch=false; pointDone=false; pointScored=false;
       const zk=document.getElementById('zknob'); if(zk) zk.style.top='50%';
       setText('currentGame',1); updateScore(); setText('playerGames','局 0'); setText('aiGames','局 0');
       setText('rallyCount',0); toggleGripInit();
