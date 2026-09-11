@@ -265,6 +265,15 @@
       text-align: center; font-size: 16px; letter-spacing: 3px; line-height: 2.2;
     }
     @media (orientation: portrait) { body.touch .rotate-hint { display: flex; } }
+    /* 窄屏手机：缩小触控件防重叠（320px 下 vjoy 与 z 滑条原本重叠约 14px） */
+    @media (max-width: 380px) {
+      body.touch .vjoy { width: 118px; height: 118px; bottom: 88px; }
+      body.touch .vjoy-knob { width: 50px; height: 50px; margin: -25px 0 0 -25px; }
+      body.touch .zslider { right: 120px; bottom: 90px; height: 140px; }
+      body.touch .hitbtn { width: 84px; height: 84px; bottom: 106px; font-size: 14px; }
+      body.touch .btn-grip { bottom: 204px; padding: 8px 13px; }
+      body.touch .scoreboard { transform: translateX(-50%) scale(.68); }
+    }
   </style>
 </head>
 <body>
@@ -409,7 +418,7 @@
     let pServes = true, serveCnt = 0, deuce = false, rally = 0;
 
     let scene, camera, renderer, camBase, shakeAmt = 0;
-    let tableGroup, netGroup, ball, pPaddle, aPaddle, pArm;
+    let tableGroup, netGroup, ball, pPaddle, aPaddle;
     let landingMarker, hitMarker; // 落点预测光圈：第一跳 / 建议击球点
     const vel = new THREE.Vector3();
     const spinV = new THREE.Vector3();
@@ -427,6 +436,7 @@
     let mouseX = 0, mouseY = 0, kbX = 0, kbY = 0, keys = {}, useKb = false;
     let charging = false, chargeT0 = 0, power = 0;
     let forehand = true, gripT = 1, swingT = 0; // swingT>0 表示挥拍中
+    let aiGripT = 1; // AI 正反手翻面插值：1=正手（AI 右手位=-x）0=反手
     let celebrating = false, celebT = 0;
 
     // 三轴控制：z 轴前后站位（滚轮/Q·E/滑条）+ 虚拟摇杆 + 球拍速度
@@ -502,7 +512,7 @@
       scene.fog = new THREE.Fog(0xdfeaf5, 10, 30);
 
       camera = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, .01, 100);
-      camBase = new THREE.Vector3(0, 1.78, CFG.table.L / 2 + 1.05);
+      camBase = new THREE.Vector3(0, 1.55, CFG.table.L / 2 + 1.05);  // 视角略微降低，更贴近真实击球视野
       camera.position.copy(camBase);
       camera.lookAt(0, CFG.table.H + .02, 0);
 
@@ -660,16 +670,17 @@
         new THREE.MeshStandardMaterial({ color:0xF0C88A, roughness:.5, metalness:.02 })
       );
       blade.rotation.x = Math.PI/2; blade.castShadow = true; g.add(blade);
-      // 胶皮：正手亮红 / 反手哑黑
+      // 胶皮：正手面红 / 反手面黑（沿厚度 y 轴分贴底板两面——z 是拍长方向，此前误用 z 偏移导致两面胶皮重叠穿模）
+      // 正手姿态下 +y 面朝玩家露出红面；反手镜像翻拍后 -y 面朝玩家露出黑面
       const rg = new THREE.ExtrudeGeometry(shape,{depth:.003, bevelEnabled:false});
-      const fh = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD83A3A, roughness:.42, metalness:.04}));
-      fh.rotation.x=Math.PI/2; fh.position.z=CFG.paddle.T/2+.001; g.add(fh);
-      const bh = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x26262B, roughness:.8}));
-      bh.rotation.x=Math.PI/2; bh.rotation.y=Math.PI; bh.position.z=-CFG.paddle.T/2-.001; g.add(bh);
-      // 白色护边替代棕色环
+      const rubFront = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD93B3B, roughness:.42, metalness:.04}));
+      rubFront.rotation.x=Math.PI/2; rubFront.position.y=CFG.paddle.T/2+.001; g.add(rubFront);
+      const rubBack = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x1B1B20, roughness:.55}));
+      rubBack.rotation.x=Math.PI/2; rubBack.rotation.y=Math.PI; rubBack.position.y=-CFG.paddle.T-.002; g.add(rubBack);
+      // 白色护边替代棕色环（对齐拍厚中心）
       const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
-      edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; g.add(edge);
-      // 一体化横拍握柄（马龙式横握：胶皮同色系扁柄，随拍面横置后自然处于右手侧）
+      edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; edge.position.y=-CFG.paddle.T/2; g.add(edge);
+      // 一体化横拍握柄（深色拍柄与正面黑呼应）
       const gripShape = new THREE.Shape();
       gripShape.moveTo(-.028,-h*.8);
       gripShape.lineTo(.028,-h*.8);
@@ -678,7 +689,7 @@
       gripShape.closePath();
       const grip = new THREE.Mesh(
         new THREE.ExtrudeGeometry(gripShape,{depth:.013, bevelEnabled:true, bevelThickness:.0015, bevelSize:.0015, bevelSegments:1}),
-        new THREE.MeshStandardMaterial({color:0xD83A3A, roughness:.55})
+        new THREE.MeshStandardMaterial({color:0x26262B, roughness:.55})
       );
       grip.rotation.x = Math.PI/2; grip.position.z = -.0065; grip.castShadow = true; g.add(grip);
       return g;
@@ -687,17 +698,12 @@
     function buildPaddles() {
       pPaddle = makePaddle();
       pPaddle.position.set(0, CFG.table.H+.1, CFG.table.L/2-.22);
-      pPaddle.rotation.set(-.27,-.2,Math.PI/2+.32);
+      pPaddle.rotation.set(-.3, Math.PI/2+.12, Math.PI/2+.3);  // 拍面竖立正对玩家（正手红面朝玩家）、拍头朝右、拍柄朝左
       scene.add(pPaddle);
-      pArm = new THREE.Group();
-      const arm = new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,.5,12), new THREE.MeshStandardMaterial({color:0xE8C4A0,roughness:.6}));
-      arm.position.set(0,.5,.9); arm.rotation.x=-.5; pArm.add(arm);
-      const wrist = new THREE.Mesh(new THREE.SphereGeometry(.045,12,12), new THREE.MeshStandardMaterial({color:0xE8C4A0,roughness:.6}));
-      wrist.position.set(0,.75,.7); pArm.add(wrist); scene.add(pArm);
 
       aPaddle = makePaddle();
       aPaddle.position.set(0, CFG.table.H+.1, -CFG.table.L/2+.22);
-      aPaddle.rotation.set(.35,.2,-.15);
+      aPaddle.rotation.set(-.3, -Math.PI/2, -Math.PI/2-.3);  // 与玩家同款翻面持拍（镜像：AI 正手位=-x，拍头朝 -x、红面朝玩家）
       scene.add(aPaddle);
     }
 
@@ -904,11 +910,11 @@
       }
     }
 
-    // 玩家三维真实触球判定：拍面横置后 x 向覆盖=拍高(H)、y 向覆盖=拍宽(W)，含 3cm 余量 + z 向 32cm 触球窗口
+    // 玩家三维真实触球判定：拍面竖立正对来球，x 向覆盖拍长(H)、y 向覆盖拍宽(W)，含 3cm 余量 + z 向 30cm 站位窗口
     function playerCanReach() {
       const dx=ball.position.x-pPaddle.position.x, dy=ball.position.y-pPaddle.position.y, dz=ball.position.z-pPaddle.position.z;
       const ex=dx/(CFG.paddle.H/2+.03), ey=dy/(CFG.paddle.W/2+.03);
-      return ex*ex+ey*ey<1 && Math.abs(dz)<.32;
+      return ex*ex+ey*ey<1 && Math.abs(dz)<.3;
     }
     function collidePaddle() {
       // 规则：球必须先在己方台面弹起一次（side 匹配且仅一跳）才能回击，禁止凌空
@@ -971,21 +977,21 @@
         const swingSpd = Math.max(0, -paddleV.z);      // 向前挥拍速度 m/s
         const sw = Math.min(swingSpd/2.5, 1);          // 归一化挥拍加成
         const pw = Math.min(1, power*.75 + sw*.35);    // 合成力量
-        // 正反手手感差异（需求：加大差异度）
-        // 正手：大力弧圈——落点深、球速快、上旋强，弧线略高保证上台
-        // 反手：快撕/弹击——落点浅平、出手更快、线路更直、侧旋更足、弧线低平
+        // 正反手手感差异（极限化：两套完全不同的击球方式）
+        // 正手：大力弧圈——落点极深、球速快、上旋极强，弧线略高保证上台
+        // 反手：快撕/弹击——落点浅平、出手更快、线路更直、侧旋更足、弧线极低平
         const fh = forehand;
-        const tz = fh ? -.32 - pw*.74 : -.16 - pw*.5;
-        const lift = fh ? .42 : .33;   // 补偿上旋下扎的弧线抬升
-        const sh = ((fh ? 3.05+pw*.95 : 2.75+pw*.65) * (TIMING_SH[timingNow]||1)) + sw*.5;
+        const tz = fh ? -.38 - pw*.85 : -.14 - pw*.45;
+        const lift = fh ? .42 : .31;   // 补偿上旋下扎的弧线抬升（反手更低平）
+        const sh = ((fh ? 3.1+pw*1.05 : 2.95+pw*.75) * (TIMING_SH[timingNow]||1)) + sw*.5;
         // 反手线路偏直线且横向散布更大（弹击变线快）
         const txBase = fh ? relX*.55 : relX*.42 + (relX>0?-.14:.14);
         const tx = Math.max(-.68, Math.min(.68, txBase + (Math.random()-.5)*(fh?.14:.2)));
         aimed = aimSolve(ball.position, tx, tz, sh, lift);
         vel.set(aimed.vx, aimed.vy, aimed.vz);
-        // 旋转：正手上旋强、反手侧旋强；越大力/越晚击球/挥拍越快越转
-        const spinAmt = (fh ? 6.6 : 4.8)*tm.spMult;
-        sv.set(relX*3.2 + (fh ? 0 : (Math.random()-.5)*3.4), spinAmt + sw*1.5, fh ? -2-power*2 : 2.6);
+        // 旋转：正手上旋极强、反手以侧旋为主；越大力/越晚击球/挥拍越快越转
+        const spinAmt = (fh ? 7.5 : 4.2)*tm.spMult;
+        sv.set(relX*3.2 + (fh ? 0 : (Math.random()-.5)*4.2), spinAmt + sw*1.5, fh ? -2-power*2 : 2.6);
         // 击球反馈
         swingT = .22; sSwing();
         sHit(Math.min(1,sh/4.4), spinType);
@@ -1176,9 +1182,13 @@
       let tz = -CFG.table.L/2+.22;
       if (vel.z<0 && ball.position.z<0) tz = Math.max(-CFG.table.L/2-.1, Math.min(-.3, ball.position.z-.12));
       aPaddle.position.z += (tz-aPaddle.position.z)*Math.min(1,12*dt);
-      aPaddle.rotation.y = Math.atan2(ball.position.x-aPaddle.position.x,1)*.25;
-      aPaddle.rotation.x = .35+(ball.position.y-aPaddle.position.y)*.3;
-      aPaddle.rotation.z = -Math.PI/2;  // 横拍镜像（对面视角拍头指向其左侧）
+      // AI 同款正反手翻面：AI 面向玩家(+z)，其右手位是 -x，球在 -x 侧为正手
+      aiGripT += ((ball.position.x<0?1:0)-aiGripT)*Math.min(1,12*dt);
+      const aiFlip = 2*aiGripT-1;
+      // 正手：拍头朝其右手侧(-x)、红面朝玩家；反手：绕竖直轴翻半圈镜像（拍头朝 +x、黑面朝玩家）
+      aPaddle.rotation.x = -.3*aiGripT - (ball.position.y-aPaddle.position.y)*.3;
+      aPaddle.rotation.y = -Math.PI/2 + Math.PI*(1-aiGripT) + Math.atan2(ball.position.x-aPaddle.position.x,1)*.25*aiFlip;
+      aPaddle.rotation.z = -.3*aiGripT - Math.PI/2;  // 恒满足 c=a-PI/2：正手红面精确朝玩家，反手黑面朝玩家
     }
 
     /* ============================================================
@@ -1227,15 +1237,15 @@
       if (swingT>0) swingT-=dt;
       const swing = swingT>0 ? Math.sin((.22-swingT)/.22*Math.PI)*.35 : 0;
 
-      // 现实击球拍形（马龙式横拍）：拍面横置（绕视线轴转90°，拍头指向侧方），右手侧横握拍柄
-      // 正手拍面前倾约15°，反手更立；蓄力拉弧圈拍面后仰引拍，挥拍瞬间前压
+      // 现实击球拍形（马龙式横拍）：正手拍面前倾约15°，反手更立；蓄力拉弧圈拍面后仰引拍，挥拍瞬间前压
       gripT += ((forehand?1:0)-gripT)*Math.min(1,12*dt);
       const tilt = charging ? power*.25 : 0;
-      pPaddle.rotation.x = (-.27*gripT-.12*(1-gripT)) - cy*.06 - tilt - swing*.85;
-      pPaddle.rotation.y = (-.2*gripT+.3*(1-gripT)) + cx*.22;
-      pPaddle.rotation.z = Math.PI/2 + (.32*gripT-.22*(1-gripT)) + cx*.05;
+      const fhFlip = 2*gripT-1;   // 1=正手 -1=反手（镜像翻拍）
+      // 拍面竖立正对玩家：正手红面全露（姿态不变）；反手绕竖直轴翻半圈呈对称形式（拍头朝左、柄朝右、黑面全露）
+      pPaddle.rotation.x = -.3 + tilt - swing*.9 - cy*.05;
+      pPaddle.rotation.y = Math.PI/2 + Math.PI*(1-gripT) + .12*fhFlip + fhFlip*cx*.25;  // 正手拍头朝右/反手镜像朝左，gripT 过渡即翻拍动作
+      pPaddle.rotation.z = Math.PI/2 + .3*fhFlip + fhFlip*cx*.05;    // 绕拍长轴滚转，正反手拍面倾角对称
 
-      if (pArm){ pArm.position.x = pPaddle.position.x*.4+(forehand?.1:-.1); }
       updateToss();
     }
 
@@ -1483,7 +1493,7 @@
       audioInit();
       document.getElementById('startScreen').classList.add('hidden');
       pScore=0;aScore=0;pGames=0;aGames=0;gameNo=1;serveCnt=0;pServes=true;
-      power=0;celebrating=false;celebT=0;forehand=true;gripT=1;deuce=false;aiMood=1;rally=0;
+      power=0;celebrating=false;celebT=0;forehand=true;gripT=1;aiGripT=1;deuce=false;aiMood=1;rally=0;
       padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
       finalSwitch=false; pointDone=false; pointScored=false;
       const zk=document.getElementById('zknob'); if(zk) zk.style.top='50%';
