@@ -642,7 +642,7 @@
     const CFG = {
       table: { L: 2.74, W: 1.525, H: 0.76, netH: 0.1525 },
       ball: { r: 0.02, g: 9.81, rest: 0.87, drag: 0.11 },
-      paddle: { W: 0.18, H: 0.22, T: 0.008, zMin: .15, zMax: 2.15, assist: .22 },
+      paddle: { W: 0.18, H: 0.22, T: 0.008, zMin: .15, zMax: 2.15, assist: .22, faceOff: .0275 },
       game: { win: 11, serveEvery: 2, maxCharge: 1.4, deuce: 10, gamesToWin: 4, substeps: 3 }
     };
 
@@ -985,13 +985,14 @@
         new THREE.MeshStandardMaterial({ color:0xF0C88A, roughness:.5, metalness:.02 })
       );
       blade.rotation.x = Math.PI/2; blade.castShadow = true; g.add(blade);
-      // 胶皮：正手面红 / 反手面黑（沿厚度 y 轴分贴底板两面——z 是拍长方向，此前误用 z 偏移导致两面胶皮重叠穿模）
-      // 正手姿态下 +y 面朝玩家露出红面；反手镜像翻拍后 -y 面朝玩家露出黑面
+      // 胶皮：正手面红 / 反手面黑（沿厚度 y 轴分贴底板两面——z 是拍长方向）
+      // 两面胶皮均与底板表面留出 ≥.0015 间隙，彻底消除胶皮与木色底板共面导致的 z-fighting 黄黑闪烁；
+      // 材质 DoubleSide：任意视角（含翻拍/回放瞬间）都不因背面剔除透出黄色底板
       const rg = new THREE.ExtrudeGeometry(shape,{depth:.003, bevelEnabled:false});
-      const rubFront = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD93B3B, roughness:.42, metalness:.04}));
-      rubFront.rotation.x=Math.PI/2; rubFront.position.y=CFG.paddle.T/2+.001; g.add(rubFront);
-      const rubBack = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x1B1B20, roughness:.55}));
-      rubBack.rotation.x=Math.PI/2; rubBack.rotation.y=Math.PI; rubBack.position.y=-CFG.paddle.T-.002; g.add(rubBack);
+      const rubFront = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD93B3B, roughness:.42, metalness:.04, side:THREE.DoubleSide}));
+      rubFront.rotation.x=Math.PI/2; rubFront.position.y=CFG.paddle.T/2+.0025; g.add(rubFront);
+      const rubBack = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x1B1B20, roughness:.55, side:THREE.DoubleSide}));
+      rubBack.rotation.x=Math.PI/2; rubBack.position.y=-CFG.paddle.T-.0035; g.add(rubBack);
       g.userData.rubF = rubFront.material; g.userData.rubB = rubBack.material; // 皮肤系统：可替换拍面胶皮颜色
       // 白色护边替代棕色环（对齐拍厚中心）
       const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
@@ -1256,11 +1257,12 @@
     function collidePaddle() {
       // 凌空截击：对方击球后、球未落台前的任意时刻均可挥拍还击（球须正朝玩家飞来）
       // 真实三维接触：x/y 需对准拍面，z 需亲自站位到位（保留轻微迎球辅助）
+      // z 窗口收紧（±.2）：球最多越过拍面 .2 即被截停并贴回拍面外侧，几乎不产生穿拍视觉
       if (lastHit!=='player' && vel.z>0 && playerCanReach()) hitBall('player');
       if (lastHit!=='ai' && side==='ai' && bounceOnSide===1) {
         const dx=ball.position.x-aPaddle.position.x, dy=ball.position.y-aPaddle.position.y, dz=ball.position.z-aPaddle.position.z;
         const dxy=Math.hypot(dx,dy);
-        if (dxy<CFG.paddle.W*1.25 && vel.z<0 && dz>-.55 && dz<.45) hitBall('ai');
+        if (dxy<CFG.paddle.W*1.25 && vel.z<0 && dz>-.25 && dz<.45) hitBall('ai');
       }
     }
 
@@ -1314,6 +1316,11 @@
     function hitBall(who) {
       const st = aiStyle();
       const paddle = who==='player' ? pPaddle : aPaddle;
+      // 防穿透：击球瞬间强制把球贴回拍面表面（球心置于拍面外侧 faceOff：拍半厚+胶皮+球半径），
+      // 高速球即使单帧越过拍面平面，视觉上也绝不会被拍子"穿过"，而是从拍面外侧被击回
+      const faceOut = CFG.paddle.faceOff;
+      if (who==='player') ball.position.z = paddle.position.z - faceOut;
+      else ball.position.z = paddle.position.z + faceOut;
       const relX = (ball.position.x-paddle.position.x)/(CFG.paddle.W/2);
       timingNow = judgeTiming();
       const tm = TIMING[timingNow];
@@ -1407,7 +1414,7 @@
         }
       }
       ball.position.x = pPaddle.position.x;
-      ball.position.z = Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)); // 发球时球始终随拍（任意站位）
+      ball.position.z = Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)) - CFG.paddle.faceOff; // 发球时球始终随拍并贴在拍面外侧（任意站位）
     }
     function playerServe() {
       if (state!=='serving'||!pServes) return;
@@ -1419,7 +1426,7 @@
       audioInit();
       // 发球第一跳落在己方近网（反解保证），弹起后过网落对方；力度决定第二落点深浅
       // 真实规则：发球须在端线附近完成
-      ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)));
+      ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)) - CFG.paddle.faceOff); // 球贴拍面外侧，不嵌入拍厚
       const tz1 = .35 - power*.2;
       // 侧旋发球：发球瞬间的左右移动输入决定侧旋强度与方向
       const sideIn = Math.max(-1, Math.min(1, joyActive?joyX:(useKb?kbX:mouseX)));
@@ -1558,7 +1565,7 @@
       resetBall(); pointDone=false; pointScored=false; // 新回合开始，解锁判分（一球只判一次）
       state='serving'; power=0; updateServeDot();
       if (pServes) {
-        ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05);
+        ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05 - CFG.paddle.faceOff);
         showMsg(diff==='train'?'训练发球':'你的发球','按住左键/空格蓄力，松开发球 · 发球时左右移动可加侧旋');
         tutTip(1);
       } else {
@@ -1812,7 +1819,8 @@
       powerBarUpdate(); updateTrail(); updateCamera();
       if(state==='serving'&&pServes&&!tossing){
         ball.position.x=pPaddle.position.x; ball.position.y=pPaddle.position.y+.06;
-        ball.position.z=Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z));
+        // 发球持球：球贴在拍面朝网一侧外表面（faceOff=拍半厚+胶皮+球半径），绝不嵌入拍厚
+        ball.position.z=Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)) - CFG.paddle.faceOff;
       }
       updateCursor();
       renderer.render(scene,camera);
