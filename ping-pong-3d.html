@@ -221,7 +221,7 @@
     // ===== 配置 =====
     const CONFIG = {
       table: { length: 2.74, width: 1.525, height: 0.76, netHeight: 0.1525 },
-      ball: { radius: 0.02, mass: 0.0027, gravity: 9.81, restitution: 0.92, airResistance: 0.1 },
+      ball: { radius: 0.02, mass: 0.0027, gravity: 9.81, restitution: 0.82, airResistance: 0.12 },
       paddle: { width: 0.18, height: 0.22, thickness: 0.008 },
       game: { winScore: 11, serveInterval: 2, maxChargeTime: 1.5, deuceScore: 10, gamesToWin: 4, totalGames: 7 }
     };
@@ -297,6 +297,8 @@
     let currentTableSide = null;
     let isBallFalling = false; // 球是否在下降（用于击球时机判定）
     let lastHitTiming = 'peak';
+    let pointScored = false; // 防止重复计分
+    let lastBounceTime = 0; // 上次弹跳时间，防止抖动重复触发
 
     // 发球状态
     let isTossing = false;
@@ -923,11 +925,15 @@
     }
 
     function checkTableCollision() {
+      if (pointScored) return;
       const tableTop = CONFIG.table.height + 0.025;
       const ballBottom = ball.position.y - CONFIG.ball.radius;
-      if (ballBottom <= tableTop && ballVelocity.y < 0) {
+      const now = clock.getElapsedTime();
+      // 碰撞冷却：0.08秒内不重复触发，防止球在桌面抖动
+      if (ballBottom <= tableTop && ballVelocity.y < 0 && (now - lastBounceTime) > 0.08) {
         if (Math.abs(ball.position.x) <= CONFIG.table.width / 2 &&
             Math.abs(ball.position.z) <= CONFIG.table.length / 2) {
+          lastBounceTime = now;
           const side = ball.position.z > 0 ? 'player' : 'ai';
           if (side !== currentTableSide) {
             currentTableSide = side;
@@ -937,12 +943,19 @@
           }
           // 弹跳2次判负
           if (ballBounceCountOnSide >= 2 && gameState === 'playing') {
+            pointScored = true;
             const loser = side;
             const scorer = loser === 'player' ? 'ai' : 'player';
-            setTimeout(() => { if (gameState === 'playing') scorePoint(scorer); }, 300);
+            // 立即冻结球
+            ballVelocity.set(0, 0, 0);
+            ballSpinVector.set(0, 0, 0);
+            setTimeout(() => { scorePoint(scorer); pointScored = false; }, 400);
+            return;
           }
           ball.position.y = tableTop + CONFIG.ball.radius;
           ballVelocity.y = -ballVelocity.y * CONFIG.ball.restitution;
+          // 确保球能弹起来，如果速度太小就给一个最小弹跳
+          if (ballVelocity.y < 0.8) ballVelocity.y = 0.8;
           ballVelocity.x *= 0.94;
           ballVelocity.z *= 0.94;
           ballSpinVector.multiplyScalar(0.88);
@@ -988,13 +1001,15 @@
     }
 
     function checkPaddleCollision() {
-      const playerHitRadius = CONFIG.paddle.width / 2 * 1.6 + CONFIG.ball.radius;
+      // 增大击球范围，让玩家更容易接到球
+      const playerHitRadius = CONFIG.paddle.width / 2 * 2.2 + CONFIG.ball.radius;
       if (lastHitBy !== 'player') {
         const dx = ball.position.x - playerPaddle.position.x;
         const dy = ball.position.y - playerPaddle.position.y;
         const dz = ball.position.z - playerPaddle.position.z;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist < playerHitRadius && ballVelocity.z < 0) {
+        // 主要看xy平面距离，z方向放宽
+        const distXY = Math.sqrt(dx * dx + dy * dy);
+        if (distXY < playerHitRadius && ballVelocity.z < 0 && Math.abs(dz) < 0.5) {
           hitBall('player');
         }
       }
@@ -1080,17 +1095,22 @@
     }
 
     function checkOutOfBounds() {
+      if (pointScored) return;
       if (ball.position.y < 0.15) {
         if (gameState === 'playing') {
+          pointScored = true;
           if (lastHitBy === 'player') scorePoint('ai');
           else if (lastHitBy === 'ai') scorePoint('player');
+          setTimeout(() => { pointScored = false; }, 500);
         }
         resetBall();
       }
       if (Math.abs(ball.position.x) > 4 || Math.abs(ball.position.z) > 5) {
         if (gameState === 'playing') {
+          pointScored = true;
           if (lastHitBy === 'player') scorePoint('ai');
           else if (lastHitBy === 'ai') scorePoint('player');
+          setTimeout(() => { pointScored = false; }, 500);
         }
         resetBall();
       }
@@ -1285,6 +1305,7 @@
       ballBounceCountOnSide = 0;
       isTossing = false;
       letBall = false;
+      pointScored = false;
       ballTrail = [];
       if (trailMeshes.length) trailMeshes.forEach(t => t.visible = false);
     }
@@ -1361,26 +1382,46 @@
         return;
       }
 
-      const clampedMouseX = Math.max(-0.85, Math.min(0.85, mouseX));
-      const clampedMouseY = Math.max(-0.7, Math.min(0.7, mouseY));
-      const handOffsetX = isForehand ? 0.05 : -0.05;
-      const handOffsetY = isForehand ? 0 : 0.02;
-      targetPaddleX = clampedMouseX * CONFIG.table.width * 0.5 + handOffsetX;
-      targetPaddleY = CONFIG.table.height + 0.08 + clampedMouseY * 0.22 + handOffsetY;
-      targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.12, Math.min(CONFIG.table.width / 2 - 0.12, targetPaddleX));
-      targetPaddleY = Math.max(CONFIG.table.height + 0.04, Math.min(CONFIG.table.height + 0.35, targetPaddleY));
-      playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, 25 * dt);
-      playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, 25 * dt);
+      const clampedMouseX = Math.max(-0.95, Math.min(0.95, mouseX));
+      const clampedMouseY = Math.max(-0.85, Math.min(0.85, mouseY));
+      const handOffsetX = isForehand ? 0.04 : -0.04;
+      const handOffsetY = isForehand ? 0 : 0.015;
+      // 鼠标直接映射到球拍位置，1:1对应
+      targetPaddleX = clampedMouseX * CONFIG.table.width * 0.52 + handOffsetX;
+      targetPaddleY = CONFIG.table.height + 0.08 + clampedMouseY * 0.26 + handOffsetY;
+
+      // 辅助瞄准：当球飞向玩家且距离较近时，球拍轻微向球的位置靠拢
+      if (gameState === 'playing' && ballVelocity.z < 0 && ball.position.z > 0.3 && ball.position.z < CONFIG.table.length / 2) {
+        const assistStrength = 0.15; // 辅助强度15%
+        targetPaddleX += (ball.position.x - targetPaddleX) * assistStrength;
+        targetPaddleY += (ball.position.y - targetPaddleY) * assistStrength * 0.5;
+      }
+
+      targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetPaddleX));
+      targetPaddleY = Math.max(CONFIG.table.height + 0.03, Math.min(CONFIG.table.height + 0.38, targetPaddleY));
+
+      // 提高跟随速度到40倍速，让球拍紧跟鼠标
+      const followSpeed = 40;
+      playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, followSpeed * dt);
+      playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, followSpeed * dt);
+
+      // 球拍z位置根据球的位置微调，让不同深度的球都能接到
+      let targetPaddleZ = CONFIG.table.length / 2 - 0.1;
+      if (gameState === 'playing' && ballVelocity.z < 0 && ball.position.z > 0.2) {
+        // 球接近时，球拍稍微前伸
+        targetPaddleZ = CONFIG.table.length / 2 - 0.15 - (1 - ball.position.z / (CONFIG.table.length / 2)) * 0.1;
+      }
+      playerPaddle.position.z += (targetPaddleZ - playerPaddle.position.z) * Math.min(1, 15 * dt);
 
       const targetTransition = isForehand ? 1 : 0;
-      paddleTransition += (targetTransition - paddleTransition) * Math.min(1, 10 * dt);
+      paddleTransition += (targetTransition - paddleTransition) * Math.min(1, 12 * dt);
       const forehandRotX = -0.35, backhandRotX = -0.15;
       const forehandRotY = -0.25, backhandRotY = 0.35;
       const forehandRotZ = 0.2, backhandRotZ = -0.15;
       const chargeTilt = isCharging ? currentPower * 0.25 : 0;
-      playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - mouseY * 0.1 - chargeTilt;
-      playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + mouseX * 0.15;
-      playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + mouseX * 0.08;
+      playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - mouseY * 0.08 - chargeTilt;
+      playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + mouseX * 0.12;
+      playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + mouseX * 0.06;
 
       if (playerArm) {
         const armOffsetX = isForehand ? 0.1 : -0.1;
