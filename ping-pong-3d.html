@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>奥运会乒乓球比赛 · 3D对战 | 于哲的个人主页</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237EB6D9'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#16345c">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -205,6 +208,8 @@
     .t-rookie .diff-name { color: #2e7d52; }
     .t-pro .diff-name { color: #16345c; }
     .t-champ .diff-name { color: #a82222; }
+    .t-train .diff-name { color: #7c5cbf; }
+    .t-train .diff-stars { color: #7c5cbf; }
     .diff-en { font-size: 9px; font-weight: 700; letter-spacing: 3px; color: #7EB6D9; margin-top: 3px; }
     .diff-desc { font-size: 10px; color: #5a7392; margin-top: 7px; line-height: 1.7; }
     .diff-celeb { font-size: 9px; color: #c9a96e; margin-top: 7px; font-weight: 700; letter-spacing: 1px; }
@@ -221,6 +226,39 @@
     /* 结束界面 */
     .end-stats { margin: 18px 0 26px; font-size: 14px; color: rgba(255,255,255,.75); text-align: center; line-height: 2; }
     .end-stats b { color: var(--gold-light); font-size: 18px; }
+
+    /* ===== 新增 UI：音效开关 / 关键分横幅 / 制胜闪光 / 难度卡战绩 / 触屏蓄力填充 ===== */
+    .snd-btn {
+      position: absolute; top: 18px; right: 18px; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      background: rgba(13,26,48,.85); border: 1px solid rgba(201,169,110,.45);
+      border-radius: 10px; cursor: pointer; pointer-events: auto; transition: all .2s; z-index: 65;
+    }
+    .snd-btn:hover { background: rgba(201,169,110,.25); }
+    .snd-btn.off { opacity: .55; }
+    .kp-banner {
+      position: absolute; top: 100px; left: 50%; transform: translateX(-50%) scale(.9);
+      padding: 6px 24px; border-radius: 22px; font-size: 14px; font-weight: 900; letter-spacing: 3px;
+      opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; white-space: nowrap;
+      background: linear-gradient(90deg, #c9a96e, #e0bd83); color: #16345c;
+      box-shadow: 0 6px 24px rgba(201,169,110,.45);
+    }
+    .kp-banner.show { opacity: 1; transform: translateX(-50%) scale(1); }
+    .kp-banner.danger { background: linear-gradient(90deg, #ef4444, #ff8a8a); color: #fff; box-shadow: 0 6px 24px rgba(239,68,68,.4); }
+    #flash {
+      position: fixed; inset: 0; pointer-events: none; z-index: 70; opacity: 0;
+      background: radial-gradient(circle, rgba(255,255,255,.85), rgba(255,255,255,0) 72%);
+    }
+    #flash.go { animation: flashPop .32s ease-out; }
+    @keyframes flashPop { 0% { opacity: .8; } 100% { opacity: 0; } }
+    .diff-record { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: #8a6d3b; margin-top: 5px; }
+    .hitbtn .hitbtn-fill {
+      position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+      background: rgba(255,255,255,.38); border-radius: 0 0 46px 46px; pointer-events: none;
+    }
+    .hitbtn span { position: relative; }
+    body.touch .snd-btn { top: 48px; right: 10px; width: 34px; height: 34px; font-size: 15px; }
+    body.touch .kp-banner { top: 86px; font-size: 11px; padding: 4px 16px; letter-spacing: 2px; }
 
     /* ===== 移动端触控 ===== */
     body { touch-action: none; }
@@ -366,6 +404,7 @@
         <span>挥拍速度加成 · 三维触球判定</span><span>双落点预测 · 四个击球时机</span>
         <span>凌空截击 · 球未落台即可还击</span><span>端线抛球发球规则 · 擦网重发</span>
         <span>精确判分 · 出边线/出底线细分</span><span>手机触屏操控 · 正反手手感差异</span>
+        <span>侧旋发球 · 发球时左右移动控转</span><span>训练模式 · 无限对拉拼回合纪录</span>
       </div>
       <div class="diff-label">选择对手 · 三档难度</div>
       <div class="diff-row" id="diffRow">
@@ -375,6 +414,7 @@
           <div class="diff-en">ROOKIE</div>
           <div class="diff-desc">反应较慢 · 失误偏多<br>球速温和 · 适合上手练手感</div>
           <div class="diff-celeb">🏆 标准夺冠庆典</div>
+          <div class="diff-record"></div>
         </div>
         <div class="diff-card t-pro selected" data-diff="pro">
           <div class="diff-stars">★★</div>
@@ -382,6 +422,7 @@
           <div class="diff-en">PRO</div>
           <div class="diff-desc">攻守均衡 · 积极调动走位<br>相持稳健 · 快攻弧圈兼备</div>
           <div class="diff-celeb">🎆 加强庆祝 · 全场烟花</div>
+          <div class="diff-record"></div>
         </div>
         <div class="diff-card t-champ" data-diff="champion">
           <div class="diff-stars">★★★</div>
@@ -389,6 +430,15 @@
           <div class="diff-en">GRAND SLAM</div>
           <div class="diff-desc">反应极快 · 几乎零失误<br>暴力弧圈 · 大角度极限调动</div>
           <div class="diff-celeb">🎆🎆🎆 传奇庆典 · 礼炮齐鸣</div>
+          <div class="diff-record"></div>
+        </div>
+        <div class="diff-card t-train" data-diff="train">
+          <div class="diff-stars">∞</div>
+          <div class="diff-name">发球机训练</div>
+          <div class="diff-en">TRAINING</div>
+          <div class="diff-desc">不计比分 · 无限对拉<br>失误自动喂球 · 练手感步法</div>
+          <div class="diff-celeb">🎯 比拼最长回合纪录</div>
+          <div class="diff-record" id="trainRecord"></div>
         </div>
       </div>
       <button class="start-btn" id="startBtn">开赛</button>
@@ -396,7 +446,7 @@
         <b>鼠标 / 方向键(↑↓←→ / WASD)</b> 左右上下移动 · <b>滚轮 / Q·E</b> 前后站位(Z轴)<br>
         <b>按住左键 / 空格</b> 蓄力，松开挥拍击球（挥拍越快球越冲）· <b>右键 / Shift</b> 切换正反手 · <b>Esc</b> 暂停<br>
         <b>手机</b>：左摇杆移动 · 右侧滑条前后站位 · 大按钮蓄力击球 · 建议横屏<br>
-        难度越高对手越强 · 击败奥运冠军可解锁最盛大的夺冠庆典
+        <b>发球时左右移动</b>可施加侧旋 · <b>训练模式</b>不计分无限对拉 · 各难度<b>战绩自动保存</b>
       </div>
     </div>
   </div>
@@ -405,6 +455,9 @@
 
   <div class="overlay">
     <div id="paddleCursor"></div>
+    <button class="snd-btn" id="sndBtn" aria-label="音效开关">🔊</button>
+    <div class="kp-banner" id="kpBanner"></div>
+    <div id="flash"></div>
     <div class="scoreboard">
       <div class="score-side" id="playerSide">
         <div class="score-label"><span class="serve-dot" id="playerServeDot" style="display:none"></span>你</div>
@@ -423,7 +476,7 @@
 
     <div class="panel game-info">
       <h2>奥运会乒乓球比赛</h2>
-      <p>第 <span id="currentGame">1</span> 局 · 七局四胜</p>
+      <p>第 <span id="currentGame">1</span> 局 · <span id="modeTag">七局四胜</span></p>
       <p>对手打法：<span class="style-name" id="styleName">国家队主力</span></p>
     </div>
 
@@ -456,7 +509,7 @@
       <div class="vjoy" id="vjoy"><div class="vjoy-knob" id="vjoyKnob"></div><div class="vjoy-tag">移动 X/Y</div></div>
       <div class="zslider" id="zslider"><div class="zcap">前</div><div class="zknob" id="zknob"></div><div class="ztag">前后 Z（双击回中）</div></div>
       <button class="btn-grip" id="btnGrip">正/反手</button>
-      <div class="hitbtn" id="btnHit"><span>蓄力</span></div>
+      <div class="hitbtn" id="btnHit"><i class="hitbtn-fill" id="hitFill"></i><span>蓄力</span></div>
     </div>
 
     <div class="controls-hint">
@@ -497,7 +550,8 @@
     const AI_STYLES = {
       rookie:   { name:'青训新秀', speed:.62,  err:.17,  mult:.92,  top:.3,  back:.35, side:.1,  react:.24,  place:.3,  placePow:.3, celeb:1 },
       pro:      { name:'国家队主力', speed:.92, err:.06,  mult:1.1,  top:.45, back:.2,  side:.25, react:.07,  place:.6,  placePow:.8, celeb:2 },
-      champion: { name:'奥运冠军', speed:1.28, err:.012, mult:1.26, top:.55, back:.12, side:.28, react:.025, place:.85, placePow:1,  celeb:3 }
+      champion: { name:'奥运冠军', speed:1.28, err:.012, mult:1.26, top:.55, back:.12, side:.28, react:.025, place:.85, placePow:1,  celeb:3 },
+      train:    { name:'发球机陪练', speed:.85, err:0,   mult:.95,  top:.35, back:.35, side:.15, react:.15,  place:.45, placePow:.5, celeb:1 }
     };
 
     const SPIN = {
@@ -549,6 +603,15 @@
     let aiGripT = 1; // AI 正反手翻面插值：1=正手（AI 右手位=-x）0=反手
     let celebrating = false, celebT = 0;
 
+    // ===== 新增：音效开关 / 战绩持久化 / 本局统计 / 训练模式 / 关键分 =====
+    const LS_STATS = 'pp3d_stats_v1', LS_MUTE = 'pp3d_mute_v1';
+    let muted = (() => { try { return localStorage.getItem(LS_MUTE) === '1'; } catch (e) { return false; } })();
+    let serveBy = null, aiTouched = false, playerTouched = false;   // 发球方 & 本回合接发方是否触球（用于 ACE 判定）
+    let statLongRally = 0, statWinners = 0, statAce = 0, statAceAgainst = 0; // 本局数据小结
+    let playerLastSmash = false;    // 本回合玩家最后一板是否爆冲（制胜一击反馈用）
+    let prevDeuce = false;          // DEUCE 提示一次性触发
+    let sessionBestRally = 0;       // 训练模式本次会话最长回合
+
     // 三轴控制：z 轴前后站位（滚轮/Q·E/滑条）+ 虚拟摇杆 + 球拍速度
     let touchMode = (typeof matchMedia === 'function') && matchMedia('(pointer: coarse)').matches;
     let joyX = 0, joyY = 0, joyActive = false;   // 虚拟摇杆输出 -1..1
@@ -589,9 +652,12 @@
         crowdSrc.start();
       } catch (e) {}
     }
-    function crowd(v) { if (crowdGain) crowdGain.gain.setTargetAtTime(.025 + v * .13, actx.currentTime, .3); }
+    function crowd(v) {
+      if (!crowdGain || !actx) return;
+      crowdGain.gain.setTargetAtTime(muted ? 0 : (.025 + v * .13), actx.currentTime, .3);
+    }
     function tone(f0, f1, dur, type, vol, filterFreq) {
-      if (!actx) return;
+      if (!actx || muted) return;
       try {
         const o = actx.createOscillator(), g = actx.createGain();
         o.connect(g);
@@ -611,6 +677,76 @@
     const sFault  = () => tone(210, 90, .32, 'sawtooth', .07);
     const sSwing  = () => tone(300, 900, .08, 'sine', .03, 2000);
     const sCheer  = (win) => { crowd(1); setTimeout(()=>crowd(.3),1800); setTimeout(()=>crowd(.12),3800); tone(win?420:280, win?640:220, .5, 'sawtooth', .018); };
+
+    /* ============================================================
+       新增功能：战绩持久化 / 音效开关 / 关键分横幅 / 制胜闪光 / 训练模式
+    ============================================================ */
+    function loadStats() { try { return JSON.parse(localStorage.getItem(LS_STATS)) || {}; } catch (e) { return {}; } }
+    function saveStats(s) { try { localStorage.setItem(LS_STATS, JSON.stringify(s)); } catch (e) {} }
+    function recordMatch(win) {
+      if (diff === 'train') return;
+      const s = loadStats();
+      const d = s[diff] || (s[diff] = { w: 0, l: 0, streak: 0, best: 0 });
+      if (win) { d.w++; d.streak++; d.best = Math.max(d.best, d.streak); }
+      else { d.l++; d.streak = 0; }
+      saveStats(s); renderRecords();
+    }
+    function renderRecords() {
+      const s = loadStats();
+      document.querySelectorAll('.diff-card').forEach(c => {
+        const el = c.querySelector('.diff-record');
+        if (!el) return;
+        if (c.dataset.diff === 'train') { el.textContent = s.trainBest ? `最长回合 ${s.trainBest} 板` : '未挑战'; return; }
+        const d = s[c.dataset.diff];
+        el.textContent = d && (d.w || d.l)
+          ? `战绩 ${d.w}胜${d.l}负${d.streak > 1 ? ` · ${d.streak}连胜` : ''}`
+          : '尚无战绩';
+      });
+    }
+    function setMute(m) {
+      muted = m;
+      try { localStorage.setItem(LS_MUTE, m ? '1' : '0'); } catch (e) {}
+      const b = document.getElementById('sndBtn');
+      if (b) { b.textContent = m ? '🔇' : '🔊'; b.classList.toggle('off', m); }
+      if (crowdGain && actx) crowdGain.gain.setTargetAtTime(m ? 0 : .035, actx.currentTime, .05);
+    }
+    function flash() {
+      const f = document.getElementById('flash');
+      if (!f) return;
+      f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+    }
+    function hideKeyPoint() { const b = document.getElementById('kpBanner'); if (b) b.classList.remove('show'); }
+    function updateKeyPoint() {
+      const b = document.getElementById('kpBanner');
+      if (!b || diff === 'train') return;
+      let txt = '', danger = false;
+      if (aGames === CFG.game.gamesToWin - 1 && aScore >= CFG.game.deuce && aScore > pScore) {
+        txt = '⚠ 对手赛点 · 全力保分！'; danger = true; crowd(.5);
+      } else if (pGames === CFG.game.gamesToWin - 1 && pScore >= CFG.game.deuce && pScore > aScore) {
+        txt = '🏆 赛点 · 你的冠军点！'; crowd(.55);
+      } else if (deuce) {
+        txt = 'DEUCE · 10 平';
+      } else if (pScore >= CFG.game.deuce && pScore > aScore) {
+        txt = '局点 · 你领先';
+      } else if (aScore >= CFG.game.deuce && aScore > pScore) {
+        txt = '对手局点'; danger = true;
+      }
+      if (txt) { b.textContent = txt; b.classList.toggle('danger', danger); b.classList.add('show'); }
+      else b.classList.remove('show');
+    }
+    function trainPointEnd(w) {
+      sessionBestRally = Math.max(sessionBestRally, rally);
+      if (rally >= 5) {
+        const s = loadStats();
+        if (rally > (s.trainBest || 0)) { s.trainBest = rally; saveStats(s); toast(`新纪录 · 连续 ${rally} 板！`, 'good'); }
+        else toast(`本回合 ${rally} 板`, 'info');
+      } else toast(w === 'player' ? '好球 · 保持节奏' : '球断了 · 重新发球', 'info');
+      renderRecords();
+      crowd(.2); if (w === 'player') sCheer(true);
+      pServes = true;
+      setTimeout(() => { if (state !== 'paused') prepareServe(); }, 900);
+    }
+
 
     /* ============================================================
        场景搭建
@@ -759,7 +895,7 @@
       for (let i=0;i<TRAIL_N;i++){
         const m = new THREE.Mesh(
           new THREE.SphereGeometry(CFG.ball.r*(1-i/TRAIL_N*.7),10,10),
-          new THREE.MeshBasicMaterial({ color:0xfff4d0, transparent:true, opacity:0 })
+          new THREE.MeshBasicMaterial({ color:0xfff4d0, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending })
         );
         m.visible=false; scene.add(m); trailMesh.push(m);
       }
@@ -1139,6 +1275,9 @@
         shakeAmt = .04 + pw*.1;
         crowd(.35); setTimeout(()=>crowd(.12),400);
         rally++; document.getElementById('rallyCount').textContent = rally;
+        statLongRally = Math.max(statLongRally, rally);
+        playerTouched = true;
+        playerLastSmash = pw > .75;
         if (timingNow==='peak' && (power>.7 || sw>.5)) qualityToast(fh?'正手爆冲！':'反手拧拉！','good');
         else if (sw>.35 && power<.25) qualityToast(fh?'正手快带':'反手弹击','info');
         else if (timingNow==='rising') qualityToast('借力快带','info');
@@ -1166,6 +1305,7 @@
         sv.set(sp.ss, sp.ts+sp.bs, 3);
         sHit(.45, spt);
         spawnParticles(ball.position, 0xffffff, 5);
+        aiTouched = true; playerLastSmash = false;
       }
 
       spinV.copy(sv); spinType = spinFromVector(sv);
@@ -1206,12 +1346,17 @@
       // 真实规则：发球须在端线附近完成
       ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)));
       const tz1 = .35 - power*.2;
-      const tx = (Math.random()-.5)*.22;
+      // 侧旋发球：发球瞬间的左右移动输入决定侧旋强度与方向
+      const sideIn = Math.max(-1, Math.min(1, joyActive?joyX:(useKb?kbX:mouseX)));
+      const tx = (Math.random()-.5)*.22 + sideIn*.12;
       const a = aimSolve(ball.position, tx, tz1, 1.5, .4);
       vel.set(a.vx, a.vy, a.vz);
       const r=Math.random();
       if (r<.4) spinV.set(0,5,-1); else if(r<.7) spinV.set(-3,3,-1); else spinV.set(3,3,-1);
+      spinV.x = spinV.x*.35 + sideIn*4.6;
+      if (Math.abs(sideIn)>.5) qualityToast(sideIn>0?'右侧旋发球':'左侧旋发球','info');
       spinType=spinFromVector(spinV); lastHit='player'; side=null; bounceOnSide=0; letBall=false; serveShot=true; netTouched=false;
+      serveBy='player'; aiTouched=false; playerTouched=false;
       state='playing'; hideMsg();
       swingT=.22; sHit(.35+power*.4,spinType); spawnParticles(ball.position,0xffe9a8,6);
       rally=0; document.getElementById('rallyCount').textContent=0;
@@ -1228,6 +1373,7 @@
       const r=Math.random();
       if(r<.4) spinV.set(0,-5,1); else if(r<.7) spinV.set(-3,-3,1); else spinV.set(3,-3,1);
       spinType=spinFromVector(spinV); lastHit='ai'; side=null; bounceOnSide=0; letBall=false; serveShot=true; netTouched=false;
+      serveBy='ai'; aiTouched=false; playerTouched=false;
       state='playing'; hideMsg(); sHit(.4,'backspin'); rally=0;
       document.getElementById('rallyCount').textContent=0;
     }
@@ -1238,6 +1384,17 @@
     function winPoint(w) {
       if (pointScored) return; // 最终防线：无论哪条路径触发，本回合只计一次分
       pointScored = true;
+      if (diff==='train') { trainPointEnd(w); return; } // 训练模式：不计比分，仅统计回合
+      // 本局数据统计：ACE / 制胜分
+      if (serveBy==='player' && w==='player' && !aiTouched) statAce++;
+      if (serveBy==='ai' && w==='ai' && !playerTouched) statAceAgainst++;
+      if (w==='player' && lastHit==='player') statWinners++;
+      // 制胜一击反馈：本回合最后一板是玩家爆冲 → 强震屏 + 白闪 + 火花
+      if (w==='player' && playerLastSmash) {
+        shakeAmt = Math.max(shakeAmt,.16); flash();
+        spawnParticles(ball.position, 0xffd86b, 18);
+        qualityToast('制胜分！','good');
+      }
       if (w==='player'){ pScore++; sCheer(true); aiMood=Math.max(.7,aiMood-.05); bump('playerScore'); }
       else { aScore++; sCheer(false); aiMood=Math.min(1.3,aiMood+.05); bump('aiScore'); }
       serveCnt++;
@@ -1256,7 +1413,9 @@
           state='matchover';
           const win = pGames>aGames;
           const lv = AI_STYLES[diff].celeb;
-          showMsg(win ? (lv>=3?'传奇加冕！':'夺冠！') : '惜败', `大比分 ${pGames} : ${aGames} · 空格重新开赛`);
+          recordMatch(win); hideKeyPoint();
+          showMsg(win ? (lv>=3?'传奇加冕！':'夺冠！') : '惜败',
+            `大比分 ${pGames} : ${aGames} · 最长回合 ${statLongRally} 板 · 制胜分 ${statWinners} · ACE ${statAce}${statAceAgainst?` · 被ACE ${statAceAgainst}`:''} · 空格重新开赛`);
           if (win) celebrate(lv);   // 难度越高夺冠庆典越盛大
           return;
         }
@@ -1269,7 +1428,9 @@
         setTimeout(()=>{ if(state!=='matchover') prepareServe(); }, 4000);
         return;
       }
+      const wasDeuce = deuce;
       deuce = pScore>=CFG.game.deuce && aScore>=CFG.game.deuce;
+      if (deuce && !wasDeuce) { toast('DEUCE · 10 平！2 分差定胜负','info'); crowd(.5); }
       if (deuce) pServes=!pServes;
       else if (serveCnt%CFG.game.serveEvery===0) pServes=!pServes;
       // 现今规则：决胜局(第7局)一方先得5分交换场地
@@ -1277,7 +1438,7 @@
         finalSwitch = true;
         toast('决胜局交换场地','info');
       }
-      updateServeDot(); updateScore();
+      updateServeDot(); updateScore(); updateKeyPoint();
       setTimeout(()=>{ if(state!=='matchover') prepareServe(); }, 1100);
     }
     function updateScore(){ setText('playerScore',pScore); setText('aiScore',aScore); }
@@ -1299,7 +1460,7 @@
       state='serving'; power=0; updateServeDot();
       if (pServes) {
         ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05);
-        showMsg('你的发球','按住左键/空格蓄力，松开抛球发球');
+        showMsg(diff==='train'?'训练发球':'你的发球','按住左键/空格蓄力，松开发球 · 发球时左右移动可加侧旋');
       } else {
         ball.position.set(0, CFG.table.H+.14, -CFG.table.L/2+.05);
         showMsg('对手发球','注意落点光圈，准备接球');
@@ -1463,10 +1624,12 @@
       }
     }
     function powerBarUpdate(){
+      const hf=document.getElementById('hitFill'); // 触屏击球按钮内的蓄力填充
       if(charging){
         const p=Math.min((clock.elapsedTime-chargeT0)/CFG.game.maxCharge,1)*100;
         document.getElementById('powerBarFill').style.width=p+'%';
-      }
+        if(hf) hf.style.height=p+'%';
+      } else if(hf) hf.style.height='0%';
     }
 
     /* ============================================================
@@ -1476,9 +1639,11 @@
       const sp=vel.length();
       if(sp>.5&&(state==='playing'||state==='serving')){
         trail.unshift(ball.position.clone()); if(trail.length>TRAIL_N) trail.pop();
+        const hot=sp>4.2; // 高速球拖尾偏暖色，视觉上更"冲"
         trailMesh.forEach((m,i)=>{
           if(i<trail.length){ m.position.copy(trail[i]); m.visible=true;
-            m.material.opacity=(1-i/TRAIL_N)*.45*Math.min(1,sp/5);
+            m.material.opacity=(1-i/TRAIL_N)*.6*Math.min(1,sp/4.5);
+            m.material.color.setHex(hot?0xffd0a0:0xfff4d0);
             m.scale.setScalar(1-i/TRAIL_N*.6);
           } else m.visible=false;
         });
@@ -1608,10 +1773,19 @@
           audioInit(); tone(660,660,.07,'sine',.05);
         });
       });
+      // 音效开关（状态记忆到 localStorage）
+      const sb = document.getElementById('sndBtn');
+      if (sb) sb.addEventListener('click', e => {
+        e.stopPropagation();
+        audioInit(); setMute(!muted);
+        if (!muted) tone(700,700,.07,'sine',.05);
+      });
       // 竖屏兜底：用户可选择忽略横屏提示直接游玩
       const pg = document.getElementById('portraitGo');
       if (pg) pg.addEventListener('click',e=>{ e.stopPropagation(); document.getElementById('rotateHint').style.display='none'; });
       document.getElementById('startBtn').addEventListener('click',startMatch);
+      setMute(muted);        // 初始化音效按钮图标（含历史静音状态）
+      renderRecords();       // 初始化难度卡上的历史战绩显示
       bindTouchUI();
     }
 
@@ -1681,10 +1855,18 @@
       power=0;celebrating=false;celebT=0;forehand=true;gripT=1;aiGripT=1;deuce=false;aiMood=1;rally=0;
       padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
       finalSwitch=false; pointDone=false; pointScored=false;
+      // 新增：本局数据 & 关键分横幅重置
+      statLongRally=0; statWinners=0; statAce=0; statAceAgainst=0;
+      playerLastSmash=false; prevDeuce=false; serveBy=null; aiTouched=false; playerTouched=false;
+      hideKeyPoint();
       const zk=document.getElementById('zknob'); if(zk) zk.style.top='50%';
-      setText('currentGame',1); updateScore(); setText('playerGames','局 0'); setText('aiGames','局 0');
+      if (diff==='train') { setText('currentGame','∞'); setText('modeTag','训练模式 · 不计比分'); }
+      else { setText('currentGame',1); setText('modeTag','七局四胜'); }
+      updateScore(); setText('playerGames','局 0'); setText('aiGames','局 0');
       setText('rallyCount',0); toggleGripInit();
-      syncDiff(); updateServeDot(); crowd(.2); prepareServe();
+      syncDiff(); updateServeDot(); crowd(.2);
+      if (diff==='train') toast('训练模式 · 无限对拉，比拼最长回合','info');
+      prepareServe();
     }
     function toggleGripInit(){
       const el=document.getElementById('gripName'); el.textContent='正手'; el.className='grip-name fh';
