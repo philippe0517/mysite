@@ -907,26 +907,35 @@
 
     function buildTable() {
       tableGroup = new THREE.Group();
+      // 台面：ITTF 比赛蓝，哑光漆面（真实台面无金属反光）
       const top = new THREE.Mesh(
         new THREE.BoxGeometry(CFG.table.W, .05, CFG.table.L),
-        new THREE.MeshStandardMaterial({ color: 0x1a6fb5, roughness: .3, metalness: .06 })
+        new THREE.MeshStandardMaterial({ color: 0x175fa8, roughness: .45, metalness: 0 })
       );
       top.position.y = CFG.table.H; top.castShadow = true; top.receiveShadow = true; tableGroup.add(top);
 
-      // 白线
+      // 白线：边线/端线 2cm · 双打中线按 ITTF 标准宽 3mm
       const line = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const add = (w,d,x,z)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,.0012,d),line); m.position.set(x,CFG.table.H+.026,z); tableGroup.add(m); };
       add(.02, CFG.table.L, -CFG.table.W/2+.01, 0);
       add(.02, CFG.table.L,  CFG.table.W/2-.01, 0);
       add(CFG.table.W, .02, 0, -CFG.table.L/2+.01);
       add(CFG.table.W, .02, 0,  CFG.table.L/2-.01);
-      add(.02, CFG.table.L, 0, 0); // 中线
+      add(.003, CFG.table.L, 0, 0); // 中线（ITTF 标准 3mm）
 
-      // 桌腿
-      const legM = new THREE.MeshStandardMaterial({ color:0x9aa7b5, metalness:.6, roughness:.38 });
+      // 桌腿：深炭灰现代比赛支架（矩形腿+万向轮，替代银灰圆柱）
+      const legM = new THREE.MeshStandardMaterial({ color:0x2b2f36, metalness:.55, roughness:.42 });
+      const wheelM = new THREE.MeshStandardMaterial({ color:0x14161a, roughness:.7 });
       [[-.68,-1.28],[.68,-1.28],[-.68,1.28],[.68,1.28]].forEach(p=>{
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(.024,.034,CFG.table.H,12), legM);
-        leg.position.set(p[0], CFG.table.H/2, p[1]); leg.castShadow = true; tableGroup.add(leg);
+        const leg = new THREE.Mesh(new THREE.BoxGeometry(.05,CFG.table.H-.05,.04), legM);
+        leg.position.set(p[0], (CFG.table.H-.05)/2+.05, p[1]); leg.castShadow = true; tableGroup.add(leg);
+        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(.032,.032,.03,14), wheelM);
+        wheel.rotation.z = Math.PI/2; wheel.position.set(p[0], .032, p[1]); wheel.castShadow = true; tableGroup.add(wheel);
+      });
+      // 每端底部横梁：连接前后腿，模拟比赛桌折叠支架结构
+      [-1.28,1.28].forEach(z=>{
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(1.36,.045,.04), legM);
+        bar.position.set(0,.16,z); bar.castShadow = true; tableGroup.add(bar);
       });
       scene.add(tableGroup);
     }
@@ -934,18 +943,23 @@
     function buildNet() {
       netGroup = new THREE.Group();
       const postM = new THREE.MeshStandardMaterial({ color:0xcccccc, metalness:.7, roughness:.2 });
+      const clampM = new THREE.MeshStandardMaterial({ color:0x22252b, metalness:.4, roughness:.5 });
       [-1,1].forEach(s=>{
         const p = new THREE.Mesh(new THREE.CylinderGeometry(.006,.006, CFG.table.netH+.04,8), postM);
         p.position.set(s*CFG.table.W/2, CFG.table.H+(CFG.table.netH+.04)/2, 0); netGroup.add(p);
+        // 网柱夹座：黑色金属夹钳底座（真实网柱固定件）
+        const clamp = new THREE.Mesh(new THREE.BoxGeometry(.03,.05,.05), clampM);
+        clamp.position.set(s*(CFG.table.W/2-.006), CFG.table.H+.022, 0); netGroup.add(clamp);
       });
+      // 网面：深色比赛网（真实 ITTF 网面为深蓝/黑网格，配白色网顶带）
       const cv = document.createElement('canvas'); cv.width=256; cv.height=32;
       const x = cv.getContext('2d'); x.clearRect(0,0,256,32);
-      x.strokeStyle='rgba(255,255,255,.65)'; x.lineWidth=.5;
+      x.strokeStyle='rgba(24,34,50,.88)'; x.lineWidth=.8;
       for(let i=0;i<256;i+=4){x.beginPath();x.moveTo(i,0);x.lineTo(i,32);x.stroke();}
       for(let j=0;j<32;j+=4){x.beginPath();x.moveTo(0,j);x.lineTo(256,j);x.stroke();}
       const mesh = new THREE.Mesh(
         new THREE.PlaneGeometry(CFG.table.W, CFG.table.netH),
-        new THREE.MeshStandardMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, opacity:.75, side:THREE.DoubleSide })
+        new THREE.MeshStandardMaterial({ map:new THREE.CanvasTexture(cv), transparent:true, opacity:.85, side:THREE.DoubleSide })
       );
       mesh.position.set(0, CFG.table.H+CFG.table.netH/2, 0); netGroup.add(mesh);
       const band = new THREE.Mesh(new THREE.BoxGeometry(CFG.table.W,.012,.005), new THREE.MeshBasicMaterial({color:0xffffff}));
@@ -970,6 +984,31 @@
       }
     }
 
+    /* 程序化木纹底板纹理（两拍共用一张；repeat/offset 补偿 ExtrudeGeometry 以形状坐标为 UV 的映射） */
+    let _woodTex = null;
+    function woodTexture() {
+      if (_woodTex) return _woodTex;
+      const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+      const x = c.getContext('2d');
+      x.fillStyle = '#f0c88a'; x.fillRect(0, 0, 256, 256);
+      x.globalAlpha = .3;
+      for (let i = 0; i < 46; i++) {  // 细木纹丝
+        x.strokeStyle = Math.random() > .5 ? 'rgba(172,122,62,1)' : 'rgba(235,198,128,1)';
+        x.lineWidth = 1 + Math.random() * 1.5;
+        const y = Math.random() * 256;
+        x.beginPath(); x.moveTo(0, y);
+        x.bezierCurveTo(85, y + (Math.random() - .5) * 16, 170, y + (Math.random() - .5) * 16, 256, y);
+        x.stroke();
+      }
+      x.globalAlpha = 1;
+      for (let i = 0; i < 5; i++) {  // 层压深色带（模拟真实底板多层夹芯）
+        x.fillStyle = 'rgba(150,100,48,.28)';
+        x.fillRect(0, 20 + i * 48 + Math.random() * 8, 256, 2.5);
+      }
+      const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(5.5, 4.5); t.offset.set(.5, .5);
+      _woodTex = t; return t;
+    }
     function makePaddle() {
       const g = new THREE.Group(), w = CFG.paddle.W/2, h = CFG.paddle.H/2;
       // 拍形：上圆下方收颈，接近真实横拍轮廓
@@ -979,36 +1018,49 @@
       shape.bezierCurveTo(w,h*.8,w*.6,h,0,h);
       shape.bezierCurveTo(-w*.6,h,-w,h*.8,-w,h*.2);
       shape.bezierCurveTo(-w,-h*.3,-w*.9,-h*.85,0,-h*.85);
-      // 底板：亮木纹色
+      // 底板：程序化木纹贴图（细木纹丝+多层夹芯色带），微高光漆面
       const blade = new THREE.Mesh(
         new THREE.ExtrudeGeometry(shape,{depth:CFG.paddle.T, bevelEnabled:true, bevelThickness:.002, bevelSize:.002, bevelSegments:2}),
-        new THREE.MeshStandardMaterial({ color:0xF0C88A, roughness:.5, metalness:.02 })
+        new THREE.MeshStandardMaterial({ color:0xffffff, map:woodTexture(), roughness:.42, metalness:.05 })
       );
       blade.rotation.x = Math.PI/2; blade.castShadow = true; g.add(blade);
       // 胶皮：正手面红 / 反手面黑（沿厚度 y 轴分贴底板两面——z 是拍长方向）
       // 两面胶皮均与底板表面留出 ≥.0015 间隙，彻底消除胶皮与木色底板共面导致的 z-fighting 黄黑闪烁；
       // 材质 DoubleSide：任意视角（含翻拍/回放瞬间）都不因背面剔除透出黄色底板
       const rg = new THREE.ExtrudeGeometry(shape,{depth:.003, bevelEnabled:false});
-      const rubFront = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD93B3B, roughness:.42, metalness:.04, side:THREE.DoubleSide}));
+      const rubFront = new THREE.Mesh(rg, new THREE.MeshStandardMaterial({color:0xD93B3B, roughness:.36, metalness:.04, side:THREE.DoubleSide}));
       rubFront.rotation.x=Math.PI/2; rubFront.position.y=CFG.paddle.T/2+.0025; g.add(rubFront);
       const rubBack = new THREE.Mesh(rg.clone(), new THREE.MeshStandardMaterial({color:0x1B1B20, roughness:.55, side:THREE.DoubleSide}));
       rubBack.rotation.x=Math.PI/2; rubBack.position.y=-CFG.paddle.T-.0035; g.add(rubBack);
       g.userData.rubF = rubFront.material; g.userData.rubB = rubBack.material; // 皮肤系统：可替换拍面胶皮颜色
-      // 白色护边替代棕色环（对齐拍厚中心）
-      const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
-      edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; edge.position.y=-CFG.paddle.T/2; g.add(edge);
-      // 一体化横拍握柄（深色拍柄与正面黑呼应）
+      // 护边：沿拍形轮廓的白色包边管（外扩 3.5% 包裹底板+胶皮侧缘，贴合真实轮廓，替代近似圆环）
+      const epts = shape.getPoints(80).map(p=>new THREE.Vector3(p.x*1.035, -CFG.paddle.T/2, p.y*1.035));
+      const ecurve = new THREE.CatmullRomCurve3(epts, true);
+      const edge = new THREE.Mesh(new THREE.TubeGeometry(ecurve, 120, .005, 8, true),
+        new THREE.MeshStandardMaterial({color:0xf5f5f5, roughness:.5}));
+      edge.castShadow = true; g.add(edge);
+      // 一体化横拍握柄：FL 收腰柄（真实横拍最常见握柄——颈部较宽、中部收窄、尾部微展，握感轮廓自然）
       const gripShape = new THREE.Shape();
-      gripShape.moveTo(-.028,-h*.8);
-      gripShape.lineTo(.028,-h*.8);
-      gripShape.lineTo(.02,-h*.8-.1);
-      gripShape.lineTo(-.02,-h*.8-.1);
+      gripShape.moveTo(-.03,-h*.8);
+      gripShape.bezierCurveTo(-.021,-h*.8-.025,-.0165,-h*.8-.05,-.018,-h*.8-.078);
+      gripShape.bezierCurveTo(-.019,-h*.8-.093,-.023,-h*.8-.1,-.0215,-h*.8-.105);
+      gripShape.lineTo(.0215,-h*.8-.105);
+      gripShape.bezierCurveTo(.023,-h*.8-.1,.019,-h*.8-.093,.018,-h*.8-.078);
+      gripShape.bezierCurveTo(.0165,-h*.8-.05,.021,-h*.8-.025,.03,-h*.8);
       gripShape.closePath();
       const grip = new THREE.Mesh(
         new THREE.ExtrudeGeometry(gripShape,{depth:.013, bevelEnabled:true, bevelThickness:.0015, bevelSize:.0015, bevelSegments:1}),
         new THREE.MeshStandardMaterial({color:0x26262B, roughness:.55})
       );
       grip.rotation.x = Math.PI/2; grip.position.z = -.0065; grip.castShadow = true; g.add(grip);
+      // 柄身金色镶嵌装饰片（沿柄长的木质镶嵌条，替代生硬的手胶分界线）
+      const inlay = new THREE.Mesh(new THREE.BoxGeometry(.007,.0015,.075),
+        new THREE.MeshStandardMaterial({color:0xC9A96E, roughness:.35, metalness:.4}));
+      inlay.position.set(0,-.0138,-h*.8-.052); g.add(inlay);
+      // 柄尾金色端帽（锥台造型，拍尾点睛细节）
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(.016,.019,.006,20),
+        new THREE.MeshStandardMaterial({color:0xC9A96E, roughness:.45, metalness:.3}));
+      cap.rotation.x=Math.PI/2; cap.position.z=-h*.8-.095; g.add(cap);
       return g;
     }
 
