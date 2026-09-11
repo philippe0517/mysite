@@ -373,7 +373,7 @@
     ============================================================ */
     const CFG = {
       table: { L: 2.74, W: 1.525, H: 0.76, netH: 0.1525 },
-      ball: { r: 0.02, g: 9.81, rest: 0.83, drag: 0.11 },
+      ball: { r: 0.02, g: 9.81, rest: 0.87, drag: 0.11 },
       paddle: { W: 0.18, H: 0.22, T: 0.008, zMin: .15, zMax: 2.15, assist: .22 },
       game: { win: 11, serveEvery: 2, maxCharge: 1.4, deuce: 10, gamesToWin: 4, substeps: 3 }
     };
@@ -578,10 +578,6 @@
         ring.position.set((i-2)*.56, 6.4, -2.2); if (i%2) ring.position.y = 6.1;
         scene.add(ring);
       });
-
-      // 裁判椅
-      const chair = new THREE.Mesh(new THREE.BoxGeometry(.42,.9,.42), new THREE.MeshStandardMaterial({ color:0x3d4c5e, roughness:.65 }));
-      chair.position.set(CFG.table.W/2 + .85, .45, 0); chair.castShadow = true; scene.add(chair);
     }
 
     function buildTable() {
@@ -673,7 +669,7 @@
       // 白色护边替代棕色环
       const edge = new THREE.Mesh(new THREE.TorusGeometry(w*.85,.004,8,32), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
       edge.rotation.x=Math.PI/2; edge.scale.y=h/w*.9; g.add(edge);
-      // 一体化扁平拍柄（贴合拍颈收窄的锥形板，与胶皮同色系）
+      // 一体化横拍握柄（马龙式横握：胶皮同色系扁柄，随拍面横置后自然处于右手侧）
       const gripShape = new THREE.Shape();
       gripShape.moveTo(-.028,-h*.8);
       gripShape.lineTo(.028,-h*.8);
@@ -685,15 +681,13 @@
         new THREE.MeshStandardMaterial({color:0xD83A3A, roughness:.55})
       );
       grip.rotation.x = Math.PI/2; grip.position.z = -.0065; grip.castShadow = true; g.add(grip);
-      const gripEnd = new THREE.Mesh(new THREE.BoxGeometry(.042,.012,.015), new THREE.MeshStandardMaterial({color:0xf5f5f5,roughness:.5}));
-      gripEnd.position.set(0,-h*.8-.105,0); g.add(gripEnd);
       return g;
     }
 
     function buildPaddles() {
       pPaddle = makePaddle();
       pPaddle.position.set(0, CFG.table.H+.1, CFG.table.L/2-.22);
-      pPaddle.rotation.set(-.27,-.2,.42);
+      pPaddle.rotation.set(-.27,-.2,Math.PI/2+.32);
       scene.add(pPaddle);
       pArm = new THREE.Group();
       const arm = new THREE.Mesh(new THREE.CylinderGeometry(.04,.05,.5,12), new THREE.MeshStandardMaterial({color:0xE8C4A0,roughness:.6}));
@@ -800,7 +794,9 @@
       for (let i=0;i<360;i++){
         _v.y -= CFG.ball.g*dt;
         _v.multiplyScalar(Math.exp(-CFG.ball.drag*dt));
-        _v.x += sv.x*.15*dt; _v.y += sv.y*.1*dt;
+        // 与 physicsStep 同步的马格努斯模拟
+        _v.x += sv.x*.15*dt; _v.y -= sv.y*.008*_v.length()*dt;
+        _v.multiplyScalar(Math.exp(-.22*dt*0)); // 旋转衰减对短时预测影响小，忽略
         _p.addScaledVector(_v, dt);
         if (!bounced) {
           if (_v.y < 0 && _p.y - CFG.ball.r <= tableTop) {
@@ -830,8 +826,13 @@
     function physicsStep(dt) {
       vel.y -= CFG.ball.g*dt;
       vel.multiplyScalar(Math.exp(-CFG.ball.drag*dt));
-      // 马格努斯力
-      vel.x += spinV.x*.15*dt; vel.y += spinV.y*.1*dt; vel.z += spinV.z*.05*dt;
+      // 马格努斯效应（现实方向）：上旋(spinV.y>0)下扎、下旋上飘、侧旋横拐，与球速耦合（快球旋得更狠）
+      const spd = vel.length();
+      vel.x += spinV.x*.15*dt;
+      vel.y -= spinV.y*.008*spd*dt;
+      vel.z += spinV.z*.05*dt;
+      // 旋转在空气中自然衰减
+      spinV.multiplyScalar(Math.exp(-.22*dt));
       ball.position.addScaledVector(vel, dt);
 
       ball.rotation.x += spinV.z*dt*15;
@@ -867,7 +868,7 @@
           }
           ball.position.y = top + CFG.ball.r;
           vel.y = -vel.y*CFG.ball.rest;
-          if (vel.y < .85) vel.y = .85;
+          if (vel.y < .5) vel.y = .5;  // 真实弹跳：低球自然弹不高（两跳判分靠自然衰减）
           vel.x*=.94; vel.z*=.94; spinV.multiplyScalar(.88);
           serveShot = false; // 球已在台面弹起，发球擦网判定窗口关闭
           // 旋转影响弹跳
@@ -903,10 +904,10 @@
       }
     }
 
-    // 玩家三维真实触球判定：拍面椭圆范围（含 3cm 余量）+ z 向 32cm 触球窗口
+    // 玩家三维真实触球判定：拍面横置后 x 向覆盖=拍高(H)、y 向覆盖=拍宽(W)，含 3cm 余量 + z 向 32cm 触球窗口
     function playerCanReach() {
       const dx=ball.position.x-pPaddle.position.x, dy=ball.position.y-pPaddle.position.y, dz=ball.position.z-pPaddle.position.z;
-      const ex=dx/(CFG.paddle.W/2+.03), ey=dy/(CFG.paddle.H/2+.03);
+      const ex=dx/(CFG.paddle.H/2+.03), ey=dy/(CFG.paddle.W/2+.03);
       return ex*ex+ey*ey<1 && Math.abs(dz)<.32;
     }
     function collidePaddle() {
@@ -975,7 +976,7 @@
         // 反手：快撕/弹击——落点浅平、出手更快、线路更直、侧旋更足、弧线低平
         const fh = forehand;
         const tz = fh ? -.32 - pw*.74 : -.16 - pw*.5;
-        const lift = fh ? .37 : .29;
+        const lift = fh ? .42 : .33;   // 补偿上旋下扎的弧线抬升
         const sh = ((fh ? 3.05+pw*.95 : 2.75+pw*.65) * (TIMING_SH[timingNow]||1)) + sw*.5;
         // 反手线路偏直线且横向散布更大（弹击变线快）
         const txBase = fh ? relX*.55 : relX*.42 + (relX>0?-.14:.14);
@@ -1014,7 +1015,7 @@
           tx = away*(.15 + Math.random()*.5);
         }
         const sh = (2.9+Math.random()*.9)*st.mult*aiMood;
-        aimed = aimSolve(ball.position, tx, tz, sh, .34);
+        aimed = aimSolve(ball.position, tx, tz, sh, .38);
         vel.set(aimed.vx, aimed.vy, aimed.vz);
         sv.set(sp.ss, sp.ts+sp.bs, 3);
         sHit(.45, spt);
@@ -1060,7 +1061,7 @@
       ball.position.set(pPaddle.position.x, CFG.table.H+.14, Math.max(CFG.paddle.zMin, Math.min(CFG.table.L/2+.05, pPaddle.position.z)));
       const tz1 = .35 - power*.2;
       const tx = (Math.random()-.5)*.22;
-      const a = aimSolve(ball.position, tx, tz1, 1.5, .35);
+      const a = aimSolve(ball.position, tx, tz1, 1.5, .4);
       vel.set(a.vx, a.vy, a.vz);
       const r=Math.random();
       if (r<.4) spinV.set(0,5,-1); else if(r<.7) spinV.set(-3,3,-1); else spinV.set(3,3,-1);
@@ -1076,7 +1077,7 @@
       ball.position.set((Math.random()-.5)*.3, CFG.table.H+.14, -CFG.table.L/2+.05);
       const tz1 = -(.35-Math.random()*.2); // AI 己方第一跳（z<0）
       const tx = (Math.random()-.5)*.22;
-      const a = aimSolve(ball.position, tx, tz1, 1.4*st.mult, .35);
+      const a = aimSolve(ball.position, tx, tz1, 1.4*st.mult, .4);
       vel.set(a.vx, a.vy, a.vz);
       const r=Math.random();
       if(r<.4) spinV.set(0,-5,1); else if(r<.7) spinV.set(-3,-3,1); else spinV.set(3,-3,1);
@@ -1177,6 +1178,7 @@
       aPaddle.position.z += (tz-aPaddle.position.z)*Math.min(1,12*dt);
       aPaddle.rotation.y = Math.atan2(ball.position.x-aPaddle.position.x,1)*.25;
       aPaddle.rotation.x = .35+(ball.position.y-aPaddle.position.y)*.3;
+      aPaddle.rotation.z = -Math.PI/2;  // 横拍镜像（对面视角拍头指向其左侧）
     }
 
     /* ============================================================
@@ -1225,13 +1227,13 @@
       if (swingT>0) swingT-=dt;
       const swing = swingT>0 ? Math.sin((.22-swingT)/.22*Math.PI)*.35 : 0;
 
-      // 现实击球拍形：正手拍面前倾约15°，反手更立；蓄力拉弧圈拍面后仰引拍，挥拍瞬间前压
-      // 拍头倾角：正手横拍约25°侧倾，反手反向；拍面朝向随站位水平角偏转
+      // 现实击球拍形（马龙式横拍）：拍面横置（绕视线轴转90°，拍头指向侧方），右手侧横握拍柄
+      // 正手拍面前倾约15°，反手更立；蓄力拉弧圈拍面后仰引拍，挥拍瞬间前压
       gripT += ((forehand?1:0)-gripT)*Math.min(1,12*dt);
       const tilt = charging ? power*.25 : 0;
       pPaddle.rotation.x = (-.27*gripT-.12*(1-gripT)) - cy*.06 - tilt - swing*.85;
       pPaddle.rotation.y = (-.2*gripT+.3*(1-gripT)) + cx*.22;
-      pPaddle.rotation.z = (.42*gripT-.32*(1-gripT)) + cx*.05;
+      pPaddle.rotation.z = Math.PI/2 + (.32*gripT-.22*(1-gripT)) + cx*.05;
 
       if (pArm){ pArm.position.x = pPaddle.position.x*.4+(forehand?.1:-.1); }
       updateToss();
