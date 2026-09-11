@@ -150,125 +150,6 @@
       50% { opacity: 1; }
     }
 
-    /* ===== Konami 乒乓球游戏全屏覆盖层 ===== */
-    .pingpong-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(30, 58, 95, 0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-    }
-
-    .pingpong-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .pingpong-overlay__title {
-      color: var(--color-white);
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      font-family: var(--font-display);
-    }
-
-    .pingpong-overlay__subtitle {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-
-    .pingpong-overlay__canvas {
-      background-color: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .pingpong-overlay__score {
-      display: flex;
-      gap: 48px;
-      margin-top: 20px;
-      color: var(--color-white);
-      font-size: 24px;
-      font-weight: 700;
-      font-family: var(--font-display);
-    }
-
-    .pingpong-overlay__score span {
-      min-width: 40px;
-      text-align: center;
-    }
-
-    .pingpong-overlay__score .label {
-      font-size: 12px;
-      font-weight: 400;
-      color: rgba(255, 255, 255, 0.5);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .pingpong-overlay__hint {
-      margin-top: 20px;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 13px;
-      text-align: center;
-      line-height: 1.8;
-    }
-
-    .pingpong-overlay__close {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: var(--color-white);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.3s ease;
-      font-size: 20px;
-    }
-
-    .pingpong-overlay__close:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .pingpong-overlay__message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: var(--color-white);
-      font-size: 32px;
-      font-weight: 700;
-      font-family: var(--font-display);
-      text-align: center;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-    }
-
-    .pingpong-overlay__message.show {
-      opacity: 1;
-    }
-
     /* 鼠标脑电波轨迹 Canvas */
     #eegTrailCanvas {
       position: fixed;
@@ -2492,6 +2373,105 @@
       height: 18px;
     }
 
+    /* ===== 3D 乒乓球游戏入口横幅 ===== */
+    .game-banner {
+      padding: 0 0 8px;
+    }
+
+    .game-banner__inner {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      background: linear-gradient(135deg, #16324f 0%, #1e3a5f 45%, #2c5f8a 100%);
+      border-radius: var(--radius-lg);
+      padding: 44px 48px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .game-banner__inner::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -60px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(126, 182, 217, 0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .game-banner__inner::after {
+      content: '';
+      position: absolute;
+      bottom: -70px;
+      right: 180px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 208, 230, 0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .game-banner__text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .game-banner__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #a8d0e6;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+    }
+
+    .game-banner__title {
+      color: var(--color-white);
+      font-size: 30px;
+      font-weight: 700;
+      font-family: var(--font-display);
+      margin: 8px 0 10px;
+    }
+
+    .game-banner__desc {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 15px;
+      line-height: 1.8;
+      max-width: 560px;
+    }
+
+    .game-banner__btn {
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      padding: 16px 38px;
+      border-radius: 999px;
+      background-color: var(--color-white);
+      color: #1e3a5f;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .game-banner__btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .game-banner__btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
     /* ===== 响应式 ===== */
     @media (max-width: 900px) {
       .hero__inner {
@@ -2659,21 +2639,160 @@
         grid-template-columns: 1fr;
       }
 
-      .skills__bento {
-        grid-template-columns: 1fr;
+      .game-banner__inner {
+        flex-direction: column;
+        text-align: center;
+        padding: 32px 24px;
+        gap: 22px;
       }
 
-      .bento-card--large,
-      .bento-card--medium,
+      .game-banner__title {
+        font-size: 24px;
+      }
+
+      .game-banner__desc {
+        font-size: 14px;
+      }
+
+      /* ===== 兴趣技能移动端重设计（电脑端不变） =====
+         布局策略：2 列骨架——大卡/中卡/目标卡通栏，四张小卡组成 2×2 小方块阵；
+         中卡改横向布局（图标居左），小卡改纵向居中小组件，消除孤立横条感 */
+      .skills__bento {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: auto;
+        gap: 12px;
+      }
+
+      .bento-card {
+        padding: 20px 18px;
+        border-radius: 18px;
+      }
+
+      /* 焦点卡：乒乓球（通栏） */
+      .bento-card--large {
+        grid-column: span 2;
+        grid-row: span 1;
+        padding: 24px 20px;
+        background: linear-gradient(135deg, rgba(126, 182, 217, 0.1) 0%, rgba(168, 208, 230, 0.16) 100%);
+      }
+
+      .bento-card--large .bento-card__icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 14px;
+      }
+
+      .bento-card--large .bento-card__title {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .bento-card--large .bento-card__desc {
+        font-size: 13.5px;
+      }
+
+      .bento-card--large .bento-card__deco--pingpong {
+        width: 150px;
+        height: 150px;
+        bottom: -34px;
+        right: -34px;
+      }
+
+      .bento-card--large .bento-card__badge {
+        top: 16px;
+        right: 16px;
+        font-size: 10px;
+        padding: 3px 10px;
+      }
+
+      .bento-card--large .bento-card__level {
+        padding-top: 12px;
+      }
+
+      /* 中卡：竖排内容卡（移动端标准阅读流，正文全宽不挤压） */
+      .bento-card--medium {
+        grid-column: span 2;
+        padding: 22px 20px;
+      }
+
+      .bento-card--medium .bento-card__icon {
+        width: 42px;
+        height: 42px;
+        margin-bottom: 12px;
+      }
+
+      .bento-card--medium .bento-card__number {
+        top: 18px;
+        right: 16px;
+        font-size: 22px;
+      }
+
+      .bento-card--medium .bento-card__title {
+        font-size: 17px;
+        margin-bottom: 8px;
+        padding-right: 40px;
+      }
+
+      .bento-card--medium .bento-card__desc {
+        font-size: 13.5px;
+        line-height: 1.7;
+      }
+
+      .bento-card--medium .bento-card__level {
+        padding-top: 14px;
+      }
+
+      /* 小卡：2×2 居中小方块（图标上、名称下、小编号），像系统小组件 */
       .bento-card--small {
         grid-column: span 1;
         grid-row: span 1;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 10px 16px;
+        gap: 9px;
       }
 
+      .bento-card--small .bento-card__icon {
+        width: 42px;
+        height: 42px;
+        margin-bottom: 0;
+      }
+
+      .bento-card--small .bento-card__icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .bento-card--small .bento-card__title {
+        font-size: 13px;
+        margin-bottom: 0;
+      }
+
+      .bento-card--small .bento-card__number {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        font-size: 13px;
+        opacity: 0.5;
+      }
+
+      /* 未来目标卡：竖排居中 */
       .bento-card--goal {
+        grid-column: span 2;
         flex-direction: column !important;
         text-align: center;
-        gap: 12px !important;
+        gap: 10px !important;
+        padding: 22px 18px;
+      }
+
+      .bento-card--goal .bento-card__title {
+        font-size: 16px;
+      }
+
+      .bento-card--goal .bento-card__desc {
+        font-size: 13px;
       }
 
       .contact__methods {
@@ -2712,6 +2831,11 @@
         width: 100%;
       }
 
+      .game-banner__btn {
+        width: 100%;
+        justify-content: center;
+      }
+
       .chat-fab {
         right: 20px;
         bottom: 24px;
@@ -2737,20 +2861,6 @@
     <div class="loader-ball"></div>
     <div class="loader-shadow"></div>
     <div class="loader-text">正在加载...</div>
-  </div>
-
-  <!-- ===== Konami 乒乓球游戏全屏覆盖层 ===== -->
-  <div class="pingpong-overlay" id="pingpongOverlay">
-    <button class="pingpong-overlay__close" id="pingpongClose" type="button" aria-label="关闭游戏">&times;</button>
-    <div class="pingpong-overlay__title">乒乓球对战</div>
-    <div class="pingpong-overlay__subtitle">彩蛋解锁！先得 5 分获胜</div>
-    <canvas class="pingpong-overlay__canvas" id="pingpongCanvas" width="600" height="400"></canvas>
-    <div class="pingpong-overlay__score">
-      <div><span class="label">你</span><span id="playerScore">0</span></div>
-      <div><span class="label">电脑</span><span id="aiScore">0</span></div>
-    </div>
-    <div class="pingpong-overlay__hint">鼠标上下移动控制左侧球拍 · 按 Esc 或点击右上角关闭</div>
-    <div class="pingpong-overlay__message" id="pingpongMessage"></div>
   </div>
 
   <!-- ===== 页面滚动进度条 ===== -->
@@ -2828,6 +2938,32 @@
           </div>
         </div>
         <div class="hero__avatar page-load page-load-delay-2" aria-label="于哲的头像占位">YZ</div>
+      </div>
+    </section>
+
+    <!-- ===== 3D 乒乓球游戏入口横幅 ===== -->
+    <section class="game-banner" id="game" aria-label="3D 乒乓球游戏入口">
+      <div class="container">
+        <div class="game-banner__inner reveal">
+          <div class="game-banner__text">
+            <span class="game-banner__eyebrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M5.5 6.5l13 11M18.5 6.5l-13 11"></path>
+              </svg>
+              PLAY NOW · 可以玩的真游戏
+            </span>
+            <h2 class="game-banner__title">3D 乒乓球奥运决赛</h2>
+            <p class="game-banner__desc">第一人称站上奥运赛场：正手红面大力爆冲、反手黑面快撕弹击，按住鼠标蓄力越久球越快。电脑手机都能玩，来和我隔网对决一局！</p>
+          </div>
+          <a class="game-banner__btn" href="ping-pong-3d.html" target="_blank" rel="noopener">
+            立即开玩
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
       </div>
     </section>
 
@@ -3902,224 +4038,6 @@
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           startReading();
-        }
-      });
-    })();
-
-    // ===== Konami 代码 + 乒乓球游戏彩蛋 =====
-    (function () {
-      var konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-      var konamiIndex = 0;
-      var overlay = document.getElementById('pingpongOverlay');
-      var canvas = document.getElementById('pingpongCanvas');
-      var closeBtn = document.getElementById('pingpongClose');
-      var playerScoreEl = document.getElementById('playerScore');
-      var aiScoreEl = document.getElementById('aiScore');
-      var messageEl = document.getElementById('pingpongMessage');
-      if (!overlay || !canvas || !closeBtn) return;
-
-      var ctx = canvas.getContext('2d');
-      var gameRunning = false;
-      var animationId = null;
-
-      // 游戏状态
-      var ball = { x: 300, y: 200, vx: 5, vy: 3, radius: 8 };
-      var player = { x: 20, y: 160, width: 10, height: 80 };
-      var ai = { x: 570, y: 160, width: 10, height: 80 };
-      var playerScore = 0;
-      var aiScore = 0;
-      var winScore = 5;
-
-      function resetBall(direction) {
-        ball.x = 300;
-        ball.y = 200;
-        ball.vx = direction * (4 + Math.random() * 2);
-        ball.vy = (Math.random() - 0.5) * 6;
-      }
-
-      function showMessage(text, duration) {
-        messageEl.textContent = text;
-        messageEl.classList.add('show');
-        setTimeout(function () {
-          messageEl.classList.remove('show');
-        }, duration || 1500);
-      }
-
-      function updateScore() {
-        playerScoreEl.textContent = playerScore;
-        aiScoreEl.textContent = aiScore;
-      }
-
-      function gameLoop() {
-        if (!gameRunning) return;
-
-        // 清空画布
-        ctx.fillStyle = 'rgba(255,255,255,0.03)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 画中线
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.setLineDash([8, 8]);
-        ctx.beginPath();
-        ctx.moveTo(300, 0);
-        ctx.lineTo(300, 400);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // 移动球
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-
-        // 上下边界
-        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-          ball.vy = -ball.vy;
-          ball.y = Math.max(ball.radius, Math.min(canvas.height - ball.radius, ball.y));
-        }
-
-        // 玩家球拍碰撞
-        if (ball.x - ball.radius < player.x + player.width &&
-            ball.x - ball.radius > player.x &&
-            ball.y > player.y &&
-            ball.y < player.y + player.height &&
-            ball.vx < 0) {
-          ball.vx = -ball.vx * 1.05;
-          var hitPos = (ball.y - player.y) / player.height;
-          ball.vy = (hitPos - 0.5) * 8;
-          ball.x = player.x + player.width + ball.radius;
-        }
-
-        // AI 球拍碰撞
-        if (ball.x + ball.radius > ai.x &&
-            ball.x + ball.radius < ai.x + ai.width &&
-            ball.y > ai.y &&
-            ball.y < ai.y + ai.height &&
-            ball.vx > 0) {
-          ball.vx = -ball.vx * 1.05;
-          var aiHitPos = (ball.y - ai.y) / ai.height;
-          ball.vy = (aiHitPos - 0.5) * 8;
-          ball.x = ai.x - ball.radius;
-        }
-
-        // 得分
-        if (ball.x < 0) {
-          aiScore++;
-          updateScore();
-          if (aiScore >= winScore) {
-            endGame('电脑获胜！');
-            return;
-          }
-          resetBall(1);
-        }
-        if (ball.x > canvas.width) {
-          playerScore++;
-          updateScore();
-          if (playerScore >= winScore) {
-            endGame('你赢了！');
-            return;
-          }
-          resetBall(-1);
-        }
-
-        // AI 移动（简单难度）
-        var aiCenter = ai.y + ai.height / 2;
-        if (aiCenter < ball.y - 20) {
-          ai.y += 3.5;
-        } else if (aiCenter > ball.y + 20) {
-          ai.y -= 3.5;
-        }
-        ai.y = Math.max(0, Math.min(canvas.height - ai.height, ai.y));
-
-        // 画球拍
-        ctx.fillStyle = '#7EB6D9';
-        ctx.fillRect(player.x, player.y, player.width, player.height);
-        ctx.fillStyle = '#A8D0E6';
-        ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
-
-        // 画球
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#fff';
-        ctx.fill();
-        ctx.shadowColor = 'rgba(126, 182, 217,0.5)';
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        animationId = requestAnimationFrame(gameLoop);
-      }
-
-      function startGame() {
-        playerScore = 0;
-        aiScore = 0;
-        updateScore();
-        resetBall(Math.random() > 0.5 ? 1 : -1);
-        gameRunning = true;
-        showMessage('开始！', 1000);
-        setTimeout(gameLoop, 1000);
-      }
-
-      function endGame(text) {
-        gameRunning = false;
-        if (animationId) cancelAnimationFrame(animationId);
-        showMessage(text, 2500);
-        setTimeout(function () {
-          if (gameRunning) return;
-          startGame();
-        }, 3000);
-      }
-
-      function openGame() {
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        // 重置玩家球拍位置
-        player.y = 160;
-        ai.y = 160;
-        startGame();
-      }
-
-      function closeGame() {
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-        gameRunning = false;
-        if (animationId) cancelAnimationFrame(animationId);
-      }
-
-      // 鼠标控制玩家球拍
-      canvas.addEventListener('mousemove', function (e) {
-        var rect = canvas.getBoundingClientRect();
-        var y = e.clientY - rect.top - player.height / 2;
-        player.y = Math.max(0, Math.min(canvas.height - player.height, y));
-      });
-
-      // 触摸控制
-      canvas.addEventListener('touchmove', function (e) {
-        e.preventDefault();
-        var rect = canvas.getBoundingClientRect();
-        var y = e.touches[0].clientY - rect.top - player.height / 2;
-        player.y = Math.max(0, Math.min(canvas.height - player.height, y));
-      }, { passive: false });
-
-      closeBtn.addEventListener('click', closeGame);
-
-      // Konami 代码监听
-      document.addEventListener('keydown', function (e) {
-        // Esc 关闭游戏
-        if (e.key === 'Escape' && overlay.classList.contains('active')) {
-          closeGame();
-          return;
-        }
-
-        var expectedKey = konamiCode[konamiIndex];
-        var pressedKey = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-
-        if (pressedKey === expectedKey) {
-          konamiIndex++;
-          if (konamiIndex === konamiCode.length) {
-            konamiIndex = 0;
-            openGame();
-          }
-        } else {
-          konamiIndex = 0;
         }
       });
     })();
