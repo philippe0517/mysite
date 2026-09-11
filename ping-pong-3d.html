@@ -156,8 +156,8 @@
     </div>
     <button class="start-btn" id="startBtn">开赛</button>
     <div class="start-tips">
-      移动鼠标控制球拍 · 按住左键蓄力，松开击球<br>
-      右键切换正反手 · 击球时机影响回球质量 · 不同旋转不同弹跳
+      鼠标或方向键(↑↓←→/WASD)控制球拍 · 按住左键/空格蓄力，松开击球<br>
+      右键/Shift切换正反手 · 击球时机影响回球质量 · 不同旋转不同弹跳
     </div>
   </div>
 
@@ -207,7 +207,7 @@
     </div>
 
     <div class="controls-hint">
-      <strong>移动鼠标</strong> 控制球拍 · <strong>按住左键</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>右键</strong> 正反手 · <strong>Esc</strong> 暂停
+      <strong>鼠标/方向键(↑↓←→或WASD)</strong> 控制球拍 · <strong>按住左键/空格</strong> 蓄力 · <strong>松开</strong> 击球 · <strong>右键/Shift</strong> 正反手 · <strong>Esc</strong> 暂停
     </div>
 
     <a href="index.html" class="back-link">← 返回主页</a>
@@ -317,6 +317,11 @@
     // 鼠标
     let mouseX = 0, mouseY = 0;
     let targetPaddleX = 0, targetPaddleY = 0;
+
+    // 键盘控制
+    let keys = { up: false, down: false, left: false, right: false };
+    let keyboardX = 0, keyboardY = 0; // 键盘控制的球拍位置（归一化-1到1）
+    let useKeyboard = false; // 是否使用键盘控制（按下方向键后激活，移动鼠标后切换回鼠标）
 
     // 蓄力
     let isCharging = false;
@@ -486,9 +491,9 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a1628);
       scene.fog = new THREE.Fog(0x0a1628, 8, 25);
-      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.01, 100);
-      camera.position.set(0, 1.15, CONFIG.table.length / 2 + 0.35);
-      camera.lookAt(0, CONFIG.table.height + 0.05, -0.3);
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 100);
+      camera.position.set(0, 1.8, CONFIG.table.length / 2 + 1.1);
+      camera.lookAt(0, CONFIG.table.height + 0.02, 0);
       renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -562,18 +567,7 @@
         }
       }
 
-      // 观众
-      const crowdColors = [0xE8787A, 0x7EB6D9, 0xF4C300, 0x009F3D, 0xDF0024, 0xffffff, 0x000000, 0xFF8C00];
-      for (let i = 0; i < 300; i++) {
-        const personGeo = new THREE.BoxGeometry(0.15, 0.35, 0.15);
-        const personMat = new THREE.MeshStandardMaterial({ color: crowdColors[Math.floor(Math.random() * crowdColors.length)], roughness: 0.9 });
-        const person = new THREE.Mesh(personGeo, personMat);
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 5.5 + Math.random() * 4;
-        person.position.set(Math.cos(angle) * radius, 0.8 + Math.random() * 2.5, Math.sin(angle) * radius);
-        person.rotation.y = -angle;
-        scene.add(person);
-      }
+      // （观众已移除，只保留观赛台座位）
 
       // 广告牌
       const adTexts = ['红双喜', '蝴蝶', '奥运', 'ITTF', '中国联通', '伊利'];
@@ -722,7 +716,7 @@
       const ballMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25, metalness: 0.02 });
       ball = new THREE.Mesh(ballGeo, ballMat);
       ball.castShadow = true;
-      ball.position.set(0, CONFIG.table.height + 0.2, CONFIG.table.length / 2 - 0.2);
+      ball.position.set(0, CONFIG.table.height + 0.2, CONFIG.table.length / 2 + 0.1);
       scene.add(ball);
 
       for (let i = 0; i < TRAIL_LENGTH; i++) {
@@ -737,7 +731,7 @@
 
     function createPaddles() {
       playerPaddle = createRealPaddle(true);
-      playerPaddle.position.set(0, CONFIG.table.height + 0.08, CONFIG.table.length / 2 - 0.1);
+      playerPaddle.position.set(0, CONFIG.table.height + 0.1, CONFIG.table.length / 2 + 0.25);
       playerPaddle.rotation.x = -0.35;
       playerPaddle.rotation.y = -0.2;
       playerPaddle.rotation.z = 0.15;
@@ -1038,8 +1032,7 @@
       let spinVector = new THREE.Vector3();
 
       if (hitter === 'player') {
-        // 玩家击球：根据蓄力和击球时机
-        speed = (2 + currentPower * 5) * timing.speedMult;
+        // 玩家击球：速度在下方ballVelocity.set中统一计算
         // 玩家旋转：根据击球位置和正反手
         const spinAmount = 6 * timing.spinMult;
         if (isForehand) {
@@ -1073,9 +1066,21 @@
       }
 
       if (hitter === 'player') {
+        // 玩家击球：确保任何力度都能过网，力度只影响落点
+        // 基础速度固定为能过网的最小值
+        const baseHitSpeed = 3.0;
+        const hitSpeedVariation = currentPower * 3.0;
+        speed = (baseHitSpeed + hitSpeedVariation) * timing.speedMult;
+        // 垂直速度：确保能过网，小力度更高弧线，大力度更平
+        const baseVertical = 2.2;
+        const verticalVariation = -currentPower * 0.8;
+        const verticalSpeed = (baseVertical + verticalVariation + relY * 1.2) * timing.speedMult;
+        // 横向速度：根据击球位置和力度
+        const horizontalSpeed = relX * 1.5 * timing.speedMult * (0.8 + currentPower * 0.4);
+
         ballVelocity.set(
-          relX * 1.8 * timing.speedMult,
-          (1.8 + relY * 1.8 + currentPower * 1.5) * timing.speedMult,
+          horizontalSpeed,
+          Math.max(verticalSpeed, 1.5), // 确保最小垂直速度
           -speed
         );
       }
@@ -1149,7 +1154,7 @@
         }
       }
       ball.position.x = playerPaddle.position.x;
-      ball.position.z = CONFIG.table.length / 2 - 0.2;
+      ball.position.z = playerPaddle.position.z - 0.05;
     }
 
     function playerServe() {
@@ -1168,10 +1173,18 @@
       }
       initAudio();
       const style = AI_STYLES[currentDifficulty];
-      const speed = (2 + currentPower * 3) * style.ballSpeedMult;
+      // 确保任何力度都能过网：基础速度固定为能过网的最小值
+      // 力度只影响球的落点：小力度=近网短球，大力度=远台长球
+      const baseSpeed = 3.2; // 基础速度，确保能过网
+      const speedVariation = currentPower * 2.5; // 力度影响速度变化
+      const speed = (baseSpeed + speedVariation) * style.ballSpeedMult;
+      // 垂直速度：小力度更高（短球需要高弧线），大力度更平（长球）
+      const verticalSpeed = 2.8 - currentPower * 0.8;
+      // 横向落点：根据力度和随机因素决定
+      const targetX = (Math.random() - 0.5) * CONFIG.table.width * (0.3 + currentPower * 0.4);
       ballVelocity.set(
-        (Math.random() - 0.5) * 0.5,
-        2 + currentPower * 0.5,
+        targetX * 0.6,
+        verticalSpeed,
         -speed
       );
       // 发球旋转：上旋或侧旋
@@ -1263,8 +1276,10 @@
         isDeuce = false;
         aiMood = 1.0; // 新一局AI状态重置
         updateScoreDisplay();
-        showMessage(`第 ${currentGame} 局`, playerGames + ':' + aiGames);
-        setTimeout(() => { if (gameState !== 'matchover') prepareServe(); }, 2000);
+        // 显示局间休息信息，4秒后开始下一局
+        const gameWinner = playerWinsGame ? '你' : '对手';
+        showMessage(`第 ${currentGame - 1} 局结束 · ${gameWinner}胜`, `大比分 ${playerGames} : ${aiGames} · 第${currentGame}局即将开始`);
+        setTimeout(() => { if (gameState !== 'matchover') prepareServe(); }, 4000);
         return;
       }
 
@@ -1316,7 +1331,7 @@
       currentPower = 0;
       updateServeIndicator();
       if (isPlayerServing) {
-        ball.position.set(playerPaddle.position.x, CONFIG.table.height + 0.12, CONFIG.table.length / 2 - 0.15);
+        ball.position.set(playerPaddle.position.x, CONFIG.table.height + 0.15, CONFIG.table.length / 2 + 0.15);
         showMessage('准备发球', '按住左键蓄力，松开抛球击球');
       } else {
         ball.position.set(aiPaddle.position.x, CONFIG.table.height + 0.12, -CONFIG.table.length / 2 + 0.15);
@@ -1382,13 +1397,32 @@
         return;
       }
 
-      const clampedMouseX = Math.max(-0.95, Math.min(0.95, mouseX));
-      const clampedMouseY = Math.max(-0.85, Math.min(0.85, mouseY));
+      // 更新键盘位置
+      const keySpeed = 1.8; // 键盘移动速度（归一化单位/秒）
+      if (keys.left) keyboardX -= keySpeed * dt;
+      if (keys.right) keyboardX += keySpeed * dt;
+      if (keys.up) keyboardY += keySpeed * dt;
+      if (keys.down) keyboardY -= keySpeed * dt;
+      keyboardX = Math.max(-1, Math.min(1, keyboardX));
+      keyboardY = Math.max(-1, Math.min(1, keyboardY));
+
+      // 选择控制源：键盘或鼠标
+      let controlX, controlY;
+      if (useKeyboard) {
+        controlX = keyboardX;
+        controlY = keyboardY;
+      } else {
+        controlX = mouseX;
+        controlY = mouseY;
+      }
+
+      const clampedMouseX = Math.max(-0.95, Math.min(0.95, controlX));
+      const clampedMouseY = Math.max(-0.85, Math.min(0.85, controlY));
       const handOffsetX = isForehand ? 0.04 : -0.04;
       const handOffsetY = isForehand ? 0 : 0.015;
-      // 鼠标直接映射到球拍位置，1:1对应
+      // 控制位置直接映射到球拍位置
       targetPaddleX = clampedMouseX * CONFIG.table.width * 0.52 + handOffsetX;
-      targetPaddleY = CONFIG.table.height + 0.08 + clampedMouseY * 0.26 + handOffsetY;
+      targetPaddleY = CONFIG.table.height + 0.1 + clampedMouseY * 0.28 + handOffsetY;
 
       // 辅助瞄准：当球飞向玩家且距离较近时，球拍轻微向球的位置靠拢
       if (gameState === 'playing' && ballVelocity.z < 0 && ball.position.z > 0.3 && ball.position.z < CONFIG.table.length / 2) {
@@ -1398,18 +1432,18 @@
       }
 
       targetPaddleX = Math.max(-CONFIG.table.width / 2 + 0.1, Math.min(CONFIG.table.width / 2 - 0.1, targetPaddleX));
-      targetPaddleY = Math.max(CONFIG.table.height + 0.03, Math.min(CONFIG.table.height + 0.38, targetPaddleY));
+      targetPaddleY = Math.max(CONFIG.table.height + 0.04, Math.min(CONFIG.table.height + 0.4, targetPaddleY));
 
-      // 提高跟随速度到40倍速，让球拍紧跟鼠标
+      // 提高跟随速度到40倍速，让球拍紧跟控制
       const followSpeed = 40;
       playerPaddle.position.x += (targetPaddleX - playerPaddle.position.x) * Math.min(1, followSpeed * dt);
       playerPaddle.position.y += (targetPaddleY - playerPaddle.position.y) * Math.min(1, followSpeed * dt);
 
       // 球拍z位置根据球的位置微调，让不同深度的球都能接到
-      let targetPaddleZ = CONFIG.table.length / 2 - 0.1;
+      let targetPaddleZ = CONFIG.table.length / 2 + 0.25;
       if (gameState === 'playing' && ballVelocity.z < 0 && ball.position.z > 0.2) {
         // 球接近时，球拍稍微前伸
-        targetPaddleZ = CONFIG.table.length / 2 - 0.15 - (1 - ball.position.z / (CONFIG.table.length / 2)) * 0.1;
+        targetPaddleZ = CONFIG.table.length / 2 + 0.15 - (1 - ball.position.z / (CONFIG.table.length / 2)) * 0.15;
       }
       playerPaddle.position.z += (targetPaddleZ - playerPaddle.position.z) * Math.min(1, 15 * dt);
 
@@ -1419,9 +1453,9 @@
       const forehandRotY = -0.25, backhandRotY = 0.35;
       const forehandRotZ = 0.2, backhandRotZ = -0.15;
       const chargeTilt = isCharging ? currentPower * 0.25 : 0;
-      playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - mouseY * 0.08 - chargeTilt;
-      playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + mouseX * 0.12;
-      playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + mouseX * 0.06;
+      playerPaddle.rotation.x = forehandRotX * paddleTransition + backhandRotX * (1 - paddleTransition) - controlY * 0.08 - chargeTilt;
+      playerPaddle.rotation.y = forehandRotY * paddleTransition + backhandRotY * (1 - paddleTransition) + controlX * 0.12;
+      playerPaddle.rotation.z = forehandRotZ * paddleTransition + backhandRotZ * (1 - paddleTransition) + controlX * 0.06;
 
       if (playerArm) {
         const armOffsetX = isForehand ? 0.1 : -0.1;
@@ -1542,7 +1576,7 @@
       if (gameState === 'serving' && isPlayerServing && !isTossing && !isCharging) {
         ball.position.x = playerPaddle.position.x;
         ball.position.y = playerPaddle.position.y + 0.06;
-        ball.position.z = CONFIG.table.length / 2 - 0.12;
+        ball.position.z = playerPaddle.position.z - 0.05;
       }
       renderer.render(scene, camera);
     }
@@ -1552,6 +1586,10 @@
       document.addEventListener('mousemove', (e) => {
         mouseX = (e.clientX / window.innerWidth) * 2 - 1;
         mouseY = -((e.clientY / window.innerHeight) * 2 - 1);
+        // 移动鼠标时切换回鼠标控制，并同步键盘位置
+        useKeyboard = false;
+        keyboardX = mouseX;
+        keyboardY = mouseY;
       });
       document.addEventListener('mousedown', (e) => {
         if (e.button === 0) { initAudio(); startCharge(); }
@@ -1564,6 +1602,42 @@
       });
       document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
       document.addEventListener('keydown', (e) => {
+        // 方向键控制
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+          keys.up = true;
+          useKeyboard = true;
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+          keys.down = true;
+          useKeyboard = true;
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+          keys.left = true;
+          useKeyboard = true;
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+          keys.right = true;
+          useKeyboard = true;
+          e.preventDefault();
+        }
+        // 空格击球/发球
+        if (e.key === ' ') {
+          e.preventDefault();
+          if (gameState === 'gameover' || gameState === 'matchover') {
+            restartMatch();
+          } else {
+            initAudio();
+            if (!isCharging) startCharge();
+          }
+        }
+        // Shift切换正反手
+        if (e.key === 'Shift') {
+          initAudio();
+          toggleForehand();
+        }
         if (e.key === 'Escape') {
           if (gameState === 'playing') {
             gameState = 'paused';
@@ -1575,8 +1649,15 @@
             setCrowdIntensity(0.15);
           }
         }
-        if (e.key === ' ' && (gameState === 'gameover' || gameState === 'matchover')) {
-          restartMatch();
+      });
+      document.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = false;
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.left = false;
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.right = false;
+        if (e.key === ' ') {
+          e.preventDefault();
+          if (isCharging) releaseCharge();
         }
       });
       window.addEventListener('resize', () => {
