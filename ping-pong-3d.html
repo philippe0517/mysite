@@ -731,7 +731,7 @@
 
     function createPaddles() {
       playerPaddle = createRealPaddle(true);
-      playerPaddle.position.set(0, CONFIG.table.height + 0.1, CONFIG.table.length / 2 + 0.25);
+      playerPaddle.position.set(0, CONFIG.table.height + 0.1, CONFIG.table.length / 2 - 0.22);
       playerPaddle.rotation.x = -0.35;
       playerPaddle.rotation.y = -0.2;
       playerPaddle.rotation.z = 0.15;
@@ -739,7 +739,7 @@
       playerArm = createPlayerArm();
       scene.add(playerArm);
       aiPaddle = createRealPaddle(false);
-      aiPaddle.position.set(0, CONFIG.table.height + 0.08, -CONFIG.table.length / 2 + 0.1);
+      aiPaddle.position.set(0, CONFIG.table.height + 0.1, -CONFIG.table.length / 2 + 0.22);
       aiPaddle.rotation.x = 0.35;
       aiPaddle.rotation.y = 0.2;
       aiPaddle.rotation.z = -0.15;
@@ -995,24 +995,26 @@
     }
 
     function checkPaddleCollision() {
-      // 增大击球范围，让玩家更容易接到球
-      const playerHitRadius = CONFIG.paddle.width / 2 * 2.8 + CONFIG.ball.radius;
+      // 玩家在z正方向，球向玩家飞来时 ballVelocity.z > 0
+      const playerHitRadius = CONFIG.paddle.width / 2 * 3.0 + CONFIG.ball.radius;
       if (lastHitBy !== 'player') {
         const dx = ball.position.x - playerPaddle.position.x;
         const dy = ball.position.y - playerPaddle.position.y;
         const dz = ball.position.z - playerPaddle.position.z;
-        // 主要看xy平面距离，z方向放宽
+        // xy平面距离 + z方向范围
         const distXY = Math.sqrt(dx * dx + dy * dy);
-        if (distXY < playerHitRadius && ballVelocity.z < 0 && Math.abs(dz) < 0.7) {
+        // 球向玩家飞来(z>0)，且在球拍击球范围内
+        if (distXY < playerHitRadius && ballVelocity.z > 0 && dz > -0.5 && dz < 0.6) {
           hitBall('player');
         }
       }
+      // AI在z负方向，球向AI飞来时 ballVelocity.z < 0
       if (lastHitBy !== 'ai') {
         const dx = ball.position.x - aiPaddle.position.x;
         const dy = ball.position.y - aiPaddle.position.y;
         const dz = ball.position.z - aiPaddle.position.z;
-        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (dist < CONFIG.paddle.width / 2 + CONFIG.ball.radius && ballVelocity.z > 0) {
+        const distXY = Math.sqrt(dx * dx + dy * dy);
+        if (distXY < CONFIG.paddle.width * 1.2 && ballVelocity.z < 0 && dz > -0.6 && dz < 0.5) {
           hitBall('ai');
         }
       }
@@ -1055,32 +1057,33 @@
         const spin = SPIN_TYPES[spinType];
         const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.8;
         const error = (Math.random() - 0.5) * style.aiError * 2 * (2 - aiMood);
-        speed = (2.5 + Math.random() * 2) * style.ballSpeedMult * aiMood;
+        // AI击球速度：控制在合理范围，给玩家反应时间
+        speed = (2.0 + Math.random() * 1.2) * style.ballSpeedMult * aiMood;
 
         ballVelocity.set(
           (targetX - ball.position.x) * 0.8 + error,
-          1.8 + Math.random() * 1.2,
+          2.0 + Math.random() * 1.0,
           speed
         );
         spinVector.set(spin.sidespin, spin.topspin + spin.backspin, 3);
       }
 
       if (hitter === 'player') {
-        // 玩家击球：确保任何力度都能过网，力度只影响落点
-        // 基础速度固定为能过网的最小值
-        const baseHitSpeed = 3.0;
-        const hitSpeedVariation = currentPower * 3.0;
+        // 玩家击球：确保任何力度都能过网，力度只影响落点和速度
+        // 球拍到球网距离约1.15m，需要足够的垂直速度保证过网
+        const baseHitSpeed = 2.5;
+        const hitSpeedVariation = currentPower * 2.5;
         speed = (baseHitSpeed + hitSpeedVariation) * timing.speedMult;
-        // 垂直速度：确保能过网，小力度更高弧线，大力度更平
-        const baseVertical = 2.2;
-        const verticalVariation = -currentPower * 0.8;
-        const verticalSpeed = (baseVertical + verticalVariation + relY * 1.2) * timing.speedMult;
+        // 垂直速度：基础2.5确保过网，小力度弧线更高，大力度更平
+        const baseVertical = 2.6;
+        const verticalVariation = -currentPower * 0.6;
+        const verticalSpeed = (baseVertical + verticalVariation + relY * 1.0) * timing.speedMult;
         // 横向速度：根据击球位置和力度
-        const horizontalSpeed = relX * 1.5 * timing.speedMult * (0.8 + currentPower * 0.4);
+        const horizontalSpeed = relX * 1.3 * timing.speedMult * (0.7 + currentPower * 0.5);
 
         ballVelocity.set(
           horizontalSpeed,
-          Math.max(verticalSpeed, 1.5), // 确保最小垂直速度
+          Math.max(verticalSpeed, 2.2), // 最小垂直速度2.2确保过网
           -speed
         );
       }
@@ -1173,17 +1176,17 @@
       }
       initAudio();
       const style = AI_STYLES[currentDifficulty];
-      // 确保任何力度都能过网：基础速度固定为能过网的最小值
-      // 力度只影响球的落点：小力度=近网短球，大力度=远台长球
-      const baseSpeed = 3.2; // 基础速度，确保能过网
-      const speedVariation = currentPower * 2.5; // 力度影响速度变化
+      // 发球：球先在自己球台弹跳，再过网，落在对方球台
+      // 力度影响落点：小力度=近网短球，大力度=远台长球
+      const baseSpeed = 2.2; // 基础速度，保证先在自己球台弹跳
+      const speedVariation = currentPower * 1.8;
       const speed = (baseSpeed + speedVariation) * style.ballSpeedMult;
-      // 垂直速度：小力度更高（短球需要高弧线），大力度更平（长球）
-      const verticalSpeed = 2.8 - currentPower * 0.8;
-      // 横向落点：根据力度和随机因素决定
-      const targetX = (Math.random() - 0.5) * CONFIG.table.width * (0.3 + currentPower * 0.4);
+      // 垂直速度：保证弧线过网
+      const verticalSpeed = 3.0 - currentPower * 0.6;
+      // 横向落点
+      const targetX = (Math.random() - 0.5) * CONFIG.table.width * (0.25 + currentPower * 0.35);
       ballVelocity.set(
-        targetX * 0.6,
+        targetX * 0.5,
         verticalSpeed,
         -speed
       );
@@ -1210,10 +1213,11 @@
       initAudio();
       const style = AI_STYLES[currentDifficulty];
       const targetX = (Math.random() - 0.5) * CONFIG.table.width * 0.4;
+      // AI发球：先在自己球台弹跳，再过网
       ballVelocity.set(
         (targetX - ball.position.x) * 0.4,
-        2.0,
-        2.0 * style.ballSpeedMult
+        3.0,
+        2.2 * style.ballSpeedMult
       );
       // AI发球旋转
       const serveSpin = Math.random();
@@ -1334,7 +1338,7 @@
         ball.position.set(playerPaddle.position.x, CONFIG.table.height + 0.15, CONFIG.table.length / 2 + 0.15);
         showMessage('准备发球', '按住左键蓄力，松开抛球击球');
       } else {
-        ball.position.set(aiPaddle.position.x, CONFIG.table.height + 0.12, -CONFIG.table.length / 2 + 0.15);
+        ball.position.set(aiPaddle.position.x, CONFIG.table.height + 0.15, -CONFIG.table.length / 2 + 0.22);
         showMessage('对手发球', '准备接球');
         setTimeout(() => { if (gameState === 'serving') aiServe(); }, 1500);
       }
@@ -1378,6 +1382,13 @@
       aiPaddle.position.x += (aiTargetX - aiPaddle.position.x) * Math.min(1, speed * dt * 3);
       aiPaddle.position.y += (aiTargetY - aiPaddle.position.y) * Math.min(1, speed * dt * 3);
 
+      // AI球拍z位置跟踪球（球向AI飞来时 ballVelocity.z < 0）
+      let aiTargetZ = -CONFIG.table.length / 2 + 0.22;
+      if (ballVelocity.z < 0 && ball.position.z < 0) {
+        aiTargetZ = Math.max(-CONFIG.table.length / 2 - 0.15, Math.min(-0.3, ball.position.z - 0.15));
+      }
+      aiPaddle.position.z += (aiTargetZ - aiPaddle.position.z) * Math.min(1, 10 * dt);
+
       // AI拍面角度
       aiPaddle.rotation.y = Math.atan2(ball.position.x - aiPaddle.position.x, 1) * 0.25;
       aiPaddle.rotation.x = 0.35 + (ball.position.y - aiPaddle.position.y) * 0.3;
@@ -1417,12 +1428,12 @@
       }
 
       // 球拍位置和鼠标/键盘位置完全对应，无延迟
-      // x方向：覆盖整个球台宽度（从左边界到右边界）
+      // x方向：覆盖整个球台宽度
       const paddleX = controlX * CONFIG.table.width * 0.55;
-      // y方向：覆盖从球台上方到较高位置
-      const paddleY = CONFIG.table.height + 0.08 + controlY * 0.45;
+      // y方向（高度）：鼠标上下控制球拍高度
+      const paddleY = CONFIG.table.height + 0.1 + controlY * 0.4;
 
-      // 限制在合理范围内（稍微超出球台边界，确保能接到边缘球）
+      // 限制在合理范围内
       const maxX = CONFIG.table.width / 2 + 0.15;
       const minY = CONFIG.table.height + 0.02;
       const maxY = CONFIG.table.height + 0.55;
@@ -1430,12 +1441,15 @@
       playerPaddle.position.x = Math.max(-maxX, Math.min(maxX, paddleX));
       playerPaddle.position.y = Math.max(minY, Math.min(maxY, paddleY));
 
-      // 球拍z位置根据球的位置微调，让不同深度的球都能接到
-      let targetPaddleZ = CONFIG.table.length / 2 + 0.25;
-      if (gameState === 'playing' && ballVelocity.z < 0 && ball.position.z > 0.2) {
-        targetPaddleZ = CONFIG.table.length / 2 + 0.15 - (1 - ball.position.z / (CONFIG.table.length / 2)) * 0.15;
+      // z位置（前后）：默认在球台端线附近，球飞来时快速跟踪球的深度
+      // 球台端线 z = table.length/2 = 1.37，球拍默认在 1.15
+      let targetPaddleZ = CONFIG.table.length / 2 - 0.22;
+      if (gameState === 'playing' && ballVelocity.z > 0 && ball.position.z > 0) {
+        // 球向玩家飞来时，球拍快速移动到球后方0.12m处迎球
+        const followZ = ball.position.z + 0.12;
+        targetPaddleZ = Math.max(0.2, Math.min(CONFIG.table.length / 2 + 0.1, followZ));
       }
-      playerPaddle.position.z += (targetPaddleZ - playerPaddle.position.z) * Math.min(1, 20 * dt);
+      playerPaddle.position.z += (targetPaddleZ - playerPaddle.position.z) * Math.min(1, 25 * dt);
 
       const targetTransition = isForehand ? 1 : 0;
       paddleTransition += (targetTransition - paddleTransition) * Math.min(1, 12 * dt);
@@ -1508,12 +1522,13 @@
         playerServe();
       } else if (gameState === 'playing' && lastHitBy !== 'player') {
         // 回合中松开按键时，主动检查球是否在球拍附近，如果在就击球
-        const hitRadius = CONFIG.paddle.width / 2 * 2.5 + CONFIG.ball.radius;
+        const hitRadius = CONFIG.paddle.width / 2 * 3.0 + CONFIG.ball.radius;
         const dx = ball.position.x - playerPaddle.position.x;
         const dy = ball.position.y - playerPaddle.position.y;
         const dz = ball.position.z - playerPaddle.position.z;
         const distXY = Math.sqrt(dx * dx + dy * dy);
-        if (distXY < hitRadius && ballVelocity.z < 0 && Math.abs(dz) < 0.6) {
+        // 球向玩家飞来(z>0)
+        if (distXY < hitRadius && ballVelocity.z > 0 && dz > -0.5 && dz < 0.6) {
           hitBall('player');
         }
       }
@@ -1566,11 +1581,12 @@
     function animate() {
       animationId = requestAnimationFrame(animate);
       const dt = Math.min(clock.getDelta(), 0.05);
-      if (gameState === 'playing' || gameState === 'serving') {
-        updatePhysics(dt);
-        updateAI(dt);
-      }
+      // 先更新球拍位置（让球拍z跟踪来球），再做物理碰撞检测
       updatePlayerPaddle(dt);
+      if (gameState === 'playing' || gameState === 'serving') {
+        updateAI(dt);
+        updatePhysics(dt);
+      }
       updatePowerBar();
       updateTrail();
       if (gameState === 'serving' && isPlayerServing && !isTossing && !isCharging) {
