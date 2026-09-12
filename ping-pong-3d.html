@@ -345,6 +345,9 @@
     .pm-btnrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
     .settings-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #a8b8cc; margin-top: 6px; cursor: pointer; }
     .settings-row input { accent-color: #c9a96e; }
+    .ctrl-row { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0; }
+    .ctrl-label { font-size: 13px; color: #cfd9e6; width: 150px; flex: none; line-height: 1.55; }
+    .ctrl-label small { font-size: 11px; color: #8ba0b9; display: block; margin-top: 2px; }
     .stat-line { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 2px; border-bottom: 1px dashed rgba(255,255,255,.09); }
     .stat-line b { color: #e8c98a; }
     .stat-sec { font-size: 12px; color: #c9a96e; letter-spacing: 2px; margin: 14px 0 4px; font-weight: 700; }
@@ -567,11 +570,12 @@
       <div class="start-btnrow">
         <button class="mini-btn" id="statsBtn">📊 生涯数据</button>
         <button class="mini-btn" id="skinBtn">🏓 球拍皮肤</button>
+        <button class="mini-btn" id="ctrlBtn">🎮 操控设置</button>
       </div>
       <div class="daily-card" id="dailyCard"></div>
       <div class="vol-row"><span id="volIcon">🔊</span><input type="range" id="volSlider" min="0" max="100" value="80"><span class="vol-val" id="volVal">80%</span></div>
       <div class="start-tips">
-        <b>鼠标 / 方向键(↑↓←→ / WASD)</b> 左右上下移动 · <b>滚轮上/下</b> 一键近台/远台 · <b>Q·E</b> 微调站位<br>
+        <b>鼠标 / 方向键(↑↓←→ / WASD)</b> 左右上下移动 · <b>滚轮上/下</b> 渐进前后移台（灵敏度可在「操控设置」调节）· <b>Q·E</b> 微调<br>
         <b>按住左键 / 空格</b> 蓄力，松开挥拍击球（挥拍越快球越冲）· <b>右键 / Shift</b> 切换正反手 · <b>Esc</b> 暂停<br>
         <b>手机</b>：左摇杆移动 · 右侧滑条前后站位 · 大按钮蓄力击球 · 建议横屏<br>
         <b>发球时左右移动</b>可施加侧旋 · <b>W/S</b> 发球选上/下旋 · <b>手柄</b>左摇杆移动 / A蓄力 / B换面 / Start暂停<br>
@@ -657,6 +661,7 @@
 
   <div class="pmodal" id="profileModal" data-closable="0"><div class="pmodal-box" id="profileBox"></div></div>
   <div class="pmodal" id="statsModal" data-closable="1"><div class="pmodal-box" id="statsBox"></div></div>
+  <div class="pmodal" id="ctrlModal" data-closable="1"><div class="pmodal-box" id="ctrlBox"></div></div>
   <div class="pmodal" id="skinModal" data-closable="1"><div class="pmodal-box" id="skinBox"></div></div>
   <div class="pmodal" id="shareModal" data-closable="1"><div class="pmodal-box" id="shareBox" style="text-align:center"></div></div>
 
@@ -751,7 +756,8 @@
     // 三轴控制：z 轴前后站位（滚轮/Q·E/滑条）+ 虚拟摇杆 + 球拍速度
     let touchMode = (typeof matchMedia === 'function') && matchMedia('(pointer: coarse)').matches;
     let joyX = 0, joyY = 0, joyActive = false;   // 虚拟摇杆输出 -1..1
-    let padZ = 0;                                 // z 轴输入 -1(近网)..1(远台)
+    let padZ = 0;                                 // z 轴输入 -1(近网)..1(远台)，缓动跟随 padZTarget
+    let padZTarget = 0, lastKnobZ = 9;            // z 轴目标位（滚轮/Q·E 设定）+ 滑条旋钮同步缓存
     const paddleV = new THREE.Vector3();          // 平滑后的球拍速度 m/s
     const _instV = new THREE.Vector3();
     const prevPaddlePos = new THREE.Vector3();
@@ -1830,14 +1836,22 @@
       const ks=2.5;
       if (keys.left) kbX-=ks*dt; if (keys.right) kbX+=ks*dt;
       if (keys.up) kbY+=ks*dt; if (keys.down) kbY-=ks*dt;
-      if (keys.zf) padZ-=ks*dt*.9; if (keys.zb) padZ+=ks*dt*.9;
+      if (keys.zf) padZTarget-=ks*dt*.9; if (keys.zb) padZTarget+=ks*dt*.9;   // Q·E 微调目标位
       kbX=Math.max(-1,Math.min(1,kbX)); kbY=Math.max(-1,Math.min(1,kbY));
-      padZ=Math.max(-1,Math.min(1,padZ));
+      padZTarget=Math.max(-1,Math.min(1,padZTarget));
+      // 滚轮/Q·E 设定的目标位平滑跟随：一次滚动约 0.3 秒滑完全程，不瞬移
+      padZ += (padZTarget-padZ)*Math.min(1,9*dt);
+      if (Math.abs(padZTarget-padZ)<.005) padZ=padZTarget;
+      if (Math.abs(padZ-lastKnobZ)>.002){   // z 轴滑条旋钮随缓动同步
+        const zs=document.getElementById('zslider'), zk=E('zknob');
+        if (zs&&zk){ const r=zs.getBoundingClientRect(); zk.style.top=(((padZ+1)/2)*(r.height-34))+'px'; }
+        lastKnobZ=padZ;
+      }
       const cx=joyActive?joyX:(padActive?padGX:(useKb?kbX:mouseX)), cy=joyActive?joyY:(padActive?padGY:(useKb?kbY:mouseY));
 
-      // 移动范围加大：x 可覆盖全场+台外救球，y 覆盖低点防守到高点进攻
-      const px = cx*CFG.table.W*.78;
-      const py = CFG.table.H+.12+cy*.52;
+      // 移动范围加大：x 可覆盖全场+台外救球，y 覆盖低点防守到高点进攻（幅度系数可在「操控设置」调节）
+      const px = cx*CFG.table.W*.78*ctrlCfg.moveK;
+      const py = CFG.table.H+.12+cy*.52*ctrlCfg.moveK;
       pPaddle.position.x = Math.max(-1.05, Math.min(1.05, px));
       pPaddle.position.y = Math.max(CFG.table.H+.02, Math.min(CFG.table.H+.66, py));
 
@@ -2075,13 +2089,12 @@
         mouseX=(e.clientX/innerWidth)*2-1; mouseY=-((e.clientY/innerHeight)*2-1);
         useKb=false; kbX=mouseX; kbY=mouseY;
       });
-      // 鼠标滚轮：z 轴前后站位（上滚=一键近台，下滚=一键远台，无需连滚；Q·E 仍可微调）
+      // 鼠标滚轮：z 轴渐进累积（默认约 12 格≈半圈从最远到最近，可在「操控设置」调节；Q·E 仍可微调）
       addEventListener('wheel',e=>{
         e.preventDefault(); useKb=false;
         if (e.deltaY===0) return;
-        padZ = e.deltaY>0 ? 1 : -1;
-        const zs=document.getElementById('zslider'), zk=E('zknob');
-        if (zs&&zk){ const r=zs.getBoundingClientRect(); zk.style.top=(((padZ+1)/2)*(r.height-34))+'px'; }
+        const unit = e.deltaMode===1 ? e.deltaY*33 : e.deltaY;   // 行模式(Firefox)换算为像素
+        padZTarget = Math.max(-1, Math.min(1, padZTarget + (unit/100)*ctrlCfg.wheelStep));
       },{passive:false});
       addEventListener('mousedown',e=>{
         if(state==='replay'){ if(e.button===0) replaySkip(); return; }   // 回放中左键跳过
@@ -2160,10 +2173,11 @@
       document.getElementById('playerChip').addEventListener('click',e=>{ e.stopPropagation(); openProfile(); });
       document.getElementById('statsBtn').addEventListener('click',e=>{ e.stopPropagation(); openStats(); });
       document.getElementById('skinBtn').addEventListener('click',e=>{ e.stopPropagation(); openSkin(); });
+      document.getElementById('ctrlBtn').addEventListener('click',e=>{ e.stopPropagation(); openCtrl(); });
       const shBtn = document.getElementById('shareBtn');
       if (shBtn) shBtn.addEventListener('click',e=>{ e.stopPropagation(); showShareCard(lastResult?'match':'career'); });
       // 模态框：点击遮罩关闭（仅当该弹窗可关闭）
-      ['profileModal','statsModal','skinModal','shareModal'].forEach(id=>{
+      ['profileModal','statsModal','skinModal','shareModal','ctrlModal'].forEach(id=>{
         const m=document.getElementById(id);
         m.addEventListener('click',e=>{ if(e.target===m && m.dataset.closable==='1') m.classList.remove('open'); });
       });
@@ -2218,7 +2232,7 @@
       const setZ=t=>{
         const r=zs.getBoundingClientRect();
         const f=Math.max(0,Math.min(1,(t.clientY-r.top-17)/(r.height-34)));
-        padZ=f*2-1;                  // 顶部=前(近网) 底部=后(远台)
+        padZ=f*2-1; padZTarget=padZ; // 顶部=前(近网) 底部=后(远台)；触屏拖动目标位同步，拍子即时跟随
         zk.style.top=(f*(r.height-34))+'px';
       };
       joy.addEventListener('touchstart',e=>{
@@ -2228,7 +2242,7 @@
       zs.addEventListener('touchstart',e=>{
         e.preventDefault(); audioInit();
         const t=e.changedTouches[0], now=performance.now();
-        if(now-lastZTap<320){ padZ=0; zk.style.top='50%'; } // 双击回中
+        if(now-lastZTap<320){ padZ=0; padZTarget=0; zk.style.top='50%'; } // 双击回中
         lastZTap=now; zid=t.identifier; setZ(t);
       },{passive:false});
       addEventListener('touchmove',e=>{
@@ -2263,6 +2277,36 @@
         g.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(trainCfg[k])===b.dataset.v));
       });
     }
+
+    /* ---------- 操控设置窗口 ---------- */
+    const CTRL_WHEEL = [
+      { v:.08, label:'慢 · 约24格' },
+      { v:.16, label:'标准 · 约12格' },
+      { v:.33, label:'快 · 约6格' }
+    ];
+    const CTRL_MOVE = [
+      { v:.7,  label:'小' },
+      { v:1,   label:'标准' },
+      { v:1.3, label:'大' }
+    ];
+    function openCtrl() {
+      document.getElementById('ctrlBox').innerHTML = `
+        <h3>操控设置</h3>
+        <div class="pmodal-sub">调节滚轮与移动手感 · 所有球员共用 · 自动保存</div>
+        <div class="ctrl-row"><span class="ctrl-label">滚轮站位移速<small>滚多少格从最远到最近（半圈约 12 格）</small></span>
+          <div class="tc-opts" id="cwGroup">${CTRL_WHEEL.map(o=>`<button data-v="${o.v}" class="${ctrlCfg.wheelStep===o.v?'on':''}">${o.label}</button>`).join('')}</div></div>
+        <div class="ctrl-row"><span class="ctrl-label">上下左右移动幅度<small>鼠标 / 键盘 / 摇杆的移拍范围</small></span>
+          <div class="tc-opts" id="cmGroup">${CTRL_MOVE.map(o=>`<button data-v="${o.v}" class="${ctrlCfg.moveK===o.v?'on':''}">${o.label}</button>`).join('')}</div></div>
+        <div class="pm-btnrow"><button class="mini-btn" id="ctrlClose">✕ 关闭</button></div>`;
+      document.getElementById('cwGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        ctrlCfg.wheelStep = +b.dataset.v; saveCtrl(); openCtrl(); tone(620,620,.05,'sine',.04);
+      }));
+      document.getElementById('cmGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        ctrlCfg.moveK = +b.dataset.v; saveCtrl(); openCtrl(); tone(620,620,.05,'sine',.04);
+      }));
+      document.getElementById('ctrlClose').addEventListener('click',()=>closeModal('ctrlModal'));
+      openModal('ctrlModal');
+    }
     function syncDiff(){
       setText('styleName', AI_STYLES[diff].name);
       const tcfg = E('trainCfg'); if (tcfg) tcfg.classList.toggle('show', diff==='train');
@@ -2274,7 +2318,7 @@
       document.getElementById('startScreen').classList.add('hidden');
       pScore=0;aScore=0;pGames=0;aGames=0;gameNo=1;serveCnt=0;pServes=true;
       power=0;celebrating=false;celebT=0;forehand=true;gripT=1;aiGripT=1;deuce=false;aiMood=1;rally=0;
-      padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
+      padZ=0; padZTarget=0; lastKnobZ=9; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
       finalSwitch=false; pointDone=false; pointScored=false;
       // 新增：本局数据 & 关键分横幅 & DDA 重置
       statLongRally=0; statWinners=0; statAce=0; statAceAgainst=0;
@@ -2312,7 +2356,7 @@
       pScore=ms.pScore; aScore=ms.aScore; pGames=ms.pGames; aGames=ms.aGames; gameNo=ms.gameNo;
       serveCnt=ms.serveCnt; pServes=ms.pServes; deuce=ms.deuce; finalSwitch=ms.finalSwitch;
       power=0;celebrating=false;celebT=0;forehand=true;gripT=1;aiGripT=1;aiMood=1;rally=0;
-      padZ=0; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
+      padZ=0; padZTarget=0; lastKnobZ=9; joyX=0; joyY=0; joyActive=false; paddleV.set(0,0,0);
       pointDone=false; pointScored=false;
       statLongRally=ms.statLongRally||0; statWinners=ms.statWinners||0; statAce=ms.statAce||0; statAceAgainst=ms.statAceAgainst||0;
       statFH=ms.statFH||0; statBH=ms.statBH||0; statServeTot=ms.statServeTot||0; statServePts=ms.statServePts||0; playerLastFH=false;
@@ -2343,6 +2387,12 @@
     let trainCfg = { spin:'random', place:'all', speed:1 };
     try { const _tc = JSON.parse(localStorage.getItem(LS_TRAINCFG)); if (_tc && _tc.spin) trainCfg = Object.assign(trainCfg, _tc); } catch (e) {}
     function saveTrainCfg(){ try { localStorage.setItem(LS_TRAINCFG, JSON.stringify(trainCfg)); } catch (e) {} }
+
+    /* ---------- 操控设置（全局，跟随设备，localStorage 记忆） ---------- */
+    const LS_CTRL = 'pp3d_ctrl_v1';
+    let ctrlCfg = { wheelStep: .16, moveK: 1 };   // wheelStep: 每格滚轮的 z 位移(0.16≈12格/半圈走完)；moveK: 上下左右移动幅度系数
+    try { const _cc = JSON.parse(localStorage.getItem(LS_CTRL)); if (_cc && _cc.wheelStep) ctrlCfg = Object.assign(ctrlCfg, _cc); } catch (e) {}
+    function saveCtrl(){ try { localStorage.setItem(LS_CTRL, JSON.stringify(ctrlCfg)); } catch (e) {} }
     function saveMatchState(snap){ try { localStorage.setItem(LS_MATCH, JSON.stringify(Object.assign({ pid: profiles && profiles.currentId, ts: Date.now() }, snap))); } catch (e) {} }
     function readMatchState(){ try { return JSON.parse(localStorage.getItem(LS_MATCH)); } catch (e) { return null; } }
     function clearMatchState(){ try { localStorage.removeItem(LS_MATCH); } catch (e) {} const cb = E('continueBtn'); if (cb) cb.style.display = 'none'; }
