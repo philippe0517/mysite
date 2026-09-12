@@ -672,6 +672,7 @@
   <div class="pmodal" id="profileModal" data-closable="0"><div class="pmodal-box" id="profileBox"></div></div>
   <div class="pmodal" id="statsModal" data-closable="1"><div class="pmodal-box" id="statsBox"></div></div>
   <div class="pmodal" id="ctrlModal" data-closable="1"><div class="pmodal-box" id="ctrlBox"></div></div>
+  <div class="pmodal" id="tutModal" data-closable="1"><div class="pmodal-box" id="tutBox"></div></div>
   <div class="pmodal" id="skinModal" data-closable="1"><div class="pmodal-box" id="skinBox"></div></div>
   <div class="pmodal" id="shareModal" data-closable="1"><div class="pmodal-box" id="shareBox" style="text-align:center"></div></div>
 
@@ -845,6 +846,7 @@
         } catch (e) { actx = null; return; }
       }
       if (actx && actx.state === 'suspended') actx.resume();
+      if (actx && ctrlCfg.bgm !== false) bgmStart();   // 音频就绪后启动合成 BGM（可在操控设置关闭）
     }
     function buildCrowd() {
       try {
@@ -885,6 +887,52 @@
     const sFault  = () => tone(210, 90, .32, 'sawtooth', .07);
     const sSwing  = () => tone(300, 900, .08, 'sine', .03, 2000);
     const sCheer  = (win) => { crowd(1); setTimeout(()=>crowd(.3),1800); setTimeout(()=>crowd(.12),3800); tone(win?420:280, win?640:220, .5, 'sawtooth', .018); };
+
+    /* ---------- 合成背景音乐：小调五声音阶琶音 + 低音脉冲（lookahead 调度，零素材） ---------- */
+    let bgmTimer = null, bgmNext = 0, bgmStep = 0, bgmGain = null;
+    const BGM_SCALE = [0, 3, 5, 7, 10];   // 小调五声
+    function bgmInit() {
+      if (bgmGain || !actx) return;
+      try {
+        bgmGain = actx.createGain(); bgmGain.gain.value = .05 * volScale;
+        bgmGain.connect(actx.destination);
+      } catch (e) { bgmGain = null; }
+    }
+    function bgmNote(f, t, dur, vol, type) {
+      try {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = type || 'triangle'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol, t + .02);
+        g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+        o.connect(g); g.connect(bgmGain);
+        o.start(t); o.stop(t + dur + .02);
+      } catch (e) {}
+    }
+    function bgmTick() {
+      if (!actx || !bgmGain) return;
+      if (ctrlCfg.bgm === false || muted) { bgmNext = actx.currentTime + .1; return; }   // 关闭/静音：不排音符，恢复时从当前时间继续
+      bgmGain.gain.value = .05 * volScale;   // 跟随主音量滑条
+      const ahead = actx.currentTime + .25;
+      const stepDur = 60 / 92 / 2;           // 92 BPM 八分音符
+      while (bgmNext < ahead) {
+        const st = bgmStep % 16;
+        if (st % 4 === 0) bgmNote(110 * (bgmStep % 32 < 16 ? 1 : .746), bgmNext, stepDur * 3.4, .5, 'sine');   // 低音脉冲 A1/E1
+        if (Math.random() < .62) {
+          const semi = BGM_SCALE[Math.floor(Math.random() * 5)] + 12 * (Math.random() < .3 ? 2 : 1);
+          bgmNote(220 * Math.pow(2, semi / 12), bgmNext, stepDur * 1.8, .22);
+        }
+        bgmNext += stepDur; bgmStep++;
+      }
+    }
+    function bgmStart() {
+      if (!actx || bgmTimer || ctrlCfg.bgm === false) return;
+      bgmInit(); if (!bgmGain) return;
+      bgmNext = actx.currentTime + .1;
+      bgmTimer = setInterval(bgmTick, 120);
+    }
+    function bgmStop() { if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; } }
+    function bgmSetEnabled(on) { if (on) { if (actx) bgmStart(); } else bgmStop(); }
 
     /* ============================================================
        新增功能：音效开关 / 关键分横幅 / 制胜闪光
@@ -947,8 +995,8 @@
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.3;
 
-      // 明亮赛场布光：高环境光 + 顶光 + 冷暖补光
-      scene.add(new THREE.AmbientLight(0xffffff, .8));
+      // 明亮赛场布光：高环境光 + 顶光 + 冷暖补光（环境光引用存全局，场馆皮肤可调氛围）
+      venueAmb = new THREE.AmbientLight(0xffffff, .8); scene.add(venueAmb);
       const hemi = new THREE.HemisphereLight(0xffffff, 0xc8d8e8, .45); scene.add(hemi);
       const key = new THREE.SpotLight(0xffffff, 1.9, 18, Math.PI / 4.2, .5, 1);
       key.position.set(0, 5.6, 0); key.target.position.set(0, CFG.table.H, 0);
@@ -957,7 +1005,7 @@
       const fill1 = new THREE.PointLight(0xbfd8ee, .75, 14); fill1.position.set(-4.5, 3.4, 1.5); scene.add(fill1);
       const fill2 = new THREE.PointLight(0xffe2c4, .55, 14); fill2.position.set(4.5, 3.4, -1.5); scene.add(fill2);
 
-      buildVenue(); buildTable(); buildNet(); buildBall(); buildPaddles(); buildLandingMarker(); buildHitRing();
+      buildVenue(); buildTable(); buildNet(); buildBall(); buildPaddles(); buildLandingMarker(); buildHitRing(); buildTargetRing();
       prevPaddlePos.copy(pPaddle.position);
     }
 
@@ -973,6 +1021,23 @@
       scene.add(hitRing);
     }
 
+    // 落点挑战（训练模式）：对方半场随机金色目标圈，回球第一跳落圈内即命中连击
+    let targetRing = null, targetHits = 0;
+    function buildTargetRing(){
+      targetRing = new THREE.Mesh(
+        new THREE.RingGeometry(.125, .185, 36),
+        new THREE.MeshBasicMaterial({ color: 0xffd86b, transparent: true, opacity: .8, side: THREE.DoubleSide, depthWrite: false })
+      );
+      targetRing.rotation.x = -Math.PI/2;
+      targetRing.visible = false;
+      scene.add(targetRing);
+    }
+    function moveTargetRing(){
+      targetRing.position.set((Math.random()-.5)*1.1, CFG.table.H+.006, -(.22 + Math.random()*1.02));
+      targetRing.visible = true;
+    }
+
+    let venueFloor = null, venueAmb = null;   // 场馆皮肤可替换元素：地面 / 环境光
     function buildVenue() {
       // 地面：国际赛场红地板
       const floor = new THREE.Mesh(
@@ -980,6 +1045,7 @@
         new THREE.MeshStandardMaterial({ color: 0xa63a3a, roughness: .82 })
       );
       floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+      venueFloor = floor;
 
       // 场地白线
       const lm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .65 });
@@ -1409,6 +1475,22 @@
             qualityToast('擦边！','good'); tone(1250,950,.09,'square',.06);
             vel.x += (Math.random()-.5)*.9;
           }
+          // 落点挑战：训练模式中，玩家回球（飞向对方半场）第一跳落进金色目标圈 → 命中连击
+          if (diff==='train' && targetRing && targetRing.visible && vel.z < 0) {
+            const dx = ball.position.x - targetRing.position.x, dz = ball.position.z - targetRing.position.z;
+            if (dx*dx + dz*dz < .19*.19) {
+              targetHits++;
+              qualityToast('🎯 落点命中 ×' + targetHits, 'good');
+              tone(880, 1320, .12, 'sine', .08); buzz(20);
+              spawnParticles(ball.position, 0xffd86b, 10);
+              const mp0 = curProfile();
+              if (mp0) { mp0.stats.targetBest = Math.max(mp0.stats.targetBest||0, targetHits); saveProfiles(); }
+              moveTargetRing();
+            } else if (targetHits > 0) {
+              if (targetHits >= 2) qualityToast('落点连击 ' + targetHits + ' 次结束', 'info');
+              targetHits = 0;
+            }
+          }
           sBounce();
         }
       }
@@ -1746,6 +1828,7 @@
           showMsg(win ? (lv>=3?'传奇加冕！':'夺冠！') : '惜败',
             `大比分 ${pGames} : ${aGames} · 最长回合 ${statLongRally} 板 · 制胜分 ${statWinners} · ACE ${statAce}${statAceAgainst?` · 被ACE ${statAceAgainst}`:''} · 空格重新开赛`);
           if (win) celebrate(lv);   // 难度越高夺冠庆典越盛大
+          if (highlights.length) setTimeout(()=>{ if (state==='matchover') startHighlightShow(); }, 2800);   // 庆典后自动播放本场精彩集锦
           return;
         }
         gameNo++; setText('currentGame',gameNo);
@@ -1789,6 +1872,7 @@
     function prepareServe() {
       resetBall(); pointDone=false; pointScored=false; // 新回合开始，解锁判分（一球只判一次）
       state='serving'; power=0; updateServeDot(); serveSpinSel = 0;   // 新回合重置发球旋转选择
+      if (diff==='train') moveTargetRing(); else if (targetRing) targetRing.visible = false;   // 落点挑战：仅训练模式，每球换位
       if (pServes) {
         if (diff!=='train') statServeTot++;   // 发球轮计数（发球得分率分母）
         ball.position.set(pPaddle.position.x, CFG.table.H+.14, CFG.table.L/2-.05 - CFG.paddle.faceOff);
@@ -2054,10 +2138,12 @@
         const i = Math.min(replay.frames.length-1, Math.floor(replay.idx));
         ball.position.copy(replay.frames[i]);
         if(replay.idx >= replay.frames.length+8){
+          const wasHl = replay.hl;
           replay=null;
           if (replayCamSaved){ camBase.copy(replayCamSaved); replayCamSaved=null; }   // 恢复回放前的镜头基准
           E('kpBanner').classList.remove('show');
-          later(()=>{ if(state!=='matchover') prepareServe(); },250);
+          if (wasHl) playNextHighlight();   // 集锦链播：本球结束自动接下一球
+          else later(()=>{ if(state!=='matchover') prepareServe(); },250);
         }
       }
       plFrame++; if ((plFrame & 1) === 0) predictLanding();   // 落点预测隔帧计算，降低 GPU/CPU 峰值
@@ -2128,6 +2214,7 @@
         if(k==='e'||k==='E'){keys.zf=true;useKb=true;}  // 前进（近网）
         if(k===' '){
           if(state==='matchover') startMatch();
+          else if(state==='replay' && hlQueue) endHighlightShow();   // 集锦播放中按空格：跳过全部回到结算
           else { audioInit(); if(!charging) chargeStart(); }
         }
         if(k==='Shift'){audioInit();toggleGrip();}
@@ -2189,9 +2276,9 @@
       const shBtn = document.getElementById('shareBtn');
       if (shBtn) shBtn.addEventListener('click',e=>{ e.stopPropagation(); showShareCard(lastResult?'match':'career'); });
       // 模态框：点击遮罩关闭（仅当该弹窗可关闭）
-      ['profileModal','statsModal','skinModal','shareModal'].forEach(id=>{
+      ['profileModal','statsModal','skinModal','shareModal','tutModal'].forEach(id=>{
         const m=document.getElementById(id);
-        m.addEventListener('click',e=>{ if(e.target===m && m.dataset.closable==='1') m.classList.remove('open'); });
+        m.addEventListener('click',e=>{ if(e.target===m && m.dataset.closable==='1'){ m.classList.remove('open'); if(id==='tutModal') closeTut(true); } });
       });
       const ctrlM=document.getElementById('ctrlModal');   // 操控设置：遮罩关闭走 closeCtrl（比赛中打开时自动恢复对局）
       ctrlM.addEventListener('click',e=>{ if(e.target===ctrlM) closeCtrl(); });
@@ -2320,13 +2407,24 @@
           <div class="tc-opts" id="cwGroup">${CTRL_WHEEL.map(o=>`<button data-v="${o.v}" class="${ctrlCfg.wheelStep===o.v?'on':''}">${o.label}</button>`).join('')}</div></div>
         <div class="ctrl-row"><span class="ctrl-label">上下左右移动幅度<small>鼠标 / 键盘 / 摇杆的移拍范围</small></span>
           <div class="tc-opts" id="cmGroup">${CTRL_MOVE.map(o=>`<button data-v="${o.v}" class="${ctrlCfg.moveK===o.v?'on':''}">${o.label}</button>`).join('')}</div></div>
-        <div class="pm-btnrow"><button class="mini-btn" id="ctrlClose">✕ 关闭</button></div>`;
+        <div class="ctrl-row"><span class="ctrl-label">震动反馈<small>击球与得分时手机轻微震动</small></span>
+          <div class="tc-opts" id="cvGroup"><button data-v="1" class="${ctrlCfg.vib!==false?'on':''}">开</button><button data-v="0" class="${ctrlCfg.vib===false?'on':''}">关</button></div></div>
+        <div class="ctrl-row"><span class="ctrl-label">背景音乐<small>轻量合成 BGM · 音效开关🔇时自动静音</small></span>
+          <div class="tc-opts" id="cbGroup"><button data-v="1" class="${ctrlCfg.bgm!==false?'on':''}">开</button><button data-v="0" class="${ctrlCfg.bgm===false?'on':''}">关</button></div></div>
+        <div class="pm-btnrow"><button class="mini-btn" id="ctrlTut">📖 重看新手引导</button><button class="mini-btn" id="ctrlClose">✕ 关闭</button></div>`;
       document.getElementById('cwGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
         ctrlCfg.wheelStep = +b.dataset.v; saveCtrl(); openCtrl(); tone(620,620,.05,'sine',.04);
       }));
       document.getElementById('cmGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
         ctrlCfg.moveK = +b.dataset.v; saveCtrl(); openCtrl(); tone(620,620,.05,'sine',.04);
       }));
+      document.getElementById('cvGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        ctrlCfg.vib = b.dataset.v==='1'; saveCtrl(); if (ctrlCfg.vib) buzz(30); openCtrl(); tone(620,620,.05,'sine',.04);
+      }));
+      document.getElementById('cbGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+        ctrlCfg.bgm = b.dataset.v==='1'; saveCtrl(); bgmSetEnabled(ctrlCfg.bgm); openCtrl(); tone(620,620,.05,'sine',.04);
+      }));
+      document.getElementById('ctrlTut').addEventListener('click',()=>{ closeModal('ctrlModal'); openTutorial(); });
       document.getElementById('ctrlClose').addEventListener('click',()=>closeCtrl());
       openModal('ctrlModal');
     }
@@ -2489,7 +2587,7 @@
     }
 
     /* ---------- 手机震动 ---------- */
-    function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+    function buzz(p) { try { if (navigator.vibrate && ctrlCfg.vib !== false) navigator.vibrate(p); } catch (e) {} }
 
     /* ---------- 每日挑战（随档案存储，本地日期刷新） ---------- */
     const DAILY_POOL = [
@@ -2573,8 +2671,46 @@
       b.textContent = '⏱ 慢动作回放 · 点击跳过'; b.classList.remove('danger'); b.classList.add('show');
     }
     function replaySkip(){ if (state==='replay' && replay) replay.idx = replay.frames.length + 100; }
+    /* ---------- 局末精彩集锦：记录每分的精彩度，比赛结束自动回放前三球 ---------- */
+    let highlights = [], hlQueue = null, hlIdx = 0;
+    function recordHighlight(w) {
+      if (diff === 'train' || state !== 'playing') return;
+      const spicy = (netTouched && w === 'player') || (w === 'player' && playerLastSmash) || rally >= 10 ||
+        (w === 'player' && rally >= 6);
+      if (!spicy) return;
+      highlights.push({ frames: rbuf.slice(-70), score: rally + (playerLastSmash?8:0) + (netTouched?4:0) });
+      if (highlights.length > 3) { highlights.sort((a,b)=>b.score-a.score); highlights.length = 3; }
+    }
+    function startHighlightShow() {
+      if (!highlights.length) return;
+      hlQueue = highlights.slice(); hlIdx = 0;
+      playNextHighlight();
+    }
+    function playNextHighlight() {
+      if (!hlQueue || hlIdx >= hlQueue.length) { endHighlightShow(); return; }
+      const h = hlQueue[hlIdx++];
+      if (!h.frames || h.frames.length < 8) { playNextHighlight(); return; }
+      state = 'replay'; hideMsg();
+      replay = { frames: h.frames, idx: 0, hl: true };
+      vel.set(0,0,0);
+      replayCamSaved = camBase.clone();
+      camBase.set(4.3, 2.05, 0);
+      const b = E('kpBanner');
+      b.textContent = '🎬 精彩集锦 ' + hlIdx + '/' + hlQueue.length + ' · 点击跳过本球';
+      b.classList.remove('danger'); b.classList.add('show');
+    }
+    function endHighlightShow() {
+      highlights = []; hlQueue = null;
+      if (replayCamSaved) { camBase.copy(replayCamSaved); replayCamSaved = null; }
+      E('kpBanner').classList.remove('show');
+      state = 'matchover';
+      const lr = lastResult;
+      if (lr) showMsg(lr.win ? (AI_STYLES[lr.diff].celeb>=3?'传奇加冕！':'夺冠！') : '惜败',
+        `大比分 ${lr.pGames} : ${lr.aGames} · 最长回合 ${lr.longRally} 板 · 制胜分 ${lr.winners} · ACE ${lr.ace} · 空格重新开赛`);
+    }
     function afterPoint(w) {
       const p = curProfile();
+      recordHighlight(w);
       if (p && !p.tutorial && tutStep >= 1) { p.tutorial = true; tutStep = 3; saveProfiles(); toast('新手教学完成 · 祝你夺冠！', 'good'); }
       if (shouldReplay(w)) { startReplay(); return; }
       later(() => { if (state !== 'matchover') prepareServe(); }, 1100);
@@ -2643,11 +2779,52 @@
       { name:'海洋之心', fh:0x1F6F9C, bh:0x0D2F45, req:10, desc:'生涯胜 10 场解锁' },
       { name:'鎏金典藏', fh:0xD9A94E, bh:0x6E531F, req:15, desc:'生涯胜 15 场解锁' }
     ];
+    /* ---------- 场馆皮肤：背景/雾色 + 地板 + 环境光氛围（生涯胜场解锁） ---------- */
+    const VENUES = [
+      { name:'奥运蓝金', bg:0xdfeaf5, floor:0xa63a3a, amb:.8,  req:0,  desc:'标准奥运赛场' },
+      { name:'霓虹夜场', bg:0x141026, floor:0x2a2440, amb:.5,  req:4,  desc:'生涯胜 4 场解锁' },
+      { name:'沙漠暖阳', bg:0xf3e3c2, floor:0xc47a3c, amb:.9,  req:8,  desc:'生涯胜 8 场解锁' },
+      { name:'翡翠球馆', bg:0xd9efe2, floor:0x1f6f4a, amb:.85, req:12, desc:'生涯胜 12 场解锁' }
+    ];
+    function applyVenue() {
+      const p = curProfile();
+      const v = VENUES[(p && p.settings.venue) || 0] || VENUES[0];
+      if (scene) {
+        if (scene.background && scene.background.setHex) scene.background.setHex(v.bg);
+        if (scene.fog && scene.fog.color) scene.fog.color.setHex(v.bg);
+      }
+      if (venueFloor) venueFloor.material.color.setHex(v.floor);
+      if (venueAmb) venueAmb.intensity = v.amb;
+    }
     function applySkin() {
       const p = curProfile();
       const s = SKINS[(p && p.settings.skin) || 0];
       if (pFaceMatF && pFaceMatB) { pFaceMatF.color.setHex(s.fh); pFaceMatB.color.setHex(s.bh); }
+      applyVenue();   // 档案切换/换装时同步场馆氛围
     }
+
+    /* ---------- 新手引导面板（首访自动弹出，操控设置可重看） ---------- */
+    const LS_TUT = 'pp3d_tutseen_v1';
+    function closeTut(silent) {
+      try { localStorage.setItem(LS_TUT, '1'); } catch (e) {}
+      closeModal('tutModal');
+      if (ctrlAutoPaused) { ctrlAutoPaused = false; if (state==='paused') togglePause(); }   // 比赛中打开引导：关闭后恢复对局
+    }
+    function openTutorial() {
+      document.getElementById('tutBox').innerHTML = `
+        <h3>新手引导 · 三步上手</h3>
+        <div class="pmodal-sub">一分钟学会，剩下的交给手感</div>
+        <div class="stat-line"><span><b>① 移动站位</b></span><b>鼠标 / 方向键 / WASD</b></div>
+        <div class="pmodal-sub" style="margin:2px 0 10px">上下左右移拍覆盖全场；滚轮前后移台（远台防守 ↔ 近台快攻），Q·E 微调</div>
+        <div class="stat-line"><span><b>② 发球蓄力</b></span><b>按住左键 → 松开出手</b></div>
+        <div class="pmodal-sub" style="margin:2px 0 10px">蓄力越久球越冲；W/S 或摇杆上下选上旋 / 下旋发球</div>
+        <div class="stat-line"><span><b>③ 回击来球</b></span><b>看青绿光圈 · 弹起后挥拍</b></div>
+        <div class="pmodal-sub" style="margin:2px 0 10px">球在本方台面弹起后出现脉动光圈——光圈亮起时把拍移到球的位置即可还击；真实规则：必须在第一跳弹起后、第二跳落地前出手</div>
+        <div class="pm-btnrow"><button class="mini-btn gold" id="tutGo">🏓 明白了，开始！</button></div>`;
+      document.getElementById('tutGo').addEventListener('click',()=>closeTut());
+      openModal('tutModal');
+    }
+    try { if (!localStorage.getItem(LS_TUT)) setTimeout(openTutorial, 900); } catch (e) {}
 
     /* ---------- 球员档案界面 ---------- */
     function renderPlayerChip() {
@@ -2763,6 +2940,7 @@
         <div class="stat-line"><span>生涯总 ACE</span><b>${c.totalAces}</b></div>
         <div class="stat-line"><span>最长回合</span><b>${c.bestRally ? c.bestRally + ' 板' : '—'}</b></div>
         <div class="stat-line"><span>训练模式纪录</span><b>${p.stats.trainBest ? p.stats.trainBest + ' 板' : '未挑战'}</b></div>
+        <div class="stat-line"><span>落点挑战纪录</span><b>${p.stats.targetBest ? '连续 ' + p.stats.targetBest + ' 次命中' : '未挑战（训练模式）'}</b></div>
         <div class="stat-line"><span>发球得分率</span><b>${c.serveTot ? Math.round(c.servePts/c.serveTot*100) + '%' : '—'}</b></div>
         <div class="stat-line"><span>正手 / 反手得分</span><b>${c.fhPts||0} / ${c.bhPts||0}</b></div>
         <div class="stat-sec">分难度战绩</div>
@@ -2771,11 +2949,52 @@
         <div class="ach-grid">${ACH.map(a => `<div class="ach ${p.achievements.includes(a.id)?'on':'off'}"><b>${p.achievements.includes(a.id)?'🏅':'🔒'} ${a.name}</b>${a.desc}</div>`).join('')}</div>
         <div class="pm-btnrow">
           <button class="mini-btn gold" id="stShare">📸 生成生涯战绩卡</button>
+          <button class="mini-btn" id="stExport">📤 导出存档</button>
+          <button class="mini-btn" id="stImport">📥 导入存档</button>
           <button class="mini-btn" id="stClose">✕ 关闭</button>
-        </div>`;
+        </div>
+        <textarea class="pf-input" id="stIO" spellcheck="false" style="display:none;width:100%;min-height:96px;font-size:10px;margin-top:10px;resize:vertical"></textarea>`;
       document.getElementById('stClose').addEventListener('click', () => closeModal('statsModal'));
       document.getElementById('stShare').addEventListener('click', () => showShareCard('career'));
+      document.getElementById('stExport').addEventListener('click', () => saveIO('export'));
+      document.getElementById('stImport').addEventListener('click', () => saveIO('import'));
       openModal('statsModal');
+    }
+
+    /* ---------- 生涯存档导出 / 导入（跨设备备份，全部 pp3d_* 本地数据） ---------- */
+    function saveIO(mode) {
+      const ta = document.getElementById('stIO');
+      if (!ta) return;
+      if (mode === 'export') {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.indexOf('pp3d_') === 0) data[k] = localStorage.getItem(k);
+        }
+        const payload = JSON.stringify({ v: 1, app: 'pp3d', ts: Date.now(), data });
+        ta.style.display = 'block'; ta.value = payload; ta.focus(); ta.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(payload).catch(()=>{});
+        toast(ok ? '存档已复制到剪贴板 · 也可手动复制文本框内容' : '请手动全选复制文本框中的存档', 'good');
+      } else {
+        if (ta.style.display === 'none' || !ta.value.trim()) {
+          ta.style.display = 'block'; ta.value = ''; ta.placeholder = '粘贴之前导出的存档 JSON，然后再次点击「导入存档」确认';
+          ta.focus();
+          toast('粘贴存档 JSON 后，再点一次「导入存档」确认', 'info');
+          return;
+        }
+        try {
+          const obj = JSON.parse(ta.value);
+          if (!obj || obj.app !== 'pp3d' || !obj.data || typeof obj.data !== 'object') throw new Error('format');
+          let n = 0;
+          Object.keys(obj.data).forEach(k => { if (k.indexOf('pp3d_') === 0) { localStorage.setItem(k, obj.data[k]); n++; } });
+          if (!n) throw new Error('empty');
+          toast(`存档导入成功（${n} 项）· 页面即将刷新`, 'good');
+          setTimeout(() => location.reload(), 900);
+        } catch (e) {
+          toast('存档格式无效 · 请粘贴完整的导出 JSON 原文', 'bad');
+        }
+      }
     }
 
     /* ---------- 皮肤选择器 ---------- */
@@ -2784,8 +3003,9 @@
       if (!p) { toast('请先创建球员档案', 'info'); openProfile(); return; }
       const wins = p.career.wins;
       document.getElementById('skinBox').innerHTML = `
-        <h3>球拍皮肤</h3>
-        <div class="pmodal-sub">用生涯胜场解锁新拍面 · 当前：${escapeHtml(p.name)} 已胜 ${wins} 场</div>
+        <h3>装备库</h3>
+        <div class="pmodal-sub">用生涯胜场解锁新拍面与场馆 · 当前：${escapeHtml(p.name)} 已胜 ${wins} 场</div>
+        <div class="stat-sec" style="margin-top:6px">球拍拍面</div>
         <div class="skin-grid">${SKINS.map((s,i) => {
           const unlocked = wins >= s.req, cur = (p.settings.skin||0) === i;
           return `<div class="skin-card${unlocked?'':' locked'}${cur?' cur':''}" data-i="${i}">
@@ -2794,13 +3014,28 @@
             <b>${s.name}</b><small>${unlocked ? (cur?'当前装备中':'点击更换') : s.desc}</small>
           </div>`;
         }).join('')}</div>
+        <div class="stat-sec">比赛场馆</div>
+        <div class="skin-grid">${VENUES.map((v,i) => {
+          const unlocked = wins >= v.req, cur = (p.settings.venue||0) === i;
+          return `<div class="skin-card${unlocked?'':' locked'}${cur?' cur':''}" data-v="${i}">
+            <span class="skin-state">${cur?'使用中':(unlocked?'可更换':'🔒')}</span>
+            <div class="skin-dots"><i style="background:#${v.bg.toString(16).padStart(6,'0')}"></i><i style="background:#${v.floor.toString(16).padStart(6,'0')}"></i></div>
+            <b>${v.name}</b><small>${unlocked ? (cur?'当前场馆':'点击更换') : v.desc}</small>
+          </div>`;
+        }).join('')}</div>
         <div class="pm-btnrow"><button class="mini-btn" id="skClose">✕ 关闭</button></div>`;
       document.getElementById('skClose').addEventListener('click', () => closeModal('skinModal'));
-      document.querySelectorAll('.skin-card').forEach(el => el.addEventListener('click', () => {
+      document.querySelectorAll('.skin-card[data-i]').forEach(el => el.addEventListener('click', () => {
         const i = +el.dataset.i;
         if (wins < SKINS[i].req) { toast('还未解锁 · ' + SKINS[i].desc, 'info'); return; }
         p.settings.skin = i; saveProfiles(); applySkin(); openSkin();
         toast('已换上「' + SKINS[i].name + '」拍面', 'good');
+      }));
+      document.querySelectorAll('.skin-card[data-v]').forEach(el => el.addEventListener('click', () => {
+        const i = +el.dataset.v;
+        if (wins < VENUES[i].req) { toast('还未解锁 · ' + VENUES[i].desc, 'info'); return; }
+        p.settings.venue = i; saveProfiles(); applySkin(); openSkin();
+        toast('已切换到「' + VENUES[i].name + '」场馆', 'good');
       }));
       openModal('skinModal');
     }
