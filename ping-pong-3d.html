@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>奥运会乒乓球比赛 · 3D对战 | 于哲的个人主页</title>
+  <title>世界乒乓球比赛 · 3D对战 | 于哲的个人主页</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237EB6D9'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#16345c">
@@ -157,21 +157,6 @@
     }
     .start-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
     .start-inner { margin: auto 0; display: flex; flex-direction: column; align-items: center; max-width: 720px; }
-    /* ===== 奥运五环（上三下二交错，官方配色） ===== */
-    .olympic-rings { position: relative; width: 176px; height: 94px; margin-bottom: 14px; }
-    .olympic-rings .ring {
-      position: absolute; width: 64px; height: 64px; border: 6px solid; border-radius: 50%;
-      animation: ringIn .55s ease-out backwards;
-    }
-    .r-blue   { border-color: #0085C7; left: 0;   top: 0;  }
-    .r-black  { border-color: #111;    left: 56px; top: 0;  animation-delay: .12s; }
-    .r-red    { border-color: #DF0024; left: 112px;top: 0;  animation-delay: .24s; }
-    .r-yellow { border-color: #F4C300; left: 28px; top: 30px; animation-delay: .36s; }
-    .r-green  { border-color: #009F3D; left: 84px; top: 30px; animation-delay: .48s; }
-    @keyframes ringIn {
-      from { opacity: 0; transform: translateY(-10px) scale(.85); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
-    }
     .start-badge {
       display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
       color: #fff; background: linear-gradient(90deg, #c9a96e, #e0bd83);
@@ -461,7 +446,7 @@
     /* ===== 手机横屏（矮视口）适配：压缩开始界面与触控 UI，保证全部可见可点 ===== */
     @media (orientation: landscape) and (max-height: 460px) {
       .start-screen { padding: 10px 14px; }
-      .olympic-rings { transform: scale(.62); margin: -10px 0 -14px; }
+      .player-chip { transform: scale(.62); margin: -10px 0 -14px; }
       .start-badge { font-size: 9px; padding: 4px 14px; margin-bottom: 8px; letter-spacing: 3px; }
       .start-screen h1 { font-size: 26px; letter-spacing: 3px; }
       .subtitle { font-size: 11px; letter-spacing: 3px; margin: 5px 0 10px; }
@@ -495,7 +480,7 @@
     /* 手机竖屏（用户选择竖屏继续游玩）：紧凑布局避免控件重叠 */
     @media (orientation: portrait) {
       .start-screen h1 { font-size: 30px; letter-spacing: 3px; }
-      .olympic-rings { transform: scale(.78); margin: -6px 0 -10px; }
+      .player-chip { transform: scale(.78); margin: -6px 0 -10px; }
       body.touch .vjoy { width: 112px; height: 112px; bottom: 84px; left: 16px; }
       body.touch .vjoy-knob { width: 48px; height: 48px; margin: -24px 0 0 -24px; }
       body.touch .zslider { right: 112px; bottom: 80px; width: 48px; height: 128px; }
@@ -521,11 +506,8 @@
   <div class="start-screen" id="startScreen">
     <div class="start-inner">
       <div class="player-chip" id="playerChip"><span class="pc-dot" id="pcDot"></span><span id="pcName">创建球员档案</span><span class="pc-hint">点击管理</span></div>
-      <div class="olympic-rings" aria-hidden="true">
-        <span class="ring r-blue"></span><span class="ring r-black"></span><span class="ring r-red"></span><span class="ring r-yellow"></span><span class="ring r-green"></span>
-      </div>
-      <div class="start-badge">OLYMPIC FINAL · 奥运决赛</div>
-      <h1>奥运会乒乓球比赛</h1>
+      <div class="start-badge">WORLD FINAL · 巅峰对决</div>
+      <h1>世界乒乓球比赛</h1>
       <p class="subtitle">七局四胜 · 11 分制 · 真实规则</p>
       <div class="feat-grid">
         <span>球拍 X/Y/Z 三维操控 · 真实步法</span><span>真实旋转物理（马格努斯效应）</span>
@@ -554,7 +536,7 @@
         </div>
         <div class="diff-card t-champ" data-diff="champion">
           <div class="diff-stars">★★★</div>
-          <div class="diff-name">奥运冠军</div>
+          <div class="diff-name">世界冠军</div>
           <div class="diff-en">GRAND SLAM</div>
           <div class="diff-desc">反应极快 · 几乎零失误<br>暴力弧圈 · 大角度极限调动</div>
           <div class="diff-celeb">🎆🎆🎆 传奇庆典 · 礼炮齐鸣</div>
@@ -618,7 +600,7 @@
     </div>
 
     <div class="panel game-info">
-      <h2>奥运会乒乓球比赛</h2>
+      <h2>世界乒乓球比赛</h2>
       <p>第 <span id="currentGame">1</span> 局 · <span id="modeTag">七局四胜</span></p>
       <p>对手打法：<span class="style-name" id="styleName">国家队主力</span></p>
     </div>
@@ -696,13 +678,13 @@
       game: { win: 11, serveEvery: 2, maxCharge: 1.4, deuce: 10, gamesToWin: 4, substeps: 3 }
     };
 
-    /* 三档难度：rookie 青训新秀 / pro 国家队主力 / champion 奥运冠军
+      /* 三档难度：rookie 青训新秀 / pro 国家队主力 / champion 世界冠军
        speed:AI移动速度  err:失误率  mult:击球力量(球速)  top/back/side:旋转概率
        react:反应延迟   place:主动调动概率  placePow:调动幅度  celeb:庆祝等级 */
     const AI_STYLES = {
       rookie:   { name:'青训新秀', speed:.62,  err:.17,  mult:.92,  top:.3,  back:.35, side:.1,  react:.24,  place:.3,  placePow:.3, celeb:1 },
       pro:      { name:'国家队主力', speed:.92, err:.06,  mult:1.1,  top:.45, back:.2,  side:.25, react:.07,  place:.6,  placePow:.8, celeb:2 },
-      champion: { name:'奥运冠军', speed:1.28, err:.012, mult:1.26, top:.55, back:.12, side:.28, react:.025, place:.85, placePow:1,  celeb:3 },
+      champion: { name:'世界冠军', speed:1.28, err:.012, mult:1.26, top:.55, back:.12, side:.28, react:.025, place:.85, placePow:1,  celeb:3 },
       train:    { name:'发球机陪练', speed:.85, err:0,   mult:.95,  top:.35, back:.35, side:.15, react:.15,  place:.45, placePow:.5, celeb:1 }
     };
 
@@ -1064,7 +1046,7 @@
       }
 
       // 广告牌
-      const ads = ['红双喜 DHS','BUTTERFLY 蝴蝶','OLYMPIC','ITTF','中国联通','YILI 伊利'];
+      const ads = ['星驰体育 STARX','旋风装备 CYCLONE','WORLD TOUR','TT PRO LEAGUE','星联电信','极光乳品'];
       let ai2 = 0;
       for (let s = 0; s < 4; s++) for (let i = 0; i < 3; i++) {
         const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64;
@@ -1082,32 +1064,32 @@
         scene.add(ad);
       }
 
-      // 奥运五环悬挂
-      const rc = [0x0085C7,0x111111,0xDF0024,0xF4C300,0x009F3D];
+      // 顶部悬挂横幅装饰（金/青/银三色旗带）
+      const rc = [0xc9a96e, 0x7EB6D9, 0xe8e8e8];
       rc.forEach((c,i)=>{
-        const ring = new THREE.Mesh(new THREE.TorusGeometry(.3,.038,10,32), new THREE.MeshStandardMaterial({ color:c, metalness:.7, roughness:.25 }));
-        ring.position.set((i-2)*.56, 6.4, -2.2); if (i%2) ring.position.y = 6.1;
-        scene.add(ring);
+        const flag = new THREE.Mesh(new THREE.BoxGeometry(1.6,.09,.03), new THREE.MeshStandardMaterial({ color:c, metalness:.5, roughness:.35 }));
+        flag.position.set((i-1)*.9, 6.4, -2.2);
+        scene.add(flag);
       });
     }
 
     function buildTable() {
       tableGroup = new THREE.Group();
-      // 台面：ITTF 比赛蓝，哑光漆面（真实台面无金属反光）
+      // 台面：国际比赛蓝，哑光漆面（真实台面无金属反光）
       const top = new THREE.Mesh(
         new THREE.BoxGeometry(CFG.table.W, .05, CFG.table.L),
         new THREE.MeshStandardMaterial({ color: 0x175fa8, roughness: .45, metalness: 0 })
       );
       top.position.y = CFG.table.H; top.castShadow = true; top.receiveShadow = true; tableGroup.add(top);
 
-      // 白线：边线/端线 2cm · 双打中线按 ITTF 标准宽 3mm
+      // 白线：边线/端线 2cm · 双打中线按国际标准宽 3mm
       const line = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const add = (w,d,x,z)=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(w,.0012,d),line); m.position.set(x,CFG.table.H+.026,z); tableGroup.add(m); };
       add(.02, CFG.table.L, -CFG.table.W/2+.01, 0);
       add(.02, CFG.table.L,  CFG.table.W/2-.01, 0);
       add(CFG.table.W, .02, 0, -CFG.table.L/2+.01);
       add(CFG.table.W, .02, 0,  CFG.table.L/2-.01);
-      add(.003, CFG.table.L, 0, 0); // 中线（ITTF 标准 3mm）
+      add(.003, CFG.table.L, 0, 0); // 中线（国际标准 3mm）
 
       // 桌腿：深炭灰现代比赛支架（矩形腿+万向轮，替代银灰圆柱）
       const legM = new THREE.MeshStandardMaterial({ color:0x2b2f36, metalness:.55, roughness:.42 });
@@ -1137,7 +1119,7 @@
         const clamp = new THREE.Mesh(new THREE.BoxGeometry(.03,.05,.05), clampM);
         clamp.position.set(s*(CFG.table.W/2-.006), CFG.table.H+.022, 0); netGroup.add(clamp);
       });
-      // 网面：深色比赛网（真实 ITTF 网面为深蓝/黑网格，配白色网顶带）
+      // 网面：深色比赛网（真实国际比赛网面为深蓝/黑网格，配白色网顶带）
       const cv = document.createElement('canvas'); cv.width=256; cv.height=32;
       const x = cv.getContext('2d'); x.clearRect(0,0,256,32);
       x.strokeStyle='rgba(24,34,50,.88)'; x.lineWidth=.8;
@@ -2005,7 +1987,7 @@
       el.className='grip-name '+(forehand?'fh':'bh');
       tone(forehand?600:500,forehand?600:500,.08,'sine',.045);
     }
-    /* 分级庆祝：level 1=标准(青训) 2=加强(国家队) 3=传奇(奥运冠军)
+    /* 分级庆祝：level 1=标准(青训) 2=加强(国家队) 3=传奇(世界冠军)
        等级越高 → 烟花波数/每波数量越多、镜头震动更强、欢呼持续更久 */
     function celebrate(level){
       level = Math.max(1, Math.min(3, level||1));
@@ -2565,7 +2547,7 @@
       { id:'first_win',  name:'开门红',     desc:'赢下第一场比赛' },
       { id:'rookie_win', name:'新秀杀手',   desc:'击败青训新秀' },
       { id:'pro_win',    name:'力克主力',   desc:'击败国家队主力' },
-      { id:'champ_win',  name:'传奇加冕',   desc:'击败奥运冠军' },
+      { id:'champ_win',  name:'传奇加冕',   desc:'击败世界冠军' },
       { id:'streak3',    name:'三连胜',     desc:'生涯累计 3 连胜' },
       { id:'streak5',    name:'五虎上将',   desc:'生涯累计 5 连胜' },
       { id:'rally10',    name:'十板大战',   desc:'单回合 10 板以上' },
@@ -2781,7 +2763,7 @@
     ];
     /* ---------- 场馆皮肤：背景/雾色 + 地板 + 环境光氛围（生涯胜场解锁） ---------- */
     const VENUES = [
-      { name:'奥运蓝金', bg:0xdfeaf5, floor:0xa63a3a, amb:.8,  req:0,  desc:'标准奥运赛场' },
+      { name:'经典蓝金', bg:0xdfeaf5, floor:0xa63a3a, amb:.8,  req:0,  desc:'标准国际赛场' },
       { name:'霓虹夜场', bg:0x141026, floor:0x2a2440, amb:.5,  req:4,  desc:'生涯胜 4 场解锁' },
       { name:'沙漠暖阳', bg:0xf3e3c2, floor:0xc47a3c, amb:.9,  req:8,  desc:'生涯胜 8 场解锁' },
       { name:'翡翠球馆', bg:0xd9efe2, floor:0x1f6f4a, amb:.85, req:12, desc:'生涯胜 12 场解锁' }
@@ -2944,7 +2926,7 @@
         <div class="stat-line"><span>发球得分率</span><b>${c.serveTot ? Math.round(c.servePts/c.serveTot*100) + '%' : '—'}</b></div>
         <div class="stat-line"><span>正手 / 反手得分</span><b>${c.fhPts||0} / ${c.bhPts||0}</b></div>
         <div class="stat-sec">分难度战绩</div>
-        ${drow('rookie')}${drow('pro')}${drow('champion') || '<div class="stat-line"><span>奥运冠军</span><b>尚未击败</b></div>'}
+        ${drow('rookie')}${drow('pro')}${drow('champion') || '<div class="stat-line"><span>世界冠军</span><b>尚未击败</b></div>'}
         <div class="stat-sec">成就墙 · ${p.achievements.length}/${ACH.length}</div>
         <div class="ach-grid">${ACH.map(a => `<div class="ach ${p.achievements.includes(a.id)?'on':'off'}"><b>${p.achievements.includes(a.id)?'🏅':'🔒'} ${a.name}</b>${a.desc}</div>`).join('')}</div>
         <div class="pm-btnrow">
@@ -3100,7 +3082,7 @@
       const url = drawShare(mode); if (!url) return;
       const isMatch = mode === 'match';
       const text = isMatch
-        ? `我在《奥运会乒乓球比赛》${lastResult.win?'夺冠':'惜败'}！${lastResult.diff==='train'?'':AI_STYLES[lastResult.diff].name+' · '}大比分 ${lastResult.pGames}:${lastResult.aGames}，最长回合 ${lastResult.longRally} 板，ACE ${lastResult.ace}。来挑战我！`
+        ? `我在《世界乒乓球比赛》${lastResult.win?'夺冠':'惜败'}！${lastResult.diff==='train'?'':AI_STYLES[lastResult.diff].name+' · '}大比分 ${lastResult.pGames}:${lastResult.aGames}，最长回合 ${lastResult.longRally} 板，ACE ${lastResult.ace}。来挑战我！`
         : `我的乒乓生涯：${p.career.matches} 场 ${p.career.wins} 胜，最长 ${p.career.bestStreak} 连胜，解锁成就 ${p.achievements.length}/${ACH.length}。来挑战我！`;
       document.getElementById('shareBox').innerHTML = `
         <h3>战绩卡已生成</h3>
