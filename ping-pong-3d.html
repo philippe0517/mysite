@@ -322,6 +322,15 @@
       padding: 20px 22px; color: #dce6f2; box-shadow: 0 18px 60px rgba(0,0,0,.65);
     }
     .pmodal-box h3 { margin: 0 0 4px; font-size: 18px; color: #e8c98a; letter-spacing: 2px; }
+    .ctrl-fab {
+      position: absolute; top: 18px; right: 70px; z-index: 66;
+      width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(201,169,110,.45);
+      background: rgba(13,29,56,.85); color: #e8c98a; font-size: 18px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: auto; transition: transform .15s, border-color .15s; user-select: none;
+    }
+    .ctrl-fab:hover { transform: scale(1.08); border-color: #c9a96e; background: rgba(201,169,110,.25); }
+    body.touch .ctrl-fab { top: 48px; right: 52px; width: 34px; height: 34px; font-size: 15px; }
     .pmodal-sub { font-size: 11px; color: #7288a3; margin-bottom: 14px; line-height: 1.7; }
     .pf-input {
       width: 100%; box-sizing: border-box; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18);
@@ -570,7 +579,7 @@
       <div class="start-btnrow">
         <button class="mini-btn" id="statsBtn">📊 生涯数据</button>
         <button class="mini-btn" id="skinBtn">🏓 球拍皮肤</button>
-        <button class="mini-btn" id="ctrlBtn">🎮 操控设置</button>
+        <button class="mini-btn" id="ctrlBtnMenu">🎮 操控设置</button>
       </div>
       <div class="daily-card" id="dailyCard"></div>
       <div class="vol-row"><span id="volIcon">🔊</span><input type="range" id="volSlider" min="0" max="100" value="80"><span class="vol-val" id="volVal">80%</span></div>
@@ -589,6 +598,7 @@
   <div class="overlay">
     <div id="paddleCursor"></div>
     <button class="snd-btn" id="sndBtn" aria-label="音效开关">🔊</button>
+    <button class="ctrl-fab" id="ctrlFab" title="操控设置" aria-label="操控设置">⚙</button>
     <div class="kp-banner" id="kpBanner"></div>
     <div id="flash"></div>
     <div class="scoreboard">
@@ -2091,6 +2101,7 @@
       });
       // 鼠标滚轮：z 轴渐进累积（默认约 12 格≈半圈从最远到最近，可在「操控设置」调节；Q·E 仍可微调）
       addEventListener('wheel',e=>{
+        if (state!=='playing' && state!=='serving') return;   // 开始界面/暂停/结算：放行页面滚动，不接管滚轮
         e.preventDefault(); useKb=false;
         if (e.deltaY===0) return;
         const unit = e.deltaMode===1 ? e.deltaY*33 : e.deltaY;   // 行模式(Firefox)换算为像素
@@ -2120,7 +2131,7 @@
           else { audioInit(); if(!charging) chargeStart(); }
         }
         if(k==='Shift'){audioInit();toggleGrip();}
-        if(k==='Escape'){ audioInit(); togglePause(); }
+        if(k==='Escape'){ audioInit(); const cm=document.getElementById('ctrlModal'); if(cm.classList.contains('open')) closeCtrl(); else togglePause(); }
         // 发球前 W/S 选旋转（移动照常生效，不冲突）
         if(state==='serving'&&pServes){
           if((k==='w'||k==='W'||k==='ArrowUp') && serveSpinSel!==1){ serveSpinSel=1; qualityToast('上旋发球','info'); }
@@ -2173,14 +2184,17 @@
       document.getElementById('playerChip').addEventListener('click',e=>{ e.stopPropagation(); openProfile(); });
       document.getElementById('statsBtn').addEventListener('click',e=>{ e.stopPropagation(); openStats(); });
       document.getElementById('skinBtn').addEventListener('click',e=>{ e.stopPropagation(); openSkin(); });
-      document.getElementById('ctrlBtn').addEventListener('click',e=>{ e.stopPropagation(); openCtrl(); });
+      document.getElementById('ctrlFab').addEventListener('click',e=>{ e.stopPropagation(); openCtrl(); });
+      document.getElementById('ctrlBtnMenu').addEventListener('click',e=>{ e.stopPropagation(); openCtrl(); });
       const shBtn = document.getElementById('shareBtn');
       if (shBtn) shBtn.addEventListener('click',e=>{ e.stopPropagation(); showShareCard(lastResult?'match':'career'); });
       // 模态框：点击遮罩关闭（仅当该弹窗可关闭）
-      ['profileModal','statsModal','skinModal','shareModal','ctrlModal'].forEach(id=>{
+      ['profileModal','statsModal','skinModal','shareModal'].forEach(id=>{
         const m=document.getElementById(id);
         m.addEventListener('click',e=>{ if(e.target===m && m.dataset.closable==='1') m.classList.remove('open'); });
       });
+      const ctrlM=document.getElementById('ctrlModal');   // 操控设置：遮罩关闭走 closeCtrl（比赛中打开时自动恢复对局）
+      ctrlM.addEventListener('click',e=>{ if(e.target===ctrlM) closeCtrl(); });
       // 音量滑条（0-100，记忆到 localStorage）
       const vs=document.getElementById('volSlider'), vv=document.getElementById('volVal'), vi=document.getElementById('volIcon');
       if (vs) {
@@ -2289,10 +2303,19 @@
       { v:1,   label:'标准' },
       { v:1.3, label:'大' }
     ];
+    /* ---------- 操控设置窗口（右上角常驻按钮，比赛中打开自动暂停、关闭自动恢复） ---------- */
+    let ctrlAutoPaused = false;
+    function closeCtrl(){
+      closeModal('ctrlModal');
+      if (ctrlAutoPaused) { ctrlAutoPaused = false; if (state==='paused') togglePause(); }
+    }
     function openCtrl() {
+      if (state==='playing' || state==='serving' || state==='replay') {
+        ctrlAutoPaused = true; togglePause();   // 对局中打开：先自动暂停，关闭弹窗后自动恢复
+      }
       document.getElementById('ctrlBox').innerHTML = `
         <h3>操控设置</h3>
-        <div class="pmodal-sub">调节滚轮与移动手感 · 所有球员共用 · 自动保存</div>
+        <div class="pmodal-sub">${ctrlAutoPaused?'已自动暂停 · 关闭后继续比赛 · ':''}调节滚轮与移动手感 · 所有球员共用 · 自动保存</div>
         <div class="ctrl-row"><span class="ctrl-label">滚轮站位移速<small>滚多少格从最远到最近（半圈约 12 格）</small></span>
           <div class="tc-opts" id="cwGroup">${CTRL_WHEEL.map(o=>`<button data-v="${o.v}" class="${ctrlCfg.wheelStep===o.v?'on':''}">${o.label}</button>`).join('')}</div></div>
         <div class="ctrl-row"><span class="ctrl-label">上下左右移动幅度<small>鼠标 / 键盘 / 摇杆的移拍范围</small></span>
@@ -2304,7 +2327,7 @@
       document.getElementById('cmGroup').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
         ctrlCfg.moveK = +b.dataset.v; saveCtrl(); openCtrl(); tone(620,620,.05,'sine',.04);
       }));
-      document.getElementById('ctrlClose').addEventListener('click',()=>closeModal('ctrlModal'));
+      document.getElementById('ctrlClose').addEventListener('click',()=>closeCtrl());
       openModal('ctrlModal');
     }
     function syncDiff(){
