@@ -1,13 +1,14 @@
 /* 乒乓球 3D · Service Worker（PWA 离线缓存 v2）
    更新策略：页面导航请求 network-first（始终优先拿最新版本，离线才回落缓存），
    其余静态资产 cache-first；新 SW 安装后立即接管（skipWaiting + clients.claim）。 */
-const CACHE = 'pp3d-v2';
+const CACHE = 'pp3d-v3';
 const ASSETS = [
   './',
   './ping-pong-3d.html',
   './index.html',
   './manifest.json',
   './three.min.js',
+  './supabase-js.js',
   './icon-192.png',
   './icon-512.png'
 ];
