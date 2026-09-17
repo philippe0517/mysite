@@ -4092,7 +4092,7 @@
   </div>
 
   <!-- Supabase 客户端库 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-js.js"></script>
 
   <script>
     // ===== 年份自动更新 =====
@@ -4882,6 +4882,7 @@
       if (!modalOverlay || !feedbackForm) return;
 
       var isSubmitting = false;
+      var lastValues = null; // 提交前暂存表单值，失败重试时恢复
 
       // ===== 打开弹窗 =====
       function openModal() {
@@ -4958,6 +4959,7 @@
         if (resultBtn) {
           resultBtn.addEventListener('click', function () {
             if (type === 'success') {
+              lastValues = null; // 成功后不再恢复旧输入
               closeModal();
               // 延迟重置表单
               setTimeout(function () {
@@ -5004,6 +5006,14 @@
         feedbackDevice = document.getElementById('feedbackDevice');
         feedbackMessage = document.getElementById('feedbackMessage');
 
+        // 恢复失败前已输入的内容
+        if (lastValues) {
+          feedbackName.value = lastValues.name || '';
+          feedbackRelation.value = lastValues.relation || '';
+          feedbackDevice.value = lastValues.device || '';
+          feedbackMessage.value = lastValues.message || '';
+        }
+
         // 重新绑定提交事件
         feedbackForm.addEventListener('submit', handleSubmit);
       }
@@ -5032,7 +5042,13 @@
 
         setLoading(true);
 
-        // 收集数据
+        // 收集数据（同时暂存一份，失败重试时恢复已输入内容）
+        lastValues = {
+          name: feedbackName.value,
+          relation: feedbackRelation.value,
+          device: feedbackDevice.value,
+          message: feedbackMessage.value
+        };
         var data = {
           name: feedbackName.value.trim() || null,
           relation: feedbackRelation.value || null,
