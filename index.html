@@ -724,17 +724,16 @@
       margin-bottom: 20px;
       letter-spacing: -1px;
       line-height: 1.2;
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(220, 235, 247, 0.8);
     }
 
-    .hero__title .hero__title-name {
+    .hero__title     .hero__title-name {
       display: block;
       font-size: 64px;
       margin-top: 4px;
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
       color: transparent;
+      -webkit-text-stroke: 2px #8FD4FF;
     }
 
     .hero__subtitle {
@@ -959,11 +958,7 @@
     .hero__title {
     }
 
-    .hero__title-name {
-      filter: drop-shadow(0 0 20px rgba(111, 195, 255, 0.5));
-    }
-
-    .about-card, .personality__block, .work-card, .twin-card, .contact-method {
+        .about-card, .personality__block, .work-card, .twin-card, .contact-method {
       transition: transform 0.35s ease, box-shadow 0.35s ease;
     }
 
@@ -983,13 +978,7 @@
     }
 
     /* ===== 标题名字流彩渐变（平时就有微妙生命感） ===== */
-    .hero__title-name {
-      background: linear-gradient(110deg, var(--color-primary) 0%, var(--color-accent) 25%, #8fb8e8 50%, var(--color-primary) 75%, var(--color-primary-dark) 100%);
-      background-size: 300% 100%;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: nameFlow 7s ease-in-out infinite;
+        .hero__title-name {
       cursor: pointer;
     }
 
@@ -1211,16 +1200,32 @@
       width: 220px;
       height: 220px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      background: linear-gradient(135deg, rgba(111, 195, 255, 0.08) 0%, rgba(61, 155, 233, 0.14) 100%);
+      border: 1px solid rgba(126, 182, 217, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: var(--font-display);
       font-size: 72px;
       font-weight: 900;
-      color: var(--color-white);
-      box-shadow: var(--shadow-lg);
+      color: transparent;
+      -webkit-text-stroke: 2px rgba(143, 212, 255, 0.9);
+      box-shadow: 0 8px 32px rgba(2, 8, 20, 0.25);
       position: relative;
+    }
+
+    /* 鼠标悬停银河中央：左右介绍向两侧让位，露出行星 */
+    .hero__content,
+    .hero__avatar {
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .hero.hero--split .hero__content {
+      transform: translateX(calc(-1 * var(--split-x, 0px)));
+    }
+    .hero.hero--split .hero__avatar {
+      transform: translateX(var(--split-x, 0px));
     }
 
     .hero__avatar::before {
@@ -4978,6 +4983,51 @@
       setTimeout(type, 1200);
     })();
 
+    // ===== 鼠标悬停银河中央：左右介绍向两侧让位 =====
+    (function () {
+      var heroEl = document.querySelector('.hero');
+      if (!heroEl) return;
+      var heroContent = heroEl.querySelector('.hero__content');
+      var heroAvatar = heroEl.querySelector('.hero__avatar');
+      if (!heroContent || !heroAvatar) return;
+      var isSplit = false;
+      var lastMove = 0;
+
+      function measureSplit() {
+        var r = heroEl.getBoundingClientRect();
+        var cr = heroContent.getBoundingClientRect();
+        var ar = heroAvatar.getBoundingClientRect();
+        var room = Math.min(cr.left - 12, r.right - ar.right - 12, 420);
+        heroEl.style.setProperty('--split-x', Math.max(0, room).toFixed(0) + 'px');
+      }
+
+      heroEl.addEventListener('mousemove', function (e) {
+        var now = performance.now();
+        if (now - lastMove < 80) return;
+        lastMove = now;
+        var r = heroEl.getBoundingClientRect();
+        var dx = Math.abs(e.clientX - (r.left + r.width / 2)) / r.width;
+        if (!isSplit && dx < 0.2) {
+          measureSplit();
+          isSplit = true;
+          heroEl.classList.add('hero--split');
+        } else if (isSplit && dx > 0.34) {
+          isSplit = false;
+          heroEl.classList.remove('hero--split');
+        }
+      });
+      heroEl.addEventListener('mouseleave', function () {
+        isSplit = false;
+        heroEl.classList.remove('hero--split');
+      });
+      window.addEventListener('resize', function () {
+        if (isSplit) {
+          isSplit = false;
+          heroEl.classList.remove('hero--split');
+        }
+      });
+    })();
+
     // ===== 导航高亮（滚动监听） =====
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.site-nav__link');
@@ -6784,12 +6834,12 @@
 
       // 行星群：每颗 = 一个区块入口（深色系球体 + 亮色辉光轨道 + 差异化特点 + 图标）
       var PLANETS = [
-        { name: '关于我',     desc: '天津大学·香港理工·深圳未来技术学院，智能医学工程大一在读。', target: '#about',        color: 0x1b3a5c, glow: 0x6fc3ff, r: 0.21,  orbit: 6.8,  speed: 0.26, tilt: 0.10, phase: 0.8, icon: '👤', feature: 'band' },
-        { name: '性格趣味卡', desc: '用一排趣味 bento 卡片，快速看懂我的性格切面。',           target: '#personality',  color: 0x33255c, glow: 0xb48cff, r: 0.185, orbit: 8.8, speed: 0.22, tilt: -0.14, phase: 2.4, icon: '🎭', feature: 'ring' },
-        { name: '项目与作品', desc: '从 3D 乒乓球到这个主页，都是我亲手做出来的作品。',          target: '#works',        color: 0x4f2b20, glow: 0xffb08a, r: 0.24,  orbit: 10.8, speed: 0.19, tilt: 0.18, phase: 4.2, icon: '💼', feature: 'moon' },
-        { name: '兴趣与技能', desc: '乒乓球、前端、设计——热爱与技能都在升级打怪。',           target: '#skills',       color: 0x1c4a3c, glow: 0x7dffb8, r: 0.20,  orbit: 12.8, speed: 0.16, tilt: -0.08, phase: 1.3, icon: '⚡', feature: 'ring' },
-        { name: '数字分身',   desc: '我的 AI 数字分身，随时在线陪你聊两句。',                  target: '#digital-twin', color: 0x45223e, glow: 0xff9ecf, r: 0.205, orbit: 14.8, speed: 0.14, tilt: 0.12, phase: 5.1, icon: '🤖', feature: 'spots' },
-        { name: '联系我',     desc: '邮箱、留言板都在这里，欢迎来找我聊天。',                    target: '#contact',      color: 0x1f3564, glow: 0x5a9bff, r: 0.22,  orbit: 16.8, speed: 0.12, tilt: -0.16, phase: 3.4, icon: '✉️', feature: 'band' }
+        { name: '关于我',     desc: '天津大学·香港理工·深圳未来技术学院，智能医学工程大一在读。', target: '#about',        color: 0x1b3a5c, glow: 0x6fc3ff, r: 0.21,  orbit: 6.8,  speed: 0.015, tilt: 0.10, phase: 0.8, icon: '👤', feature: 'band' },
+        { name: '性格趣味卡', desc: '用一排趣味 bento 卡片，快速看懂我的性格切面。',           target: '#personality',  color: 0x33255c, glow: 0xb48cff, r: 0.185, orbit: 8.8, speed: 0.012, tilt: -0.14, phase: 2.4, icon: '🎭', feature: 'ring' },
+        { name: '项目与作品', desc: '从 3D 乒乓球到这个主页，都是我亲手做出来的作品。',          target: '#works',        color: 0x4f2b20, glow: 0xffb08a, r: 0.24,  orbit: 10.8, speed: 0.011, tilt: 0.18, phase: 4.2, icon: '💼', feature: 'moon' },
+        { name: '兴趣与技能', desc: '乒乓球、前端、设计——热爱与技能都在升级打怪。',           target: '#skills',       color: 0x1c4a3c, glow: 0x7dffb8, r: 0.20,  orbit: 12.8, speed: 0.01, tilt: -0.08, phase: 1.3, icon: '⚡', feature: 'ring' },
+        { name: '数字分身',   desc: '我的 AI 数字分身，随时在线陪你聊两句。',                  target: '#digital-twin', color: 0x45223e, glow: 0xff9ecf, r: 0.205, orbit: 14.8, speed: 0.008, tilt: 0.12, phase: 5.1, icon: '🤖', feature: 'spots' },
+        { name: '联系我',     desc: '邮箱、留言板都在这里，欢迎来找我聊天。',                    target: '#contact',      color: 0x1f3564, glow: 0x5a9bff, r: 0.22,  orbit: 16.8, speed: 0.007, tilt: -0.16, phase: 3.4, icon: '✉️', feature: 'band' }
       ];
 
       // 深色表面纹理：条纹 / 陨石坑，每颗行星长得不一样
@@ -7170,12 +7220,12 @@
             var pp = planets[pv];
             var pa = pp.phase + t * pp.speed;
             pp._mesh.position.set(Math.cos(pa) * pp.orbit, Math.sin(t * 0.8 + pv) * 0.25, Math.sin(pa) * pp.orbit);
-            pp._mesh.rotation.y = t * 0.4 + pv;
+            pp._mesh.rotation.y = t * 0.06 + pv;
             var want = (hoverIdx === pv || activePlanet === pv) ? 1.3 : 1;
             var curS = pp._mesh.scale.x + (want - pp._mesh.scale.x) * 0.12;
             pp._mesh.scale.set(curS, curS, curS);
             pp._orbMat.opacity = ((hoverIdx === pv || activePlanet === pv) ? 0.5 : 0.22) * fade;
-            if (pp._moonPivot) pp._moonPivot.rotation.y = t * 1.4;
+            if (pp._moonPivot) pp._moonPivot.rotation.y = t * 0.25;
             if (pp._ringMat) pp._ringMat.opacity = ((hoverIdx === pv || activePlanet === pv) ? 0.5 : 0.32) * fade;
             if (pp._icon) {
               pp._mesh.getWorldPosition(pp._icon.position);
