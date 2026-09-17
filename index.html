@@ -2852,6 +2852,376 @@
         max-height: none;
       }
     }
+
+    /* ===== 反馈悬浮按钮 ===== */
+    .feedback-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 92px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+      color: var(--color-white);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(126, 182, 217, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      transition: var(--transition);
+    }
+
+    .feedback-fab:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 6px 28px rgba(126, 182, 217, 0.5);
+    }
+
+    .feedback-fab svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .feedback-fab__tooltip {
+      position: absolute;
+      right: 64px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--color-text);
+      color: var(--color-white);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .feedback-fab:hover .feedback-fab__tooltip {
+      opacity: 1;
+    }
+
+    /* ===== 反馈弹窗遮罩 ===== */
+    .feedback-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 62, 80, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      padding: 20px;
+    }
+
+    .feedback-modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ===== 反馈弹窗 ===== */
+    .feedback-modal {
+      background: var(--color-white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      transform: translateY(20px) scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .feedback-modal-overlay.open .feedback-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .feedback-modal__header {
+      padding: 24px 28px 16px;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .feedback-modal__title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 4px;
+    }
+
+    .feedback-modal__subtitle {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .feedback-modal__close {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--color-bg-alt);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .feedback-modal__close:hover {
+      background: var(--color-accent-light);
+      color: var(--color-text);
+      transform: rotate(90deg);
+    }
+
+    .feedback-modal__close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .feedback-modal__body {
+      padding: 20px 28px 24px;
+    }
+
+    /* ===== 表单样式 ===== */
+    .feedback-form__group {
+      margin-bottom: 16px;
+    }
+
+    .feedback-form__label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text);
+      margin-bottom: 6px;
+    }
+
+    .feedback-form__label .required {
+      color: #e74c3c;
+      margin-left: 2px;
+    }
+
+    .feedback-form__label .optional {
+      color: var(--color-text-light);
+      font-weight: 400;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    .feedback-form__input,
+    .feedback-form__select,
+    .feedback-form__textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-white);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      outline: none;
+    }
+
+    .feedback-form__input:focus,
+    .feedback-form__select:focus,
+    .feedback-form__textarea:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(126, 182, 217, 0.15);
+    }
+
+    .feedback-form__textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    .feedback-form__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .feedback-form__hint {
+      font-size: 12px;
+      color: var(--color-text-light);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .feedback-form__privacy {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--color-accent-light);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+
+    .feedback-form__privacy svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-primary-dark);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feedback-form__privacy-text {
+      font-size: 12px;
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .feedback-form__submit {
+      width: 100%;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+      color: var(--color-white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .feedback-form__submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(126, 182, 217, 0.35);
+    }
+
+    .feedback-form__submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .feedback-form__submit svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: var(--color-white);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ===== 提交结果提示 ===== */
+    .feedback-result {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .feedback-result__icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .feedback-result__icon.success {
+      background: rgba(46, 204, 113, 0.12);
+      color: #27ae60;
+    }
+
+    .feedback-result__icon.error {
+      background: rgba(231, 76, 60, 0.12);
+      color: #e74c3c;
+    }
+
+    .feedback-result__icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .feedback-result__title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: 8px;
+    }
+
+    .feedback-result__text {
+      font-size: 14px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .feedback-result__btn {
+      padding: 10px 24px;
+      background: var(--color-bg-alt);
+      color: var(--color-text);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .feedback-result__btn:hover {
+      background: var(--color-accent-light);
+    }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 600px) {
+      .feedback-fab {
+        right: 16px;
+        bottom: 84px;
+        width: 46px;
+        height: 46px;
+      }
+
+      .feedback-fab svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .feedback-fab__tooltip {
+        display: none;
+      }
+
+      .feedback-modal__header {
+        padding: 20px 20px 14px;
+      }
+
+      .feedback-modal__body {
+        padding: 16px 20px 20px;
+      }
+
+      .feedback-form__row {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -3333,7 +3703,7 @@
               </svg>
             </div>
             <h3 class="bento-card__title">网页制作 / 个人主页搭建</h3>
-            <p class="bento-card__desc">用纯 HTML/CSS/JS 搭建静态网页，从 V1 到 V2 一步步迭代，正在学习响应式布局和交互设计。</p>
+            <p class="bento-card__desc">用纯 HTML/CSS/JS 搭建静态网页，从 V1 到 V3 一步步迭代，正在学习响应式布局和交互设计。</p>
             <div class="bento-card__level">
               <div class="bento-card__level-bar">
                 <div class="bento-card__level-fill" style="--target-width: 35%"></div>
@@ -3465,7 +3835,7 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            V2 静态版已上线
+            V3 反馈功能已上线
           </div>
           <h3 class="twin-card__title">和数字版的我聊聊</h3>
           <p class="twin-card__desc">
@@ -3536,12 +3906,12 @@
               </svg>
               发送邮件
             </a>
-            <a class="btn btn--ghost" href="mailto:16602256906@163.com?subject=个人主页反馈&body=你好于哲，我访问了你的个人主页，有一些反馈：%0A%0A1. %0A2. %0A3. ">
+            <button class="btn btn--ghost" id="feedbackBtnContact" type="button">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
               </svg>
               给我反馈
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -3576,7 +3946,7 @@
         <div class="site-footer__slogan">保持好奇，持续创造</div>
       </div>
       <div class="site-footer__divider"></div>
-      <div class="site-footer__bottom">个人主页 V2 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
+      <div class="site-footer__bottom">个人主页 V3 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
     </div>
   </footer>
 
@@ -3636,6 +4006,93 @@
       </button>
     </div>
   </div>
+
+  <!-- ===== 反馈悬浮按钮 ===== -->
+  <button class="feedback-fab" id="feedbackFab" type="button" aria-label="提交反馈">
+    <span class="feedback-fab__tooltip">提交反馈</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <!-- ===== 反馈弹窗 ===== -->
+  <div class="feedback-modal-overlay" id="feedbackModalOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackModalTitle" aria-hidden="true">
+    <div class="feedback-modal">
+      <div class="feedback-modal__header">
+        <div>
+          <h3 class="feedback-modal__title" id="feedbackModalTitle">给我反馈</h3>
+          <p class="feedback-modal__subtitle">你的每一条意见都很重要，帮我把主页做得更好</p>
+        </div>
+        <button class="feedback-modal__close" id="feedbackModalClose" type="button" aria-label="关闭反馈窗口">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="feedback-modal__body" id="feedbackModalBody">
+        <!-- 表单内容 -->
+        <form class="feedback-form" id="feedbackForm" novalidate>
+          <div class="feedback-form__privacy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div class="feedback-form__privacy-text">
+              反馈不会公开显示，只有我自己在后台能看到。感谢你的真诚建议！
+            </div>
+          </div>
+
+          <div class="feedback-form__row">
+            <div class="feedback-form__group">
+              <label class="feedback-form__label" for="feedbackName">昵称<span class="optional">（可选）</span></label>
+              <input type="text" class="feedback-form__input" id="feedbackName" name="name" placeholder="怎么称呼你？" maxlength="50">
+            </div>
+            <div class="feedback-form__group">
+              <label class="feedback-form__label" for="feedbackRelation">与我的关系</label>
+              <select class="feedback-form__select" id="feedbackRelation" name="relation">
+                <option value="">请选择</option>
+                <option value="同学">同学</option>
+                <option value="老师">老师</option>
+                <option value="家人">家人</option>
+                <option value="朋友">朋友</option>
+                <option value="同事">同事</option>
+                <option value="其他">其他</option>
+                <option value="不便透露">不便透露</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="feedback-form__group">
+            <label class="feedback-form__label" for="feedbackDevice">本条反馈针对的设备</label>
+            <select class="feedback-form__select" id="feedbackDevice" name="device">
+              <option value="">请选择</option>
+              <option value="电脑">电脑</option>
+              <option value="手机">手机</option>
+              <option value="平板">平板</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+
+          <div class="feedback-form__group">
+            <label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label>
+            <textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea>
+            <div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div>
+          </div>
+
+          <button type="submit" class="feedback-form__submit" id="feedbackSubmitBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            <span id="feedbackSubmitText">提交反馈</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase 客户端库 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     // ===== 年份自动更新 =====
@@ -4384,6 +4841,229 @@
       } catch (e) {
         console.error('数字分身初始化失败:', e);
       }
+    })();
+
+    // ============================================================
+    // 反馈功能（Supabase）
+    // ============================================================
+    (function () {
+      'use strict';
+
+      // ===== Supabase 配置（请替换为你自己的项目信息）=====
+      // 获取方式：Supabase 项目 → Settings → API → Project URL + anon public key
+      var SUPABASE_URL = 'https://lfgdjbstktbqtivfxekd.supabase.co';
+      var SUPABASE_ANON_KEY = 'sb_publishable_cTyKTLMWZ0p0IkJDBrAN8A_6wGIezBZ';
+      var SITE_VERSION = 'V3';
+
+      // 初始化 Supabase 客户端
+      var supabaseClient = null;
+      if (typeof supabase !== 'undefined' && SUPABASE_URL !== 'https://your-project-ref.supabase.co') {
+        try {
+          supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+          console.warn('Supabase 初始化失败:', e);
+        }
+      }
+
+      // ===== DOM 元素 =====
+      var feedbackFab = document.getElementById('feedbackFab');
+      var feedbackBtnContact = document.getElementById('feedbackBtnContact');
+      var modalOverlay = document.getElementById('feedbackModalOverlay');
+      var modalClose = document.getElementById('feedbackModalClose');
+      var modalBody = document.getElementById('feedbackModalBody');
+      var feedbackForm = document.getElementById('feedbackForm');
+      var submitBtn = document.getElementById('feedbackSubmitBtn');
+      var submitText = document.getElementById('feedbackSubmitText');
+      var feedbackName = document.getElementById('feedbackName');
+      var feedbackRelation = document.getElementById('feedbackRelation');
+      var feedbackDevice = document.getElementById('feedbackDevice');
+      var feedbackMessage = document.getElementById('feedbackMessage');
+
+      if (!modalOverlay || !feedbackForm) return;
+
+      var isSubmitting = false;
+
+      // ===== 打开弹窗 =====
+      function openModal() {
+        modalOverlay.classList.add('open');
+        modalOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        // 自动聚焦到反馈内容输入框
+        setTimeout(function () {
+          feedbackMessage.focus();
+        }, 300);
+      }
+
+      // ===== 关闭弹窗 =====
+      function closeModal() {
+        modalOverlay.classList.remove('open');
+        modalOverlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      // ===== 绑定打开按钮 =====
+      if (feedbackFab) {
+        feedbackFab.addEventListener('click', openModal);
+      }
+      if (feedbackBtnContact) {
+        feedbackBtnContact.addEventListener('click', openModal);
+      }
+
+      // ===== 绑定关闭按钮 =====
+      if (modalClose) {
+        modalClose.addEventListener('click', closeModal);
+      }
+
+      // ===== 点击遮罩关闭 =====
+      modalOverlay.addEventListener('click', function (e) {
+        if (e.target === modalOverlay) {
+          closeModal();
+        }
+      });
+
+      // ===== ESC 键关闭 =====
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalOverlay.classList.contains('open')) {
+          closeModal();
+        }
+      });
+
+      // ===== 显示加载状态 =====
+      function setLoading(loading) {
+        isSubmitting = loading;
+        submitBtn.disabled = loading;
+        if (loading) {
+          submitText.textContent = '提交中...';
+          submitBtn.innerHTML = '<span class="spinner"></span><span>提交中...</span>';
+        } else {
+          submitBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span id="feedbackSubmitText">提交反馈</span>';
+        }
+      }
+
+      // ===== 显示结果页面 =====
+      function showResult(type, title, text, btnText) {
+        var iconSvg = type === 'success'
+          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+
+        modalBody.innerHTML =
+          '<div class="feedback-result">' +
+            '<div class="feedback-result__icon ' + type + '">' + iconSvg + '</div>' +
+            '<h4 class="feedback-result__title">' + title + '</h4>' +
+            '<p class="feedback-result__text">' + text + '</p>' +
+            '<button type="button" class="feedback-result__btn" id="feedbackResultBtn">' + btnText + '</button>' +
+          '</div>';
+
+        var resultBtn = document.getElementById('feedbackResultBtn');
+        if (resultBtn) {
+          resultBtn.addEventListener('click', function () {
+            if (type === 'success') {
+              closeModal();
+              // 延迟重置表单
+              setTimeout(function () {
+                resetForm();
+                restoreForm();
+              }, 300);
+            } else {
+              restoreForm();
+            }
+          });
+        }
+      }
+
+      // ===== 重置表单 =====
+      function resetForm() {
+        feedbackForm.reset();
+      }
+
+      // ===== 恢复表单视图（从结果页回到表单）=====
+      function restoreForm() {
+        modalBody.innerHTML = '';
+        // 重新创建表单
+        var formHtml = '<form class="feedback-form" id="feedbackForm" novalidate>' +
+          '<div class="feedback-form__privacy">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>' +
+            '<div class="feedback-form__privacy-text">反馈不会公开显示，只有我自己在后台能看到。感谢你的真诚建议！</div>' +
+          '</div>' +
+          '<div class="feedback-form__row">' +
+            '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackName">昵称<span class="optional">（可选）</span></label><input type="text" class="feedback-form__input" id="feedbackName" name="name" placeholder="怎么称呼你？" maxlength="50"></div>' +
+            '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackRelation">与我的关系</label><select class="feedback-form__select" id="feedbackRelation" name="relation"><option value="">请选择</option><option value="同学">同学</option><option value="老师">老师</option><option value="家人">家人</option><option value="朋友">朋友</option><option value="同事">同事</option><option value="其他">其他</option><option value="不便透露">不便透露</option></select></div>' +
+          '</div>' +
+          '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackDevice">本条反馈针对的设备</label><select class="feedback-form__select" id="feedbackDevice" name="device"><option value="">请选择</option><option value="电脑">电脑</option><option value="手机">手机</option><option value="平板">平板</option><option value="其他">其他</option></select></div>' +
+          '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label><textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea><div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div></div>' +
+          '<button type="submit" class="feedback-form__submit" id="feedbackSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span id="feedbackSubmitText">提交反馈</span></button>' +
+        '</form>';
+        modalBody.innerHTML = formHtml;
+
+        // 重新获取元素引用
+        feedbackForm = document.getElementById('feedbackForm');
+        submitBtn = document.getElementById('feedbackSubmitBtn');
+        submitText = document.getElementById('feedbackSubmitText');
+        feedbackName = document.getElementById('feedbackName');
+        feedbackRelation = document.getElementById('feedbackRelation');
+        feedbackDevice = document.getElementById('feedbackDevice');
+        feedbackMessage = document.getElementById('feedbackMessage');
+
+        // 重新绑定提交事件
+        feedbackForm.addEventListener('submit', handleSubmit);
+      }
+
+      // ===== 表单提交处理 =====
+      function handleSubmit(e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        // 验证
+        var message = feedbackMessage.value.trim();
+        if (!message) {
+          feedbackMessage.focus();
+          feedbackMessage.style.borderColor = '#e74c3c';
+          setTimeout(function () {
+            feedbackMessage.style.borderColor = '';
+          }, 2000);
+          return;
+        }
+
+        // 如果 Supabase 未配置，给出提示
+        if (!supabaseClient) {
+          showResult('error', '反馈功能暂未配置', '网站管理员还未完成后台配置，请稍后再试，或通过邮件联系我。', '返回');
+          return;
+        }
+
+        setLoading(true);
+
+        // 收集数据
+        var data = {
+          name: feedbackName.value.trim() || null,
+          relation: feedbackRelation.value || null,
+          device: feedbackDevice.value || null,
+          message: message,
+          version: SITE_VERSION
+        };
+
+        // 提交到 Supabase
+        supabaseClient
+          .from('feedback')
+          .insert(data)
+          .then(function (result) {
+            setLoading(false);
+            if (result.error) {
+              console.error('反馈提交失败:', result.error);
+              showResult('error', '提交失败', '网络异常或服务暂时不可用，请稍后重试。你输入的内容已保留。', '重试');
+            } else {
+              showResult('success', '反馈已收到！', '感谢你的宝贵意见，我会认真阅读每一条反馈。', '完成');
+            }
+          })
+          .catch(function (err) {
+            setLoading(false);
+            console.error('反馈提交异常:', err);
+            showResult('error', '提交失败', '网络异常，请检查网络连接后重试。', '重试');
+          });
+      }
+
+      // 绑定表单提交
+      feedbackForm.addEventListener('submit', handleSubmit);
+
     })();
   </script>
 
