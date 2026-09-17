@@ -2903,6 +2903,24 @@
       opacity: 1;
     }
 
+    /* 首次访客引导：轻晃 + 气泡（尊重减弱动效偏好） */
+    .feedback-fab.nudge {
+      animation: fabNudge 2.4s ease-in-out 2;
+    }
+
+    .feedback-fab.nudge .feedback-fab__tooltip {
+      opacity: 1;
+    }
+
+    @keyframes fabNudge {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(126, 182, 217, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 8px 30px rgba(126, 182, 217, 0.65); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feedback-fab.nudge { animation: none; }
+    }
+
     /* ===== 反馈弹窗遮罩 ===== */
     .feedback-modal-overlay {
       position: fixed;
@@ -3060,6 +3078,37 @@
       line-height: 1.4;
     }
 
+    /* 快捷标签：一键填入反馈主题，降低填写门槛 */
+    .feedback-form__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .feedback-chip {
+      padding: 6px 14px;
+      border: 1px solid var(--color-accent);
+      background: var(--color-white);
+      color: var(--color-text-secondary);
+      border-radius: 999px;
+      font-size: 13px;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .feedback-chip:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .feedback-chip.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: var(--color-white);
+    }
+
     .feedback-form__privacy {
       display: flex;
       align-items: flex-start;
@@ -3149,6 +3198,16 @@
     .feedback-result__icon.success {
       background: rgba(46, 204, 113, 0.12);
       color: #27ae60;
+      animation: resultPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes resultPop {
+      0% { transform: scale(0.4); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feedback-result__icon.success { animation: none; }
     }
 
     .feedback-result__icon.error {
@@ -4074,6 +4133,17 @@
           </div>
 
           <div class="feedback-form__group">
+            <label class="feedback-form__label">想先说点什么？<span class="optional">（点击标签自动填入，可再补充）</span></label>
+            <div class="feedback-form__chips" id="feedbackChips">
+              <button type="button" class="feedback-chip" data-prefix="[建议] ">建议</button>
+              <button type="button" class="feedback-chip" data-prefix="[看不懂] ">看不懂</button>
+              <button type="button" class="feedback-chip" data-prefix="[不好找] ">不好找</button>
+              <button type="button" class="feedback-chip" data-prefix="[不方便] ">不方便</button>
+              <button type="button" class="feedback-chip" data-prefix="[点赞] ">点赞</button>
+            </div>
+          </div>
+
+          <div class="feedback-form__group">
             <label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label>
             <textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea>
             <div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div>
@@ -4884,11 +4954,113 @@
       var isSubmitting = false;
       var lastValues = null; // 提交前暂存表单值，失败重试时恢复
 
+      // ===== 轻量防刷：提交成功后 60 秒冷却 =====
+      var FEEDBACK_COOLDOWN_KEY = 'feedback_last_submit_at';
+      var FEEDBACK_SEEN_KEY = 'feedback_nudge_seen';
+      var COOLDOWN_MS = 60000;
+      var cooldownTimer = null;
+
+      function getRemainMs() {
+        var last = 0;
+        try { last = parseInt(localStorage.getItem(FEEDBACK_COOLDOWN_KEY), 10) || 0; } catch (e) {}
+        return last + COOLDOWN_MS - Date.now();
+      }
+
+      function applyCooldown() {
+        if (cooldownTimer) { clearInterval(cooldownTimer); cooldownTimer = null; }
+        var tick = function () {
+          var label = document.getElementById('feedbackSubmitText');
+          var remain = getRemainMs();
+          if (remain <= 0) {
+            if (cooldownTimer) { clearInterval(cooldownTimer); cooldownTimer = null; }
+            submitBtn.disabled = false;
+            if (label) label.textContent = '提交反馈';
+          } else {
+            submitBtn.disabled = true;
+            if (label) label.textContent = '刚刚已提交，' + Math.ceil(remain / 1000) + ' 秒后可再次反馈';
+          }
+        };
+        if (getRemainMs() > 0) {
+          tick();
+          cooldownTimer = setInterval(tick, 1000);
+        }
+      }
+
+      // ===== 设备自动预选：减少一项手动选择（访客仍可修改）=====
+      function autoSelectDevice() {
+        if (feedbackDevice.value) return;
+        var ua = navigator.userAgent;
+        var guessed = /iPad|Tablet/i.test(ua) ? '平板' : (/Mobi|Android|iPhone/i.test(ua) ? '手机' : '电脑');
+        feedbackDevice.value = guessed;
+      }
+
+      // ===== 快捷标签：一键填入主题前缀，再次点击取消 =====
+      function bindChips() {
+        var chips = modalBody.querySelectorAll('.feedback-chip');
+        Array.prototype.forEach.call(chips, function (chip) {
+          chip.addEventListener('click', function () {
+            var prefix = chip.getAttribute('data-prefix');
+            var current = feedbackMessage.value;
+            var cleaned = current;
+            Array.prototype.forEach.call(chips, function (c) {
+              var p = c.getAttribute('data-prefix');
+              if (cleaned.indexOf(p) === 0) cleaned = cleaned.slice(p.length);
+              c.classList.remove('active');
+            });
+            if (current.indexOf(prefix) === 0) {
+              feedbackMessage.value = cleaned; // 取消该标签
+            } else {
+              feedbackMessage.value = prefix + cleaned;
+              chip.classList.add('active');
+            }
+            feedbackMessage.focus();
+          });
+        });
+      }
+
+      function syncChipActive() {
+        var chips = modalBody.querySelectorAll('.feedback-chip');
+        Array.prototype.forEach.call(chips, function (c) {
+          c.classList.toggle('active', feedbackMessage.value.indexOf(c.getAttribute('data-prefix')) === 0);
+        });
+      }
+
+      // ===== 首次访客引导：5 秒后轻晃反馈按钮（点开过就不再打扰）=====
+      function markFeedbackSeen() {
+        try { sessionStorage.setItem(FEEDBACK_SEEN_KEY, '1'); } catch (e) {}
+        if (feedbackFab) {
+          feedbackFab.classList.remove('nudge');
+          var tip = feedbackFab.querySelector('.feedback-fab__tooltip');
+          if (tip) tip.textContent = '提交反馈';
+        }
+      }
+
+      (function scheduleNudge() {
+        var seen = false;
+        try { seen = !!sessionStorage.getItem(FEEDBACK_SEEN_KEY); } catch (e) {}
+        if (seen || !feedbackFab) return;
+        setTimeout(function () {
+          try { if (sessionStorage.getItem(FEEDBACK_SEEN_KEY)) return; } catch (e) {}
+          var tip = feedbackFab.querySelector('.feedback-fab__tooltip');
+          var tipText = tip ? tip.textContent : '';
+          if (tip) tip.textContent = '喜欢这个主页吗？说说哪里可以更好';
+          feedbackFab.classList.add('nudge');
+          setTimeout(function () {
+            feedbackFab.classList.remove('nudge');
+            if (tip) tip.textContent = tipText;
+          }, 5200);
+        }, 5000);
+      })();
+
       // ===== 打开弹窗 =====
       function openModal() {
         modalOverlay.classList.add('open');
         modalOverlay.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
+        markFeedbackSeen();
+        syncChipActive();
+        autoSelectDevice();
+        applyCooldown();
         // 自动聚焦到反馈内容输入框
         setTimeout(function () {
           feedbackMessage.focus();
@@ -4900,6 +5072,10 @@
         modalOverlay.classList.remove('open');
         modalOverlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        if (cooldownTimer) {
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+        }
       }
 
       // ===== 绑定打开按钮 =====
@@ -4992,6 +5168,7 @@
             '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackRelation">与我的关系</label><select class="feedback-form__select" id="feedbackRelation" name="relation"><option value="">请选择</option><option value="同学">同学</option><option value="老师">老师</option><option value="家人">家人</option><option value="朋友">朋友</option><option value="同事">同事</option><option value="其他">其他</option><option value="不便透露">不便透露</option></select></div>' +
           '</div>' +
           '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackDevice">本条反馈针对的设备</label><select class="feedback-form__select" id="feedbackDevice" name="device"><option value="">请选择</option><option value="电脑">电脑</option><option value="手机">手机</option><option value="平板">平板</option><option value="其他">其他</option></select></div>' +
+          '<div class="feedback-form__group"><label class="feedback-form__label">想先说点什么？<span class="optional">（点击标签自动填入，可再补充）</span></label><div class="feedback-form__chips" id="feedbackChips"><button type="button" class="feedback-chip" data-prefix="[建议] ">建议</button><button type="button" class="feedback-chip" data-prefix="[看不懂] ">看不懂</button><button type="button" class="feedback-chip" data-prefix="[不好找] ">不好找</button><button type="button" class="feedback-chip" data-prefix="[不方便] ">不方便</button><button type="button" class="feedback-chip" data-prefix="[点赞] ">点赞</button></div></div>' +
           '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label><textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea><div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div></div>' +
           '<button type="submit" class="feedback-form__submit" id="feedbackSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span id="feedbackSubmitText">提交反馈</span></button>' +
         '</form>';
@@ -5013,6 +5190,11 @@
           feedbackDevice.value = lastValues.device || '';
           feedbackMessage.value = lastValues.message || '';
         }
+        if (!feedbackDevice.value) {
+          autoSelectDevice();
+        }
+        bindChips();
+        syncChipActive();
 
         // 重新绑定提交事件
         feedbackForm.addEventListener('submit', handleSubmit);
@@ -5067,6 +5249,7 @@
               console.error('反馈提交失败:', result.error);
               showResult('error', '提交失败', '网络异常或服务暂时不可用，请稍后重试。你输入的内容已保留。', '重试');
             } else {
+              try { localStorage.setItem(FEEDBACK_COOLDOWN_KEY, String(Date.now())); } catch (e) {}
               showResult('success', '反馈已收到！', '感谢你的宝贵意见，我会认真阅读每一条反馈。', '完成');
             }
           })
@@ -5079,6 +5262,9 @@
 
       // 绑定表单提交
       feedbackForm.addEventListener('submit', handleSubmit);
+
+      // 初始绑定快捷标签
+      bindChips();
 
     })();
   </script>
