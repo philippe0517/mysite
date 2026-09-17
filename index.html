@@ -3144,6 +3144,16 @@
       color: var(--color-white);
     }
 
+    /* 蜜罐防刷：人类不可见（不能 display:none，防机器人检测），机器人填了直接丢弃 */
+    .hp-field {
+      position: absolute;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
     .feedback-form__privacy {
       display: flex;
       align-items: flex-start;
@@ -4193,6 +4203,12 @@
             </svg>
             <span id="feedbackSubmitText">提交反馈</span>
           </button>
+
+          <!-- 蜜罐字段：人类不可见、不可聚焦；机器人会填，填了在提交时被静默丢弃 -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="feedbackWebsite">网站</label>
+            <input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off">
+          </div>
         </form>
       </div>
     </div>
@@ -5208,6 +5224,7 @@
           '<div class="feedback-form__group"><label class="feedback-form__label">想先说点什么？<span class="optional">（点击标签自动填入，可再补充）</span></label><div class="feedback-form__chips" id="feedbackChips"><button type="button" class="feedback-chip" data-prefix="[建议] ">建议</button><button type="button" class="feedback-chip" data-prefix="[看不懂] ">看不懂</button><button type="button" class="feedback-chip" data-prefix="[不好找] ">不好找</button><button type="button" class="feedback-chip" data-prefix="[不方便] ">不方便</button><button type="button" class="feedback-chip" data-prefix="[点赞] ">点赞</button></div></div>' +
           '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label><textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea><div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div></div>' +
           '<button type="submit" class="feedback-form__submit" id="feedbackSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span id="feedbackSubmitText">提交反馈</span></button>' +
+          '<div class="hp-field" aria-hidden="true"><label for="feedbackWebsite">网站</label><input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off"></div>' +
         '</form>';
         modalBody.innerHTML = formHtml;
 
@@ -5256,6 +5273,13 @@
         // 如果 Supabase 未配置，给出提示
         if (!supabaseClient) {
           showResult('error', '反馈功能暂未配置', '网站管理员还未完成后台配置，请稍后再试，或通过邮件联系我。', '返回');
+          return;
+        }
+
+        // 蜜罐检查：隐藏字段被填写 = 机器人，静默假成功（不写入数据库，不给机器人反馈信号）
+        var honeypot = document.getElementById('feedbackWebsite');
+        if (honeypot && honeypot.value) {
+          showResult('success', '反馈已收到！', '感谢你的宝贵意见，我会认真阅读每一条反馈。', '完成');
           return;
         }
 

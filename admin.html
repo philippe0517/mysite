@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>反馈管理台 | 于哲的个人主页</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235A9BC7'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='14' font-weight='bold' text-anchor='middle' fill='%23ffffff'%3EYZ%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --color-primary: #7EB6D9;
+      --color-primary-dark: #5A9BC7;
+      --color-accent-light: #EBF4F9;
+      --color-bg: #F7FBFD;
+      --color-bg-alt: #F2F8FB;
+      --color-text: #2C3E50;
+      --color-text-secondary: #6B7C93;
+      --color-text-light: #9AABBE;
+      --color-border: #DCE9F0;
+      --color-white: #FFFFFF;
+      --color-danger: #e74c3c;
+      --color-ok: #27ae60;
+      --font-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-md: 0 4px 20px rgba(126, 182, 217, 0.1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :focus-visible { outline: 2px solid var(--color-primary-dark); outline-offset: 2px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 64px; }
+
+    /* ===== 登录卡片 ===== */
+    .login-card {
+      max-width: 400px;
+      margin: 12vh auto 0;
+      background: var(--color-white);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 36px 32px;
+    }
+    .login-card h1 { font-size: 22px; margin-bottom: 4px; }
+    .login-card .sub { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 24px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .field input {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      font-size: 15px; font-family: var(--font-body); background: var(--color-white);
+    }
+    .field input:focus { border-color: var(--color-primary); outline: none; box-shadow: 0 0 0 3px rgba(126,182,217,0.18); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 20px; border: none; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 600; font-family: var(--font-body);
+      cursor: pointer; transition: all 0.25s ease; text-decoration: none;
+    }
+    .btn--primary { background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)); color: #fff; width: 100%; }
+    .btn--primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(126,182,217,0.35); }
+    .btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn--ghost { background: var(--color-white); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+    .btn--ghost:hover { border-color: var(--color-primary); color: var(--color-primary-dark); }
+    .btn--danger { background: transparent; color: var(--color-danger); border: 1px solid transparent; padding: 6px 10px; font-size: 13px; }
+    .btn--danger:hover { border-color: var(--color-danger); background: rgba(231,76,60,0.06); }
+    .form-error { color: var(--color-danger); font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+    /* ===== 仪表盘 ===== */
+    .dash { display: none; }
+    .dash.visible { display: block; }
+    .dash-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .dash-head h1 { font-size: 22px; display: flex; align-items: center; gap: 10px; }
+    .rt-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-text-light); flex-shrink: 0; }
+    .rt-dot.on { background: var(--color-ok); box-shadow: 0 0 0 3px rgba(39,174,113,0.18); }
+    .rt-dot.warn { background: #f39c12; }
+    .rt-label { font-size: 12px; color: var(--color-text-light); font-weight: 400; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 14px 16px; }
+    .stat-card__num { font-size: 26px; font-weight: 700; color: var(--color-primary-dark); }
+    .stat-card__label { font-size: 12px; color: var(--color-text-secondary); }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .toolbar input, .toolbar select {
+      padding: 9px 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font-body); background: var(--color-white);
+    }
+    .toolbar input[type="search"] { flex: 1 1 200px; }
+    .list { display: flex; flex-direction: column; gap: 12px; }
+    .fb-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 16px 18px; }
+    .fb-card.is-new { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(126,182,217,0.15); }
+    .fb-card__meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .tag { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--color-accent-light); color: var(--color-primary-dark); }
+    .tag--time { background: transparent; color: var(--color-text-light); }
+    .tag--name { background: var(--color-primary); color: #fff; }
+    .fb-card__msg { font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+    .fb-card__foot { display: flex; justify-content: flex-end; margin-top: 8px; }
+    .empty { text-align: center; color: var(--color-text-light); padding: 48px 0; }
+    .toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-80px);
+      background: var(--color-text); color: #fff; padding: 12px 22px; border-radius: 999px;
+      font-size: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 50; max-width: 90vw;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .foot { text-align: center; margin-top: 40px; font-size: 12px; color: var(--color-text-light); }
+    .foot a { color: var(--color-text-secondary); }
+    @media (max-width: 560px) {
+      .login-card { margin-top: 6vh; padding: 28px 22px; }
+      .dash-head h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- ===== 登录 ===== -->
+    <div class="login-card" id="loginCard">
+      <h1>反馈管理台</h1>
+      <p class="sub">只有主页主人能进入 · 安全由数据库权限（RLS）保证</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginEmail">管理员邮箱</label>
+          <input type="email" id="loginEmail" autocomplete="username" required placeholder="你在 Supabase 创建的账号">
+        </div>
+        <div class="field">
+          <label for="loginPassword">密码</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn--primary" id="loginBtn">登录</button>
+        <div class="form-error" id="loginError"></div>
+      </form>
+    </div>
+
+    <!-- ===== 仪表盘 ===== -->
+    <div class="dash" id="dash">
+      <div class="dash-head">
+        <h1><span class="rt-dot" id="rtDot"></span>反馈管理台 <span class="rt-label" id="rtLabel"></span></h1>
+        <button class="btn btn--ghost" id="logoutBtn">退出登录</button>
+      </div>
+
+      <div class="stats" id="stats"></div>
+
+      <div class="toolbar">
+        <input type="search" id="searchBox" placeholder="搜索内容 / 昵称 / 关系…">
+        <select id="filterDevice">
+          <option value="">全部设备</option>
+          <option value="电脑">电脑</option>
+          <option value="手机">手机</option>
+          <option value="平板">平板</option>
+          <option value="其他">其他</option>
+        </select>
+        <select id="filterVersion">
+          <option value="">全部版本</option>
+          <option value="V3">V3</option>
+        </select>
+        <button class="btn btn--ghost" id="refreshBtn">刷新</button>
+        <button class="btn btn--ghost" id="exportBtn">导出 CSV</button>
+      </div>
+
+      <div class="list" id="list"><div class="empty">加载中…</div></div>
+
+      <div class="foot"><a href="./index.html">← 返回我的主页</a></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./supabase-js.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    // 与主页相同的公开配置（publishable key，安全靠 RLS + 登录）
+    var SUPABASE_URL = 'https://lfgdjbstktbqtivfxekd.supabase.co';
+    var SUPABASE_ANON_KEY = 'sb_publishable_cTyKTLMWZ0p0IkJDBrAN8A_6wGIezBZ';
+    var client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    var $ = function (id) { return document.getElementById(id); };
+    var allRows = [];
+    var channel = null;
+
+    // ===== 会话恢复 =====
+    client.auth.getSession().then(function (res) {
+      if (res.data && res.data.session) enterDashboard();
+      else showLogin();
+    });
+    client.auth.onAuthStateChange(function (event, session) {
+      if (event === 'SIGNED_IN' && session) enterDashboard();
+      if (event === 'SIGNED_OUT') { stopRealtime(); showLogin(); }
+    });
+
+    function showLogin() {
+      $('loginCard').style.display = 'block';
+      $('dash').classList.remove('visible');
+    }
+
+    function enterDashboard() {
+      $('loginCard').style.display = 'none';
+      $('dash').classList.add('visible');
+      loadFeedback();
+      startRealtime();
+    }
+
+    // ===== 登录 =====
+    $('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var btn = $('loginBtn');
+      btn.disabled = true;
+      btn.textContent = '登录中…';
+      $('loginError').textContent = '';
+      client.auth.signInWithPassword({
+        email: $('loginEmail').value.trim(),
+        password: $('loginPassword').value
+      }).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '登录';
+        if (res.error) {
+          $('loginError').textContent = '登录失败：' + (res.error.message || '邮箱或密码不正确');
+        }
+        // 成功后由 onAuthStateChange 驱动进入仪表盘
+      });
+    });
+
+    $('logoutBtn').addEventListener('click', function () {
+      client.auth.signOut();
+    });
+
+    // ===== 数据加载 =====
+    function loadFeedback() {
+      $('list').innerHTML = '<div class="empty">加载中…</div>';
+      client
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(300)
+        .then(function (res) {
+          if (res.error) {
+            $('list').innerHTML = '<div class="empty">读取失败：' + esc(res.error.message) + '<br>请确认已登录</div>';
+            return;
+          }
+          allRows = res.data || [];
+          render();
+        });
+    }
+
+    $('refreshBtn').addEventListener('click', loadFeedback);
+    $('searchBox').addEventListener('input', render);
+    $('filterDevice').addEventListener('change', render);
+    $('filterVersion').addEventListener('change', render);
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fmtTime(ts) {
+      try { return new Date(ts).toLocaleString('zh-CN', { hour12: false }); } catch (e) { return ts; }
+    }
+
+    function currentRows() {
+      var kw = $('searchBox').value.trim().toLowerCase();
+      var dev = $('filterDevice').value;
+      var ver = $('filterVersion').value;
+      return allRows.filter(function (r) {
+        if (dev && r.device !== dev) return false;
+        if (ver && r.version !== ver) return false;
+        if (kw) {
+          var hay = ((r.message || '') + ' ' + (r.name || '') + ' ' + (r.relation || '')).toLowerCase();
+          if (hay.indexOf(kw) < 0) return false;
+        }
+        return true;
+      });
+    }
+
+    function render() {
+      var rows = currentRows();
+      renderStats(rows);
+      if (!rows.length) {
+        $('list').innerHTML = '<div class="empty">暂无符合条件的反馈</div>';
+        return;
+      }
+      $('list').innerHTML = rows.map(function (r) {
+        return '<div class="fb-card" data-id="' + esc(r.id) + '">' +
+          '<div class="fb-card__meta">' +
+            (r.name ? '<span class="tag tag--name">' + esc(r.name) + '</span>' : '<span class="tag tag--name">匿名</span>') +
+            (r.relation ? '<span class="tag">' + esc(r.relation) + '</span>' : '') +
+            (r.device ? '<span class="tag">' + esc(r.device) + '</span>' : '') +
+            (r.version ? '<span class="tag">' + esc(r.version) + '</span>' : '') +
+            '<span class="tag tag--time">' + esc(fmtTime(r.created_at)) + '</span>' +
+          '</div>' +
+          '<div class="fb-card__msg">' + esc(r.message) + '</div>' +
+          '<div class="fb-card__foot"><button class="btn btn--danger" data-del="' + esc(r.id) + '">删除</button></div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderStats(rows) {
+      var today = new Date(); today.setHours(0, 0, 0, 0);
+      var todayCount = rows.filter(function (r) { return new Date(r.created_at) >= today; }).length;
+      var byDev = {};
+      rows.forEach(function (r) { var k = r.device || '未填'; byDev[k] = (byDev[k] || 0) + 1; });
+      var devText = Object.keys(byDev).sort(function (a, b) { return byDev[b] - byDev[a]; })
+        .slice(0, 3).map(function (k) { return k + ' ' + byDev[k]; }).join(' · ');
+      $('stats').innerHTML =
+        '<div class="stat-card"><div class="stat-card__num">' + rows.length + '</div><div class="stat-card__label">筛选结果（总 ' + allRows.length + ' 条）</div></div>' +
+        '<div class="stat-card"><div class="stat-card__num">' + todayCount + '</div><div class="stat-card__label">今日新增</div></div>' +
+        '<div class="stat-card"><div class="stat-card__num" style="font-size:15px;line-height:34px;">' + (devText || '—') + '</div><div class="stat-card__label">设备分布 Top3</div></div>';
+    }
+
+    // ===== 删除（事件委托）=====
+    $('list').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-del]');
+      if (!btn) return;
+      var id = btn.getAttribute('data-del');
+      if (!confirm('确定删除这条反馈吗？删除后不可恢复。')) return;
+      btn.disabled = true;
+      btn.textContent = '删除中…';
+      client.from('feedback').delete().eq('id', id).then(function (res) {
+        if (res.error) {
+          alert('删除失败：' + res.error.message);
+          btn.disabled = false;
+          btn.textContent = '删除';
+          return;
+        }
+        allRows = allRows.filter(function (r) { return r.id !== id; });
+        render();
+        showToast('已删除');
+      });
+    });
+
+    // ===== CSV 导出（为“整理反馈”做准备）=====
+    $('exportBtn').addEventListener('click', function () {
+      var rows = currentRows();
+      if (!rows.length) { showToast('没有可导出的数据'); return; }
+      var head = ['id', '昵称', '关系', '设备', '反馈内容', '版本', '提交时间'];
+      var body = rows.map(function (r) {
+        return [r.id, r.name || '', r.relation || '', r.device || '', r.message || '', r.version || '', r.created_at || ''];
+      });
+      var csv = '\ufeff' + [head].concat(body).map(function (row) {
+        return row.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+      }).join('\r\n');
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '反馈记录-' + new Date().toISOString().slice(0, 10) + '.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('已导出 ' + rows.length + ' 条');
+    });
+
+    // ===== Realtime 实时新反馈 =====
+    function startRealtime() {
+      stopRealtime();
+      channel = client.channel('feedback-live');
+      channel
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'feedback' }, function (payload) {
+          if (payload.new) {
+            allRows.unshift(payload.new);
+            render();
+            var card = document.querySelector('.fb-card[data-id="' + payload.new.id + '"]');
+            if (card) card.classList.add('is-new');
+            var who = payload.new.name || '有人';
+            showToast('🔔 ' + who + ' 刚刚提交了一条新反馈');
+          }
+        })
+        .subscribe(function (status) {
+          var dot = $('rtDot'), label = $('rtLabel');
+          if (status === 'SUBSCRIBED') { dot.className = 'rt-dot on'; label.textContent = '实时监听中'; }
+          else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+            dot.className = 'rt-dot warn'; label.textContent = '实时未连接（可在 Supabase 开启后刷新）';
+          }
+        });
+    }
+
+    function stopRealtime() {
+      if (channel) { client.removeChannel(channel); channel = null; }
+      $('rtDot').className = 'rt-dot';
+      $('rtLabel').textContent = '';
+    }
+
+    // ===== Toast =====
+    var toastTimer = null;
+    function showToast(msg) {
+      var t = $('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { t.classList.remove('show'); }, 3200);
+    }
+  })();
+  </script>
+</body>
+</html>
