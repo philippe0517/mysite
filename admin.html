@@ -198,6 +198,8 @@
     }
 
     function enterDashboard() {
+      // 防重入：会话恢复与登录事件回调可能先后触发，避免重复加载
+      if ($('dash').classList.contains('visible')) return;
       $('loginCard').style.display = 'none';
       $('dash').classList.add('visible');
       loadFeedback();
