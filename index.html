@@ -671,14 +671,17 @@
     .hero__inner {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 60px;
+      /* 两侧让位银河：拉大列间距，把中央留给旋臂 */
+      gap: 110px;
       align-items: center;
       position: relative;
       z-index: 1;
     }
 
     .hero__content {
-      max-width: 600px;
+      max-width: 560px;
+      /* 内容群向左微移，与头像形成「两边」的对望构图 */
+      margin-left: -20px;
     }
 
     .hero__greeting {
@@ -1155,6 +1158,62 @@
       gap: 10px;
       margin-bottom: 36px;
     }
+    /* ===== 棣栭〉绉戞妧甯︼細楂樿揪寰芥爣 + 鑴戠數娉㈡祦鍏?+ 绁炵粡閾炬帴鏍囩 =====
+       涓€鏉′綆璋冪粏甯﹀悓鏃舵壙杞戒袱涓瘝棰橈紝鍗婇€忔槑鍏嬪埗涓嶆姠閾舵渤鐨勬垙 */
+    .hero__techline {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 420px;
+      margin: -18px 0 24px;
+      opacity: 0.75;
+    }
+
+    .hero__techline-gundam {
+      width: 20px;
+      height: 20px;
+      flex: none;
+      color: var(--color-accent);
+      filter: drop-shadow(0 0 4px rgba(143, 212, 255, 0.45));
+    }
+
+    .hero__techline-wave {
+      flex: 1;
+      height: 22px;
+      min-width: 0;
+    }
+
+    .hero__techline-wave polyline {
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .hero__techline-wave-base {
+      stroke: rgba(143, 212, 255, 0.18);
+    }
+
+    .hero__techline-wave-run {
+      stroke: rgba(143, 212, 255, 0.65);
+      stroke-dasharray: 46 194;
+      filter: drop-shadow(0 0 3px rgba(143, 212, 255, 0.55));
+      animation: techlineWaveRun 4.2s linear infinite;
+    }
+
+    @keyframes techlineWaveRun {
+      from { stroke-dashoffset: 240; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    .hero__techline-tag {
+      flex: none;
+      font-family: 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(157, 184, 214, 0.85);
+      white-space: nowrap;
+    }
 
     .hero__actions {
       display: flex;
@@ -1178,6 +1237,8 @@
       -webkit-text-stroke: 2px rgba(143, 212, 255, 0.9);
       box-shadow: 0 8px 32px rgba(2, 8, 20, 0.25);
       position: relative;
+      /* 头像向右微移，与左侧文字群拉开对望 */
+      margin-right: -16px;
     }
 
     /* 头像视差柔顺过渡（标题不再随鼠标位移；靠近银河拉开标题由 --spread 驱动） */
@@ -3150,6 +3211,10 @@
         height: 160px;
         font-size: 52px;
       }
+      .hero__techline {
+        max-width: 340px;
+        margin: -14px auto 20px;
+      }
 
       .hero__tags {
         justify-content: center;
@@ -4124,6 +4189,22 @@
             <span class="chip chip--blue">#智能医学工程</span>
             <span class="chip">#乒乓球</span>
             <span class="chip chip--blue">#深圳</span>
+          </div>
+          <div class="hero__techline" aria-hidden="true">
+            <svg class="hero__techline-gundam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1.5 L12 4.5"></path>
+              <path d="M7 3.5 L9.5 8"></path>
+              <path d="M17 3.5 L14.5 8"></path>
+              <path d="M5 11 a7 7 0 0 1 14 0 v3.5 h-14 z"></path>
+              <circle cx="9.2" cy="13.2" r="0.9" fill="currentColor" stroke="none"></circle>
+              <circle cx="14.8" cy="13.2" r="0.9" fill="currentColor" stroke="none"></circle>
+              <path d="M10 16.5 v1.6 M14 16.5 v1.6"></path>
+            </svg>
+            <svg class="hero__techline-wave" viewBox="0 0 120 24" preserveAspectRatio="none">
+              <polyline class="hero__techline-wave-base" points="0,12 14,12 20,4 27,20 33,12 48,12 54,8 60,12 78,12 84,2 92,22 99,12 120,12"></polyline>
+              <polyline class="hero__techline-wave-run" points="0,12 14,12 20,4 27,20 33,12 48,12 54,8 60,12 78,12 84,2 92,22 99,12 120,12"></polyline>
+            </svg>
+            <span class="hero__techline-tag">NEURAL LINK · θ</span>
           </div>
           <div class="hero__actions page-load page-load-delay-4">
             <a class="btn btn--primary" href="#works">
@@ -7054,10 +7135,7 @@
       var coreCrossH = new THREE.Sprite(crossMatH);
       coreCrossH.scale.set(52, 1.6, 1);
       galaxySys.add(coreCrossH);
-      var crossMatV = new THREE.SpriteMaterial({ map: crossTexH, color: 0xfff6e0, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, rotation: Math.PI / 2 });
-      var coreCrossV = new THREE.Sprite(crossMatV);
-      coreCrossV.scale.set(52, 1.6, 1);
-      galaxySys.add(coreCrossV);
+
       // 倾斜吸积光环（渐变亮环绕星核，缓慢自转）
       var discTex = (function () {
         var cv = document.createElement('canvas');
@@ -7188,7 +7266,7 @@
         return new THREE.CanvasTexture(cv);
       }
 
-      var planets = [], planetMeshes = [], fadeMats = [sysMat, coreMat, coreGlowMat1, coreGlowMat2, crossMatH, crossMatV, discMat, haloMat];
+      var planets = [], planetMeshes = [], fadeMats = [sysMat, coreMat, coreGlowMat1, coreGlowMat2, crossMatH, discMat, haloMat];
       for (var pi = 0; pi < PLANETS.length; pi++) {
         var pd = PLANETS[pi];
         var tiltGrp = new THREE.Group();
@@ -7197,12 +7275,12 @@
         // 行星本体 = 区块图标徽章（玻璃底盘 + 发光描边环，不再有深色球体）
         var badgeMat = new THREE.SpriteMaterial({ map: makeIconTex(pd.icon, pd.glow), transparent: true, opacity: 1, depthWrite: false });
         var badge = new THREE.Sprite(badgeMat);
-        badge.scale.set(1.6, 1.6, 1);
+        badge.scale.set(1.1, 1.1, 1);
         badge.userData = { idx: pi };
         // 底部光晕（叠加发光，hover 时增亮）
         var haloMat = new THREE.SpriteMaterial({ map: glowTex, color: pd.glow, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false });
         var halo = new THREE.Sprite(haloMat);
-        halo.scale.set(2.7, 2.7, 1);
+        halo.scale.set(1.9, 1.9, 1);
         halo.userData = { idx: pi };
         var body = new THREE.Group();
         body.add(halo);
@@ -7490,7 +7568,6 @@
           discRing.rotation.z = t * 0.05;
           var crossGlow = 0.8 + 0.2 * Math.sin(t * 1.2);
           crossMatH.opacity = crossGlow * fade;
-          crossMatV.opacity = (1.6 - crossGlow) * fade;
         }
         // 3D 冲击波扩散
         for (var pu = pulses3d.length - 1; pu >= 0; pu--) {
