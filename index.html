@@ -726,6 +726,54 @@
       line-height: 1.2;
       color: transparent;
       -webkit-text-stroke: 1px rgba(220, 235, 247, 0.8);
+      /* 玻璃化：面板宽度适应文字，为向两边展开留出空间 */
+      width: fit-content;
+      max-width: 100%;
+      position: relative;
+      padding: 14px 26px;
+      border-radius: 22px;
+    }
+
+    /* 玻璃面板层（伪元素绘制，文字不受影响）
+       展开度由 --spread 驱动：JS 根据鼠标与银河的接近度平滑写入（0=合拢，1=完全拉开） */
+    .hero__title::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      border-radius: inherit;
+      background: linear-gradient(115deg,
+          rgba(255, 255, 255, 0.16) 0%,
+          rgba(143, 212, 255, 0.08) 30%,
+          rgba(255, 255, 255, 0.20) 50%,
+          rgba(143, 212, 255, 0.08) 70%,
+          rgba(255, 255, 255, 0.16) 100%);
+      background-size: 220% 100%;
+      background-position: 0% 0;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      box-shadow:
+        0 10px 36px rgba(2, 8, 20, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.38),
+        inset 0 -1px 0 rgba(143, 212, 255, 0.16);
+      -webkit-backdrop-filter: blur(20px) saturate(1.5);
+      backdrop-filter: blur(20px) saturate(1.5);
+      transform: translateY(calc(var(--spread, 0) * -4px)) scaleX(calc(1 + var(--spread, 0) * 1.1));
+      transform-origin: center;
+    }
+
+    /* 靠近银河时：标题背后的蓝紫双色辉光随 --spread 渐显 */
+    .hero__title::after {
+      content: '';
+      position: absolute;
+      inset: -18px -32px;
+      z-index: -1;
+      border-radius: 32px;
+      background:
+        radial-gradient(58% 92% at 28% 50%, rgba(111, 195, 255, 0.42), transparent 72%),
+        radial-gradient(58% 92% at 72% 50%, rgba(178, 132, 255, 0.34), transparent 72%);
+      filter: blur(14px);
+      opacity: var(--spread, 0);
+      pointer-events: none;
     }
 
     .hero__title     .hero__title-name {
@@ -823,109 +871,7 @@
       .game-banner__inner, .game-banner__btn { animation: none; }
       .game-banner__title { animation: none; }
       .music-fab.playing { animation: none; }
-      .planet-card.show { animation: none; }
       .section__title::after { display: none; }
-    }
-
-    /* ===== 星球漂浮卡片 ===== */
-    .planet-card {
-      position: fixed;
-      left: -9999px;
-      top: -9999px;
-      width: min(300px, 78vw);
-      padding: 20px 22px 18px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(126, 182, 217, 0.1) 0%, rgba(168, 208, 230, 0.16) 100%);
-      border: 1px solid rgba(126, 182, 217, 0.3);
-      box-shadow: 0 14px 46px rgba(2, 8, 20, 0.3), 0 0 30px rgba(111, 195, 255, 0.28);
-      color: #22344A;
-      z-index: 60;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px) scale(0.96);
-      transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.4, 0.5, 1), visibility 0.28s;
-      pointer-events: none;
-    }
-
-    .planet-card.show {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-      pointer-events: auto;
-    }
-
-    .planet-card__close {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(34, 52, 74, 0.08);
-      color: #55718F;
-      font-size: 16px;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s ease;
-    }
-
-    .planet-card__close:hover {
-      background: rgba(34, 52, 74, 0.16);
-    }
-
-    .planet-card__dot {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #6fc3ff;
-      margin-bottom: 8px;
-    }
-
-    .planet-card__name {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 6px;
-      color: #22344A;
-    }
-
-    .planet-card__desc {
-      font-size: 13px;
-      line-height: 1.65;
-      color: #55718F;
-      margin: 0 0 12px;
-    }
-
-    .planet-card__link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #1F78C2;
-      text-decoration: none;
-      padding: 7px 16px;
-      border-radius: 100px;
-      background: rgba(31, 120, 194, 0.1);
-      transition: background 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .planet-card__link:hover {
-      background: rgba(31, 120, 194, 0.18);
-      box-shadow: 0 0 14px rgba(111, 195, 255, 0.35);
-    }
-
-    .planet-card.show {
-      animation: cardAura 3.6s ease-in-out infinite;
-    }
-
-    @keyframes cardAura {
-      0%, 100% { box-shadow: 0 14px 46px rgba(2, 8, 20, 0.5), 0 0 24px rgba(111, 195, 255, 0.22); }
-      50% { box-shadow: 0 14px 50px rgba(2, 8, 20, 0.55), 0 0 40px rgba(180, 140, 255, 0.34); }
     }
 
     /* hover 行星时的轻提示 */
@@ -948,10 +894,6 @@
 
     .planet-tip.show {
       opacity: 1;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .planet-card { transition: opacity 0.2s ease, visibility 0.2s; transform: none; }
     }
 
     /* ===== 光影系统 ===== */
@@ -1003,7 +945,7 @@
       100% { transform: scale(1); }
     }
 
-    /* ===== 3D Tilt 卡片高光（跟随鼠标的光泽） ===== */
+    /* ===== 3D Tilt 卡片高光（跟随鼠标的光泽）+ HUD 四角括号（hover 亮起） ===== */
     .work-card,
     .bento-card {
       position: relative;
@@ -1017,7 +959,29 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(560px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.16), transparent 42%);
+      background-image:
+        radial-gradient(560px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.16), transparent 42%),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8)),
+        linear-gradient(rgba(191, 230, 255, 0.8), rgba(191, 230, 255, 0.8));
+      background-size:
+        100% 100%,
+        16px 2px, 2px 16px,
+        16px 2px, 2px 16px,
+        16px 2px, 2px 16px,
+        16px 2px, 2px 16px;
+      background-position:
+        0 0,
+        10px 10px, 10px 10px,
+        calc(100% - 26px) 10px, calc(100% - 12px) 10px,
+        10px calc(100% - 12px), 10px calc(100% - 26px),
+        calc(100% - 26px) calc(100% - 12px), calc(100% - 12px) calc(100% - 26px);
+      background-repeat: no-repeat;
       opacity: 0;
       transition: opacity 0.35s ease;
       pointer-events: none;
@@ -1179,7 +1143,9 @@
     /* 动画减免：尊重系统设置 */
     @media (prefers-reduced-motion: reduce) {
       .btn--primary::before { animation: none; }
-      .hero__title-name { animation: none; }
+      .hero__title-name { animation: none; transition: none; }
+      .hero__title::before { transition: none; }
+      .hero__title { transition: none; }
       .hero__title-name.rainbow { animation: none; -webkit-text-fill-color: initial; background: none; color: var(--color-primary); }
     }
 
@@ -1214,18 +1180,10 @@
       position: relative;
     }
 
-    /* 鼠标悬停银河中央：左右介绍向两侧让位，露出行星 */
-    .hero__content,
+    /* 头像视差柔顺过渡（标题不再随鼠标位移；靠近银河拉开标题由 --spread 驱动） */
     .hero__avatar {
       transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
       will-change: transform;
-    }
-
-    .hero.hero--split .hero__content {
-      transform: translateX(calc(-1 * var(--split-x, 0px)));
-    }
-    .hero.hero--split .hero__avatar {
-      transform: translateX(var(--split-x, 0px));
     }
 
     .hero__avatar::before {
@@ -1245,7 +1203,7 @@
 
     /* ===== 关于我 ===== */
     .about {
-      background-color: var(--color-card);
+      background: transparent;
     }
 
     .about__grid {
@@ -1256,17 +1214,33 @@
 
     .about-card {
       padding: 32px;
-      background-color: var(--color-bg);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(143, 212, 255, 0.08);
       transition: var(--transition);
       position: relative;
     }
 
     .about-card--featured {
       grid-column: span 2;
-      background: linear-gradient(135deg, rgba(126, 182, 217, 0.04) 0%, rgba(168, 208, 230, 0.08) 100%);
-      border-color: rgba(126, 182, 217, 0.2);
+      /* 独特点：顶部中央「数据接口槽」亮线 */
+      background:
+        linear-gradient(90deg, transparent, rgba(191, 230, 255, 0.55), transparent) no-repeat 50% 0 / 130px 2px,
+        radial-gradient(420px circle at 85% 0%, rgba(143, 212, 255, 0.12) 0%, transparent 60%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
+      border-color: rgba(126, 182, 217, 0.32);
+      animation: cardAurora 5s ease-in-out infinite;
+    }
+
+    /* 独特点：主打卡「极光呼吸」辉光 */
+    @keyframes cardAurora {
+      0%, 100% { box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), 0 0 22px rgba(111, 195, 255, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+      50% { box-shadow: 0 12px 44px rgba(2, 8, 20, 0.4), 0 0 44px rgba(178, 132, 255, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.24); }
     }
 
     .about-card--featured .about-card__icon {
@@ -1326,7 +1300,9 @@
 
     .about-card:hover {
       transform: translateY(-4px);
-      border-color: var(--color-primary);
+      border-color: rgba(143, 212, 255, 0.55);
+      /* 独特点：普通卡左缘亮起竖向蓝光条 */
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.4), inset 3px 0 14px -6px rgba(111, 195, 255, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 
     .about-card__icon {
@@ -1359,7 +1335,7 @@
 
     /* ===== 性格趣味卡 ===== */
     .personality {
-      background-color: var(--color-bg-alt);
+      background: transparent;
     }
 
     .personality__grid {
@@ -1370,15 +1346,24 @@
     }
 
     .personality__block {
-      background-color: var(--color-card);
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 14px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(143, 212, 255, 0.08);
       padding: 32px;
       transition: var(--transition);
     }
 
     .personality__block:hover {
-      box-shadow: var(--shadow-md);
+      /* 独特点：斜纹「多面性格」纹理悬停时浮现变亮 */
+      background:
+        repeating-linear-gradient(45deg, rgba(143, 212, 255, 0.09) 0 2px, transparent 2px 14px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(126, 182, 217, 0.07) 50%, rgba(255, 255, 255, 0.11) 100%);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.4), 0 0 30px rgba(111, 195, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.22);
       border-color: var(--color-accent);
     }
 
@@ -1410,13 +1395,14 @@
       align-items: flex-start;
       gap: 14px;
       padding: 14px 16px;
-      background-color: var(--color-bg-alt);
+      background-color: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.07);
       border-radius: var(--radius-md);
       transition: var(--transition);
     }
 
     .if-item:hover {
-      background-color: var(--color-accent-light);
+      background-color: rgba(143, 212, 255, 0.12);
       transform: translateX(4px);
     }
 
@@ -1555,9 +1541,11 @@
       font-size: 14px;
       font-weight: 500;
       font-family: var(--font-body);
-      border: 1px solid var(--color-border);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 100px;
-      background-color: var(--color-card);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(126, 182, 217, 0.05));
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
       color: var(--color-text-secondary);
       cursor: pointer;
       transition: var(--transition);
@@ -1580,14 +1568,17 @@
 
     .works__grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 24px;
     }
 
     .work-card {
-      background-color: var(--color-card);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(143, 212, 255, 0.08);
       overflow: hidden;
       transition: var(--transition);
       display: flex;
@@ -1596,7 +1587,13 @@
 
     .work-card:hover {
       transform: translateY(-6px);
-      border-color: var(--color-primary);
+      border-color: rgba(143, 212, 255, 0.55);
+      /* 独特点：顶边亮起流动的扫描光线 */
+      background:
+        linear-gradient(90deg, transparent 20%, rgba(143, 212, 255, 0.75) 50%, transparent 80%) no-repeat -40% 0 / 40% 2px,
+        linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(126, 182, 217, 0.07) 50%, rgba(255, 255, 255, 0.11) 100%);
+      transition: transform 0.35s ease, border-color 0.35s ease, background-position 0.9s ease;
+      background-position: 140% 0, 0 0;
     }
 
     .work-card:active {
@@ -1618,7 +1615,8 @@
 
     .work-card__cover {
       height: 140px;
-      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+      background: linear-gradient(135deg, rgba(111, 195, 255, 0.32) 0%, rgba(61, 155, 233, 0.42) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1645,11 +1643,25 @@
     }
 
     .work-card__cover--alt {
-      background: linear-gradient(135deg, #A8D0E6 0%, #7EB6D9 100%);
+      background: linear-gradient(135deg, rgba(168, 208, 230, 0.38) 0%, rgba(126, 182, 217, 0.48) 100%);
     }
 
     .work-card__cover--third {
-      background: linear-gradient(135deg, #C5E0F0 0%, #A8D0E6 100%);
+      background: linear-gradient(135deg, rgba(197, 224, 240, 0.34) 0%, rgba(168, 208, 230, 0.44) 100%);
+    }
+
+    /* OASIS 封面：绿洲全息网格底纹（同色系蓝白，不下沉不渐隐） */
+    .work-card__cover--oasis {
+      background:
+        repeating-linear-gradient(0deg, rgba(191, 230, 255, 0.1) 0 1px, transparent 1px 22px),
+        repeating-linear-gradient(90deg, rgba(191, 230, 255, 0.1) 0 1px, transparent 1px 22px),
+        linear-gradient(135deg, rgba(126, 182, 217, 0.4) 0%, rgba(95, 127, 216, 0.5) 100%);
+    }
+
+    .work-card__cover--oasis svg {
+      width: 58px;
+      height: 58px;
+      filter: drop-shadow(0 0 10px rgba(191, 230, 255, 0.5));
     }
 
     .work-card__cover svg {
@@ -1727,7 +1739,7 @@
 
     /* ===== 兴趣技能（Bento Grid） ===== */
     .skills {
-      background-color: var(--color-bg-alt);
+      background: transparent;
     }
 
     .skills__bento {
@@ -1738,9 +1750,12 @@
     }
 
     .bento-card {
-      background-color: var(--color-bg);
-      border: 1px solid var(--color-border);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: var(--radius-lg);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(143, 212, 255, 0.08);
       padding: 28px;
       transition: var(--transition);
       display: flex;
@@ -1751,7 +1766,8 @@
 
     .bento-card:hover {
       transform: translateY(-4px);
-      border-color: var(--color-primary);
+      border-color: rgba(143, 212, 255, 0.55);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.4), 0 0 26px rgba(111, 195, 255, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 
     .bento-card:hover .bento-card__icon {
@@ -1765,7 +1781,11 @@
     .bento-card--large {
       grid-column: span 2;
       grid-row: span 2;
-      background: linear-gradient(135deg, rgba(126, 182, 217, 0.1) 0%, rgba(168, 208, 230, 0.16) 100%);
+      /* 独特点：大卡内嵌缓慢漂移的「星环」光晕 */
+      background:
+        radial-gradient(240px circle at 78% 82%, rgba(143, 212, 255, 0.16) 0%, transparent 62%),
+        radial-gradient(180px circle at 18% 12%, rgba(178, 132, 255, 0.12) 0%, transparent 60%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(126, 182, 217, 0.06) 50%, rgba(255, 255, 255, 0.1) 100%);
     }
 
     .bento-card--medium {
@@ -1959,7 +1979,13 @@
     }
 
     .bento-card--small:hover {
-      background-color: rgba(126, 182, 217, 0.04);
+      background-color: rgba(143, 212, 255, 0.08);
+    }
+
+    /* 独特点：小卡悬停时编号点亮发光 */
+    .bento-card--small:hover .bento-card__number {
+      color: rgba(191, 230, 255, 0.9);
+      text-shadow: 0 0 12px rgba(111, 195, 255, 0.6);
     }
 
     /* 未来目标卡片渐变边框 */
@@ -1970,7 +1996,12 @@
       gap: 20px;
       padding: 24px 28px;
       position: relative;
-      background: linear-gradient(135deg, rgba(126, 182, 217, 0.06) 0%, rgba(168, 208, 230, 0.08) 100%);
+      /* 独特点：左上角「充能进度条」 */
+      background:
+        linear-gradient(90deg, rgba(143, 212, 255, 0.2), rgba(191, 230, 255, 0.7), rgba(143, 212, 255, 0.2)) no-repeat 16px 12px / 72px 3px,
+        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
       border: 1px solid transparent;
       background-clip: padding-box;
     }
@@ -1995,7 +2026,13 @@
     }
 
     .bento-card--goal:hover {
-      box-shadow: var(--shadow-md);
+      /* 独特点：目标卡「蓄势待发」蓝光脉冲 */
+      animation: goalPulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes goalPulse {
+      0%, 100% { box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), 0 0 14px rgba(111, 195, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.18); }
+      50% { box-shadow: 0 12px 44px rgba(2, 8, 20, 0.4), 0 0 38px rgba(111, 195, 255, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.24); }
     }
 
     /* 思维读取器彩蛋 */
@@ -2053,8 +2090,10 @@
       top: calc(100% + 8px);
       left: 50%;
       transform: translateX(-50%) translateY(-8px);
-      background-color: var(--color-card);
-      border: 1px solid var(--color-border);
+      background: rgba(12, 22, 40, 0.92);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(143, 212, 255, 0.3);
       border-radius: var(--radius-md);
       padding: 10px 16px;
       font-size: 13px;
@@ -2081,9 +2120,9 @@
       transform: translateX(-50%) rotate(45deg);
       width: 8px;
       height: 8px;
-      background-color: var(--color-card);
-      border-left: 1px solid var(--color-border);
-      border-top: 1px solid var(--color-border);
+      background: rgba(12, 22, 40, 0.92);
+      border-left: 1px solid rgba(143, 212, 255, 0.3);
+      border-top: 1px solid rgba(143, 212, 255, 0.3);
     }
 
     /* 进度条初始状态（JS控制动画） */
@@ -2097,7 +2136,7 @@
 
     /* ===== 数字分身 ===== */
     .digital-twin {
-      background: linear-gradient(135deg, #17405C 0%, #10314A 100%);
+      background: transparent;
       color: var(--color-white);
       position: relative;
       overflow: hidden;
@@ -2159,10 +2198,11 @@
     .twin-card {
       max-width: 640px;
       margin: 0 auto;
-      background-color: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(126, 182, 217, 0.07) 100%);
+      backdrop-filter: blur(18px) saturate(1.35);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(143, 212, 255, 0.1);
       border-radius: var(--radius-lg);
       padding: 40px;
       text-align: center;
@@ -2179,6 +2219,17 @@
       align-items: center;
       justify-content: center;
       margin: 0 auto 24px;
+    }
+
+    /* 独特点：图标外围旋转的全息光环 */
+    .twin-card__icon {
+      position: relative;
+      animation: iconHalo 3.4s ease-in-out infinite;
+    }
+
+    @keyframes iconHalo {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(143, 212, 255, 0.35), 0 0 18px rgba(111, 195, 255, 0.25); }
+      50% { box-shadow: 0 0 0 10px rgba(143, 212, 255, 0), 0 0 30px rgba(178, 132, 255, 0.45); }
     }
 
     .twin-card__icon svg {
@@ -2218,6 +2269,105 @@
       height: 14px;
     }
 
+    /* ===== 脑机接口面板（NEURAL LINK）===== */
+    .bci-panel {
+      margin: 0 auto 22px;
+      max-width: 380px;
+      padding: 12px 14px 10px;
+      border: 1px solid rgba(143, 212, 255, 0.22);
+      border-radius: 12px;
+      background:
+        linear-gradient(rgba(143, 212, 255, 0.05), rgba(143, 212, 255, 0.02)),
+        repeating-linear-gradient(0deg, rgba(143, 212, 255, 0.045) 0 1px, transparent 1px 4px);
+      text-align: left;
+    }
+
+    .bci-panel__head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: rgba(220, 235, 247, 0.85);
+      margin-bottom: 8px;
+    }
+
+    .bci-panel__dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #8FD4FF;
+      box-shadow: 0 0 8px rgba(143, 212, 255, 0.9);
+      animation: bciBlink 1.6s ease-in-out infinite;
+      flex: none;
+    }
+
+    @keyframes bciBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .bci-panel__val {
+      margin-left: auto;
+      font-variant-numeric: tabular-nums;
+      color: #BFE6FF;
+    }
+
+    .bci-panel__wave {
+      display: block;
+      width: 100%;
+      height: 36px;
+      margin-bottom: 9px;
+    }
+
+    .bci-panel__trace {
+      fill: none;
+      stroke: rgba(191, 230, 255, 0.9);
+      stroke-width: 1.6;
+      stroke-linejoin: round;
+      stroke-dasharray: 620;
+      stroke-dashoffset: 620;
+      animation: bciScan 3.2s linear infinite;
+      filter: drop-shadow(0 0 4px rgba(143, 212, 255, 0.55));
+    }
+
+    @keyframes bciScan {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* 通道矩阵：已连接通道亮格闪烁 */
+    .bci-panel__ch {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 5px;
+    }
+
+    .bci-panel__ch span {
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      padding: 3px 0;
+      border-radius: 4px;
+      border: 1px solid rgba(143, 212, 255, 0.16);
+      color: rgba(157, 184, 214, 0.55);
+    }
+
+    .bci-panel__ch span.on {
+      border-color: rgba(143, 212, 255, 0.5);
+      color: #DCEBF7;
+      background: rgba(143, 212, 255, 0.12);
+      animation: bciChPulse 2.4s ease-in-out infinite;
+    }
+
+    .bci-panel__ch span.on:nth-child(2) { animation-delay: 0.3s; }
+    .bci-panel__ch span.on:nth-child(3) { animation-delay: 0.6s; }
+    .bci-panel__ch span.on:nth-child(4) { animation-delay: 0.9s; }
+
+    @keyframes bciChPulse {
+      0%, 100% { background: rgba(143, 212, 255, 0.12); }
+      50% { background: rgba(143, 212, 255, 0.3); }
+    }
+
     /* ===== 联系我 ===== */
     .contact__inner {
       max-width: 640px;
@@ -2237,15 +2387,23 @@
       align-items: center;
       gap: 16px;
       padding: 24px;
-      border: 1px solid rgba(126, 182, 217, 0.26);
+      /* 独特点：右缘「信号强度」竖格条 */
+      background:
+        repeating-linear-gradient(0deg, rgba(191, 230, 255, 0.4) 0 4px, transparent 4px 9px) no-repeat calc(100% - 16px) 50% / 4px 30px,
+        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 3px 0 10px -7px rgba(111, 195, 255, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
       border-radius: var(--radius-lg);
       text-align: left;
       transition: var(--transition);
     }
 
     .contact-method:hover {
-      border-color: var(--color-primary);
-      box-shadow: var(--shadow-sm);
+      border-color: rgba(143, 212, 255, 0.55);
+      /* 独特点：左侧常亮光条悬停时增亮外溢 */
+      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.4), inset 3px 0 16px -5px rgba(111, 195, 255, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.22);
       transform: translateY(-2px);
     }
 
@@ -2422,9 +2580,11 @@
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background-color: var(--color-card);
-      color: var(--color-primary);
-      border: none;
+      background: rgba(14, 24, 48, 0.8);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      color: var(--color-accent);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -2543,9 +2703,12 @@
       max-width: calc(100vw - 48px);
       height: 520px;
       max-height: calc(100vh - 140px);
-      background-color: var(--color-card);
+      background: rgba(10, 18, 34, 0.88);
+      -webkit-backdrop-filter: blur(18px) saturate(1.3);
+      backdrop-filter: blur(18px) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -2697,7 +2860,8 @@
     }
 
     .chat-msg--bot .chat-msg__bubble {
-      background-color: var(--color-card);
+      background-color: rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       color: var(--color-text);
       border-top-left-radius: 4px;
       box-shadow: var(--shadow-sm);
@@ -2742,14 +2906,14 @@
 
     .chat-window__quick {
       padding: 10px 16px;
-      background-color: var(--color-card);
-      border-top: 1px solid var(--color-border);
+      background: rgba(10, 18, 34, 0.55);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       flex-shrink: 0;
     }
 
     .chat-quick__label {
       font-size: 11px;
-      color: var(--color-text-light);
+      color: var(--color-text-secondary);
       display: block;
       margin-bottom: 8px;
     }
@@ -2763,9 +2927,9 @@
     .chat-quick__btn {
       padding: 5px 12px;
       font-size: 12px;
-      background-color: var(--color-accent-light);
-      color: var(--color-primary-dark);
-      border: 1px solid transparent;
+      background-color: rgba(111, 195, 255, 0.12);
+      color: var(--color-accent);
+      border: 1px solid rgba(111, 195, 255, 0.22);
       border-radius: 100px;
       cursor: pointer;
       transition: var(--transition);
@@ -2781,8 +2945,8 @@
       display: flex;
       gap: 8px;
       padding: 12px 16px;
-      background-color: var(--color-card);
-      border-top: 1px solid var(--color-border);
+      background: rgba(10, 18, 34, 0.55);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       flex-shrink: 0;
     }
 
@@ -2791,16 +2955,17 @@
       padding: 10px 14px;
       font-size: 14px;
       font-family: var(--font-body);
-      border: 1px solid var(--color-border);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: var(--radius-md);
       outline: none;
       transition: var(--transition);
-      background-color: var(--color-bg);
+      background-color: rgba(255, 255, 255, 0.06);
+      color: var(--color-text);
     }
 
     .chat-input:focus {
       border-color: var(--color-primary);
-      background-color: var(--color-card);
+      background-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 0 0 3px rgba(126, 182, 217, 0.12);
     }
 
@@ -2849,10 +3014,15 @@
       align-items: center;
       justify-content: space-between;
       gap: 32px;
-      background: linear-gradient(135deg, #16324f 0%, #1e3a5f 45%, #2c5f8a 100%);
+      background:
+        radial-gradient(340px circle at 88% 10%, rgba(143, 212, 255, 0.14) 0%, transparent 62%),
+        linear-gradient(135deg, rgba(22, 50, 79, 0.62) 0%, rgba(30, 58, 95, 0.55) 45%, rgba(44, 95, 138, 0.5) 100%);
+      -webkit-backdrop-filter: blur(18px) saturate(1.35);
+      backdrop-filter: blur(18px) saturate(1.35);
       border-radius: var(--radius-lg);
       padding: 44px 48px;
       border: 1px solid rgba(111, 195, 255, 0.4);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(143, 212, 255, 0.1);
       animation: gameGlow 3.2s ease-in-out infinite;
     }
 
@@ -3066,6 +3236,8 @@
 
       .hero__title {
         font-size: 32px;
+        padding: 10px 18px;
+        border-radius: 16px;
       }
 
       .hero__title .hero__title-name {
@@ -3083,11 +3255,13 @@
         top: 68px;
         left: 0;
         right: 0;
-        background-color: var(--color-card);
+        background: rgba(10, 18, 34, 0.92);
+        -webkit-backdrop-filter: blur(16px);
+        backdrop-filter: blur(16px);
         flex-direction: column;
         padding: 20px 24px;
         gap: 16px;
-        border-bottom: 1px solid var(--color-border);
+        border-bottom: 1px solid rgba(143, 212, 255, 0.2);
         box-shadow: var(--shadow-md);
       }
 
@@ -3142,6 +3316,30 @@
 
       .game-banner__desc {
         font-size: 14px;
+      }
+
+      /* 数字分身卡 + 脑机接口面板：小屏紧凑化 */
+      .twin-card {
+        padding: 28px 20px;
+      }
+
+      .bci-panel {
+        max-width: 100%;
+        padding: 10px 12px 9px;
+      }
+
+      .bci-panel__head {
+        font-size: 10px;
+        letter-spacing: 1px;
+      }
+
+      .bci-panel__ch {
+        gap: 4px;
+      }
+
+      .bci-panel__ch span {
+        font-size: 8px;
+        padding: 2px 0;
       }
 
       /* ===== 兴趣技能移动端重设计（电脑端不变） =====
@@ -3307,6 +3505,8 @@
     @media (max-width: 480px) {
       .hero__title {
         font-size: 28px;
+        padding: 8px 14px;
+        border-radius: 14px;
       }
 
       .hero__title .hero__title-name {
@@ -3795,33 +3995,51 @@
         grid-template-columns: 1fr;
       }
     }
-    /* ===== 全透明星雾卡片系统：卡片隐形，只有深色文字与微光边框浮在星空上 ===== */
+    /* ===== 玻璃卡片系统统一收尾：浅色文字变量 + 弹窗玻璃化 ===== */
     .about-card, .personality__block, .work-card, .works__tab, .contact-method,
     .twin-card, .bento-card, .chat-window, .feedback-modal, .feedback-form__textarea,
-    .feedback-chip, .mind-reader__result, .game-banner__btn, .to-top, .spinner, .if-item,
+    .feedback-chip, .mind-reader__result, .if-item,
     .chat-msg--bot .chat-msg__bubble, .chat-window__input, .chat-window__quick,
     .chat-input:focus {
-      --color-text: #22344A;
-      --color-text-secondary: #55718F;
+      --color-text: #DCEBF7;
+      --color-text-secondary: #9DB8D6;
       --color-text-light: #7E93AC;
-      --color-primary: #1F78C2;
-      --color-primary-dark: #1668AC;
-      --color-accent: #2E86C9;
-      --color-accent-light: #E1F0FA;
-      --color-border: #C7DAE8;
-      background: linear-gradient(135deg, rgba(126, 182, 217, 0.09) 0%, rgba(168, 208, 230, 0.15) 100%);
-      border: 1px solid rgba(126, 182, 217, 0.3);
-      box-shadow: 0 8px 32px rgba(2, 8, 20, 0.25);
+      --color-primary: #6FC3FF;
+      --color-primary-dark: #3D9BE9;
+      --color-accent: #8FD4FF;
+      --color-accent-light: rgba(111, 195, 255, 0.12);
+      --color-border: rgba(143, 212, 255, 0.25);
     }
 
     .twin-card__title,
     .twin-card__icon svg {
-      color: #22344A;
+      color: #FFFFFF;
     }
 
-    /* 区块透明化，透出全页星空 */
+    /* 反馈弹窗玻璃化（配合浅色文字） */
+    .feedback-modal {
+      background: linear-gradient(135deg, rgba(16, 30, 52, 0.94) 0%, rgba(22, 40, 68, 0.9) 100%);
+      -webkit-backdrop-filter: blur(20px) saturate(1.3);
+      backdrop-filter: blur(20px) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 20px 60px rgba(2, 8, 20, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .feedback-form__input,
+    .feedback-form__select,
+    .feedback-form__textarea {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: var(--color-text);
+    }
+
+    .feedback-chip {
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    /* 区块透明化兜底：透出全页星空 */
     .about, .personality, .skills {
-      background-color: transparent;
+      background: transparent;
     }
 
     /* 内容层级：确保浮在 fixed 星空与纱层之上 */
@@ -3832,18 +4050,6 @@
 
     .site-footer {
       background-color: rgba(6, 13, 26, 0.85);
-    }
-
-    .game-banner__inner {
-      background: linear-gradient(135deg, rgba(22, 50, 79, 0.88) 0%, rgba(30, 58, 95, 0.86) 45%, rgba(44, 95, 138, 0.8) 100%);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .digital-twin {
-      background: linear-gradient(135deg, rgba(23, 64, 92, 0.8) 0%, rgba(16, 49, 74, 0.8) 100%);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
     }
 
   </style>
@@ -3933,20 +4139,6 @@
         <div class="hero__avatar page-load page-load-delay-2" aria-label="于哲的头像占位">YZ</div>
       </div>
 
-      <!-- 星球点击后漂浮出来的卡片 -->
-      <div class="planet-card" id="planetCard" aria-live="polite">
-        <button class="planet-card__close" id="planetCardClose" type="button" aria-label="关闭卡片">×</button>
-        <span class="planet-card__dot" id="planetCardDot" aria-hidden="true"></span>
-        <h3 class="planet-card__name" id="planetCardName"></h3>
-        <p class="planet-card__desc" id="planetCardDesc"></p>
-        <a class="planet-card__link" id="planetCardLink" href="#about">
-          前往查看
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-            <polyline points="12 5 19 12 12 19"></polyline>
-          </svg>
-        </a>
-      </div>
       <div class="planet-tip" id="planetTip" aria-hidden="true"></div>
     </section>
 
@@ -4283,6 +4475,33 @@
               </div>
             </div>
           </article>
+
+          <article class="work-card reveal reveal-delay-1" data-category="planned">
+            <div class="work-card__cover work-card__cover--oasis">
+              <!-- 初代高达 RX-78-2 头部：V 字天线 + 双眼 + 下巴 -->
+              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 15 L26 4 L32 12 L38 4 L42 15"/>
+                <path d="M18 25 Q18 15 32 15 Q46 15 46 25 L46 33 Q46 40 40 42 L38 48 Q35 53 32 53 Q29 53 26 48 L24 42 Q18 40 18 33 Z"/>
+                <path d="M23 30 L29 30 M35 30 L41 30"/>
+                <path d="M32 31 L32 45"/>
+                <path d="M22 36 L27 36 M37 36 L42 36"/>
+              </svg>
+            </div>
+            <div class="work-card__body">
+              <h3 class="work-card__title">OASIS 计划 · 绿洲之门</h3>
+              <p class="work-card__desc">致敬《头号玩家》：正在学习的 WebXR / Three.js 虚拟世界入口。初代高达 RX-78-2（1979）会是我的第一台守护机体——在绿洲里，人人都能成为自己想成为的人。</p>
+              <div class="work-card__footer">
+                <div class="work-card__tags">
+                  <span class="work-card__tag">VR 梦想</span>
+                  <span class="work-card__tag work-card__tag--tech">WebXR</span>
+                  <span class="work-card__tag work-card__tag--tech">Three.js</span>
+                </div>
+                <span class="work-card__link" style="color:var(--color-text-light);cursor:default;">
+                  组装中 · 1979→未来
+                </span>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -4468,6 +4687,20 @@
               <circle cx="12" cy="5" r="2"></circle>
               <path d="M12 7v4M8 16h.01M16 16h.01"></path>
             </svg>
+          </div>
+          <!-- 脑机接口面板：神经链路状态 + 实时 EEG 波形 + 通道矩阵 -->
+          <div class="bci-panel" aria-hidden="true">
+            <div class="bci-panel__head">
+              <span class="bci-panel__dot"></span>
+              <span class="bci-panel__label">NEURAL LINK · θ/α SYNC</span>
+              <span class="bci-panel__val">98.6%</span>
+            </div>
+            <svg class="bci-panel__wave" viewBox="0 0 300 36" preserveAspectRatio="none">
+              <path class="bci-panel__trace" d="M0 18 L14 18 L20 6 L26 30 L32 12 L38 24 L44 16 L58 16 L64 4 L70 32 L76 14 L82 22 L96 22 L102 10 L108 28 L114 15 L128 15 L134 5 L140 31 L146 13 L152 23 L166 23 L172 9 L178 29 L184 14 L198 14 L204 6 L210 30 L216 12 L222 24 L236 24 L242 10 L248 28 L254 16 L268 16 L274 4 L280 32 L286 13 L292 21 L300 18"/>
+            </svg>
+            <div class="bci-panel__ch">
+              <span class="on">CH1</span><span class="on">CH2</span><span class="on">CH3</span><span class="on">CH4</span><span>CH5</span><span>CH6</span><span>CH7</span><span>CH8</span>
+            </div>
           </div>
           <div class="twin-card__badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -4981,51 +5214,6 @@
 
       // 等页面加载动画完成后开始打字
       setTimeout(type, 1200);
-    })();
-
-    // ===== 鼠标悬停银河中央：左右介绍向两侧让位 =====
-    (function () {
-      var heroEl = document.querySelector('.hero');
-      if (!heroEl) return;
-      var heroContent = heroEl.querySelector('.hero__content');
-      var heroAvatar = heroEl.querySelector('.hero__avatar');
-      if (!heroContent || !heroAvatar) return;
-      var isSplit = false;
-      var lastMove = 0;
-
-      function measureSplit() {
-        var r = heroEl.getBoundingClientRect();
-        var cr = heroContent.getBoundingClientRect();
-        var ar = heroAvatar.getBoundingClientRect();
-        var room = Math.min(cr.left - 12, r.right - ar.right - 12, 420);
-        heroEl.style.setProperty('--split-x', Math.max(0, room).toFixed(0) + 'px');
-      }
-
-      heroEl.addEventListener('mousemove', function (e) {
-        var now = performance.now();
-        if (now - lastMove < 80) return;
-        lastMove = now;
-        var r = heroEl.getBoundingClientRect();
-        var dx = Math.abs(e.clientX - (r.left + r.width / 2)) / r.width;
-        if (!isSplit && dx < 0.2) {
-          measureSplit();
-          isSplit = true;
-          heroEl.classList.add('hero--split');
-        } else if (isSplit && dx > 0.34) {
-          isSplit = false;
-          heroEl.classList.remove('hero--split');
-        }
-      });
-      heroEl.addEventListener('mouseleave', function () {
-        isSplit = false;
-        heroEl.classList.remove('hero--split');
-      });
-      window.addEventListener('resize', function () {
-        if (isSplit) {
-          isSplit = false;
-          heroEl.classList.remove('hero--split');
-        }
-      });
     })();
 
     // ===== 导航高亮（滚动监听） =====
@@ -6275,7 +6463,7 @@
 
       // 单击：小脉冲；双击：大爆炸
       hero.addEventListener('click', function (e) {
-        if (e.target.closest('a, button, .site-nav, .hero__title-name, .planet-card, .planet-tip')) return;
+        if (e.target.closest('a, button, .site-nav, .hero__title-name, .planet-tip')) return;
         var rect = hero.getBoundingClientRect();
         var x = e.clientX - rect.left, y = e.clientY - rect.top;
         spawnBurst(x, y, 30, 1.1);
@@ -6284,7 +6472,7 @@
       });
 
       hero.addEventListener('dblclick', function (e) {
-        if (e.target.closest('a, button, .site-nav, .planet-card, .planet-tip')) return;
+        if (e.target.closest('a, button, .site-nav, .planet-tip')) return;
         var rect = hero.getBoundingClientRect();
         megaBoom(e.clientX - rect.left, e.clientY - rect.top);
       });
@@ -6347,22 +6535,32 @@
       window.__heroFX = { spawnBurst: spawnBurst, megaBoom: megaBoom, fireworksShow: fireworksShow };
     })();
 
-    // ===== Hero 鼠标视差（课件 Part 5 · Parallax，轻量版） =====
+    // ===== Hero：头像视差 + 鼠标靠近银河时拉开标题 =====
     (function () {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       if (window.matchMedia && !window.matchMedia('(pointer: fine)').matches) return;
       var hero = document.querySelector('.hero');
-      var content = document.querySelector('.hero__content');
       var avatar = document.querySelector('.hero__avatar');
-      if (!hero || (!content && !avatar)) return;
+      if (!hero) return;
 
       var rafId = null, mx = 0, my = 0;
+      var spreadTarget = 0, spreadCur = 0;
 
       function apply() {
         rafId = null;
-        if (content) content.style.transform = 'translate(' + (mx * -7) + 'px,' + (my * -7) + 'px)';
         if (avatar) avatar.style.transform = 'translate(' + (mx * -14) + 'px,' + (my * -14) + 'px)';
+        // 标题拉开度平滑逼近目标（不适用 CSS transition，避免与逐帧写入打架）
+        var diff = spreadTarget - spreadCur;
+        if (Math.abs(diff) > 0.0015) {
+          spreadCur += diff * 0.085;
+          rafId = requestAnimationFrame(apply);
+        } else {
+          spreadCur = spreadTarget;
+        }
+        hero.style.setProperty('--spread', spreadCur.toFixed(4));
       }
+
+      function kick() { if (!rafId) rafId = requestAnimationFrame(apply); }
 
       // 等入场动画结束后再启用，避免打断 page-load 过渡
       setTimeout(function () {
@@ -6370,11 +6568,19 @@
           var rect = hero.getBoundingClientRect();
           mx = (e.clientX - rect.left) / rect.width - 0.5;
           my = (e.clientY - rect.top) / rect.height - 0.5;
-          if (!rafId) rafId = requestAnimationFrame(apply);
+          // 银河吸引点：hero 中心略偏上（银河系在画面中的位置）
+          // 距离归一化：越靠近银河中心 spread 越大，smoothstep 让"靠近"有渐进层次
+          var dx = mx / 0.62;
+          var dy = (my + 0.08) / 0.62;
+          var d = Math.sqrt(dx * dx + dy * dy);
+          var t = Math.max(0, Math.min(1, 1 - d));
+          spreadTarget = t * t * (3 - 2 * t);
+          kick();
         });
         hero.addEventListener('mouseleave', function () {
           mx = 0; my = 0;
-          if (!rafId) rafId = requestAnimationFrame(apply);
+          spreadTarget = 0;
+          kick();
         });
       }, 2200);
     })();
@@ -6791,18 +6997,18 @@
       galaxySys.add(sysLight);
       scene.add(new THREE.AmbientLight(0x334466, 0.75));
 
-      // 螺旋星系粒子（双旋臂，核心暖白 → 外缘蓝紫）
-      var SYS_COUNT = isMobile ? 1600 : 3200;
+      // 螺旋星系粒子（四条壮丽旋臂，核心暖白 → 外缘蓝紫）
+      var SYS_COUNT = isMobile ? 2400 : 4600;
       var sysGeo = new THREE.BufferGeometry();
       var sysPos = new Float32Array(SYS_COUNT * 3);
       var sysCol = new Float32Array(SYS_COUNT * 3);
       var sysColor = new THREE.Color();
       var coreC = new THREE.Color(0xfff2d0), midC = new THREE.Color(0x8fd4ff), edgeC = new THREE.Color(0x5f7fd8), pinkC = new THREE.Color(0xc98fe0);
       for (var si = 0; si < SYS_COUNT; si++) {
-        var arm = si % 2;
+        var arm = si % 4;
         var tt = Math.pow(Math.random(), 0.72);
-        var ang = tt * 4.4 + arm * Math.PI + gauss() * (0.5 - tt * 0.28);
-        var rad = 1.6 + tt * 12.5;
+        var ang = tt * 4.4 + arm * (Math.PI / 2) + gauss() * (0.5 - tt * 0.28);
+        var rad = 1.6 + tt * 13.5;
         sysPos[si * 3] = Math.cos(ang) * rad + gauss() * 0.55;
         sysPos[si * 3 + 1] = gauss() * (1.5 - tt * 0.9);
         sysPos[si * 3 + 2] = Math.sin(ang) * rad + gauss() * 0.55;
@@ -6814,121 +7020,194 @@
       sysGeo.setAttribute('position', new THREE.BufferAttribute(sysPos, 3));
       sysGeo.setAttribute('color', new THREE.BufferAttribute(sysCol, 3));
       var sysMat = new THREE.PointsMaterial({
-        size: 0.34, vertexColors: true, transparent: true, opacity: 0.85,
+        size: 0.4, vertexColors: true, transparent: true, opacity: 0.95,
         blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
         map: starTex, alphaTest: 0.01
       });
       var sysPoints = new THREE.Points(sysGeo, sysMat);
       galaxySys.add(sysPoints);
 
-      // 发光星核（纯光晕，银河系中心没有星球）
+      // 发光星核（纯光晕 + 十字光斑 + 倾斜吸积光环，银河系中心没有星球）
       var coreMat = new THREE.MeshBasicMaterial({ color: 0xfff7e8, transparent: true, opacity: 1 });
-      var coreGlowMat1 = new THREE.SpriteMaterial({ map: glowTex, color: 0xfff2d0, transparent: true, opacity: 0.62, blending: THREE.AdditiveBlending, depthWrite: false });
+      var coreGlowMat1 = new THREE.SpriteMaterial({ map: glowTex, color: 0xfff2d0, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false });
       var coreGlow1 = new THREE.Sprite(coreGlowMat1);
-      coreGlow1.scale.setScalar(9);
+      coreGlow1.scale.setScalar(13);
       galaxySys.add(coreGlow1);
-      var coreGlowMat2 = new THREE.SpriteMaterial({ map: glowTex, color: 0x2a7fc9, transparent: true, opacity: 0.26, blending: THREE.AdditiveBlending, depthWrite: false });
+      var coreGlowMat2 = new THREE.SpriteMaterial({ map: glowTex, color: 0x2a7fc9, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
       var coreGlow2 = new THREE.Sprite(coreGlowMat2);
-      coreGlow2.scale.setScalar(17);
+      coreGlow2.scale.setScalar(26);
       galaxySys.add(coreGlow2);
+      // 十字光斑（两张拉长光斑 sprite 正交叠出镜头光晕十字）
+      var crossTexH = (function () {
+        var cv = document.createElement('canvas');
+        cv.width = 256; cv.height = 32;
+        var ctx = cv.getContext('2d');
+        var g = ctx.createLinearGradient(0, 0, 256, 0);
+        g.addColorStop(0, 'rgba(255,242,208,0)');
+        g.addColorStop(0.5, 'rgba(255,246,224,0.95)');
+        g.addColorStop(1, 'rgba(255,242,208,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 32);
+        return new THREE.CanvasTexture(cv);
+      })();
+      var crossMatH = new THREE.SpriteMaterial({ map: crossTexH, color: 0xfff6e0, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
+      var coreCrossH = new THREE.Sprite(crossMatH);
+      coreCrossH.scale.set(52, 1.6, 1);
+      galaxySys.add(coreCrossH);
+      var crossMatV = new THREE.SpriteMaterial({ map: crossTexH, color: 0xfff6e0, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false, rotation: Math.PI / 2 });
+      var coreCrossV = new THREE.Sprite(crossMatV);
+      coreCrossV.scale.set(52, 1.6, 1);
+      galaxySys.add(coreCrossV);
+      // 倾斜吸积光环（渐变亮环绕星核，缓慢自转）
+      var discTex = (function () {
+        var cv = document.createElement('canvas');
+        cv.width = 256; cv.height = 256;
+        var ctx = cv.getContext('2d');
+        var g = ctx.createRadialGradient(128, 128, 60, 128, 128, 128);
+        g.addColorStop(0, 'rgba(143,212,255,0)');
+        g.addColorStop(0.55, 'rgba(143,212,255,0.06)');
+        g.addColorStop(0.8, 'rgba(190,150,255,0.4)');
+        g.addColorStop(0.94, 'rgba(255,242,208,0.55)');
+        g.addColorStop(1, 'rgba(255,242,208,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 256, 256);
+        return new THREE.CanvasTexture(cv);
+      })();
+      var discMat = new THREE.MeshBasicMaterial({ map: discTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false });
+      var discRing = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), discMat);
+      discRing.rotation.x = Math.PI / 2 - 0.42;
+      discRing.rotation.y = 0.14;
+      galaxySys.add(discRing);
+      // 外围恒星环带（一圈稀疏亮星，撑出星系的庞大轮廓）
+      var haloCount = isMobile ? 220 : 420;
+      var haloGeo = new THREE.BufferGeometry();
+      var haloPos = new Float32Array(haloCount * 3);
+      var haloCol = new Float32Array(haloCount * 3);
+      var haloC1 = new THREE.Color(0xbfe6ff), haloC2 = new THREE.Color(0xd8b8ff), haloC3 = new THREE.Color(0xffe9b8);
+      for (var hi = 0; hi < haloCount; hi++) {
+        var ha = Math.random() * Math.PI * 2;
+        var hr = 19 + Math.random() * 6 + gauss() * 0.8;
+        haloPos[hi * 3] = Math.cos(ha) * hr;
+        haloPos[hi * 3 + 1] = gauss() * 1.1;
+        haloPos[hi * 3 + 2] = Math.sin(ha) * hr;
+        var hc = Math.random();
+        var haloColor = hc < 0.5 ? haloC1 : (hc < 0.82 ? haloC2 : haloC3);
+        haloCol[hi * 3] = haloColor.r; haloCol[hi * 3 + 1] = haloColor.g; haloCol[hi * 3 + 2] = haloColor.b;
+      }
+      haloGeo.setAttribute('position', new THREE.BufferAttribute(haloPos, 3));
+      haloGeo.setAttribute('color', new THREE.BufferAttribute(haloCol, 3));
+      var haloMat = new THREE.PointsMaterial({
+        size: 0.85, vertexColors: true, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+        map: starTex, alphaTest: 0.01
+      });
+      var haloPoints = new THREE.Points(haloGeo, haloMat);
+      galaxySys.add(haloPoints);
+      // 整个星系盘放大：占满视野的庞大体量（手机端收敛，避免溢出）
+      galaxySys.scale.setScalar(isMobile ? 1.15 : 1.55);
 
-      // 行星群：每颗 = 一个区块入口（深色系球体 + 亮色辉光轨道 + 差异化特点 + 图标）
+      // 行星群：每颗 = 一个区块入口（发光玻璃图标徽章沿轨道公转，点击直达对应卡片）
       var PLANETS = [
-        { name: '关于我',     desc: '天津大学·香港理工·深圳未来技术学院，智能医学工程大一在读。', target: '#about',        color: 0x1b3a5c, glow: 0x6fc3ff, r: 0.21,  orbit: 6.8,  speed: 0.015, tilt: 0.10, phase: 0.8, icon: '👤', feature: 'band' },
-        { name: '性格趣味卡', desc: '用一排趣味 bento 卡片，快速看懂我的性格切面。',           target: '#personality',  color: 0x33255c, glow: 0xb48cff, r: 0.185, orbit: 8.8, speed: 0.012, tilt: -0.14, phase: 2.4, icon: '🎭', feature: 'ring' },
-        { name: '项目与作品', desc: '从 3D 乒乓球到这个主页，都是我亲手做出来的作品。',          target: '#works',        color: 0x4f2b20, glow: 0xffb08a, r: 0.24,  orbit: 10.8, speed: 0.011, tilt: 0.18, phase: 4.2, icon: '💼', feature: 'moon' },
-        { name: '兴趣与技能', desc: '乒乓球、前端、设计——热爱与技能都在升级打怪。',           target: '#skills',       color: 0x1c4a3c, glow: 0x7dffb8, r: 0.20,  orbit: 12.8, speed: 0.01, tilt: -0.08, phase: 1.3, icon: '⚡', feature: 'ring' },
-        { name: '数字分身',   desc: '我的 AI 数字分身，随时在线陪你聊两句。',                  target: '#digital-twin', color: 0x45223e, glow: 0xff9ecf, r: 0.205, orbit: 14.8, speed: 0.008, tilt: 0.12, phase: 5.1, icon: '🤖', feature: 'spots' },
-        { name: '联系我',     desc: '邮箱、留言板都在这里，欢迎来找我聊天。',                    target: '#contact',      color: 0x1f3564, glow: 0x5a9bff, r: 0.22,  orbit: 16.8, speed: 0.007, tilt: -0.16, phase: 3.4, icon: '✉️', feature: 'band' }
+        { name: '关于我',     target: '#about',        glow: 0x6fc3ff, orbit: 6.8,  speed: 0.015, tilt: 0.10, phase: 0.8, icon: '👤' },
+        { name: '性格趣味卡', target: '#personality',  glow: 0xb48cff, orbit: 8.8,  speed: 0.012, tilt: -0.14, phase: 2.4, icon: '🎭' },
+        { name: '项目与作品', target: '#works',        glow: 0xffb08a, orbit: 10.8, speed: 0.011, tilt: 0.18, phase: 4.2, icon: '💼' },
+        { name: '兴趣与技能', target: '#skills',       glow: 0x7dffb8, orbit: 12.8, speed: 0.01, tilt: -0.08, phase: 1.3, icon: '⚡' },
+        { name: '数字分身',   target: '#digital-twin', glow: 0xff9ecf, orbit: 14.8, speed: 0.008, tilt: 0.12, phase: 5.1, icon: '🤖' },
+        { name: '联系我',     target: '#contact',      glow: 0x5a9bff, orbit: 16.8, speed: 0.007, tilt: -0.16, phase: 3.4, icon: '✉️' }
       ];
 
-      // 深色表面纹理：条纹 / 陨石坑，每颗行星长得不一样
-      function shadeColor(hex, f) {
-        var r = Math.min(255, Math.round(((hex >> 16) & 255) * f));
-        var g = Math.min(255, Math.round(((hex >> 8) & 255) * f));
-        var b = Math.min(255, Math.round((hex & 255) * f));
-        return 'rgb(' + r + ',' + g + ',' + b + ')';
+      // 卡片图标徽章纹理：实心玻璃底盘（带主题色）+ 双发光环 + 区块图标（替代原深色球体，需在星空里清晰醒目）
+      function glowRGB(hex) {
+        return ((hex >> 16) & 255) + ',' + ((hex >> 8) & 255) + ',' + (hex & 255);
       }
-      function makePlanetTex(baseHex, feature) {
+      function makeIconTex(ch, glowHex) {
         var cv = document.createElement('canvas');
-        cv.width = 256; cv.height = 128;
+        cv.width = cv.height = 160;
         var ctx = cv.getContext('2d');
-        var g = ctx.createLinearGradient(0, 0, 0, 128);
-        g.addColorStop(0, shadeColor(baseHex, 1.5));
-        g.addColorStop(0.5, shadeColor(baseHex, 1.0));
-        g.addColorStop(1, shadeColor(baseHex, 0.5));
+        var cx = 80, cy = 80;
+        var rgb = glowRGB(glowHex);
+        // 玻璃底盘：深蓝基底 + 主题色内晕，实心不透明，黑星空上清晰可见
+        var g = ctx.createRadialGradient(cx, cy - 18, 6, cx, cy, 74);
+        g.addColorStop(0, 'rgba(64, 104, 158, 0.98)');
+        g.addColorStop(0.42, 'rgba(38, 66, 108, 0.97)');
+        g.addColorStop(0.8, 'rgba(28, 52, 88, 0.95)');
+        g.addColorStop(1, 'rgba(30, 56, 94, 0.88)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 256, 128);
-        if (feature === 'band') {
-          for (var bi = 0; bi < 7; bi++) {
-            ctx.fillStyle = 'rgba(255,255,255,' + (0.05 + Math.random() * 0.06).toFixed(3) + ')';
-            ctx.fillRect(0, 10 + bi * 16 + Math.random() * 6, 256, 5 + Math.random() * 7);
-          }
-          ctx.fillStyle = 'rgba(255,255,255,0.14)';
-          ctx.beginPath();
-          ctx.ellipse(74, 86, 26, 9, 0, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (feature === 'spots') {
-          for (var si = 0; si < 26; si++) {
-            ctx.fillStyle = 'rgba(0,0,0,' + (0.12 + Math.random() * 0.16).toFixed(3) + ')';
-            ctx.beginPath();
-            ctx.arc(Math.random() * 256, Math.random() * 128, 2 + Math.random() * 7, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-        return new THREE.CanvasTexture(cv);
-      }
-      // 区块图标纹理（悬浮在行星上方）
-      function makeIconTex(ch) {
-        var cv = document.createElement('canvas');
-        cv.width = 128; cv.height = 128;
-        var ctx = cv.getContext('2d');
-        ctx.font = '84px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 74, 0, Math.PI * 2);
+        ctx.fill();
+        // 主题色内晕（底盘上半部染上行星自己的颜色）
+        var tint = ctx.createRadialGradient(cx, cy - 26, 4, cx, cy - 10, 62);
+        tint.addColorStop(0, 'rgba(' + rgb + ',0.5)');
+        tint.addColorStop(0.55, 'rgba(' + rgb + ',0.16)');
+        tint.addColorStop(1, 'rgba(' + rgb + ',0)');
+        ctx.fillStyle = tint;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 72, 0, Math.PI * 2);
+        ctx.fill();
+        // 顶部玻璃高光
+        var hl = ctx.createLinearGradient(cx, cy - 68, cx, cy + 6);
+        hl.addColorStop(0, 'rgba(255,255,255,0.4)');
+        hl.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = hl;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 66, Math.PI, Math.PI * 2);
+        ctx.fill();
+        // 主发光描边环（主题色，粗亮）
+        ctx.strokeStyle = 'rgba(' + rgb + ',1)';
+        ctx.lineWidth = 4.5;
+        ctx.shadowColor = 'rgba(' + rgb + ',1)';
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 63, 0, Math.PI * 2);
+        ctx.stroke();
+        // 外圈细环（半透明，行星徽章的"轨道环"层次）
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(' + rgb + ',0.55)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 71, 0, Math.PI * 2);
+        ctx.stroke();
+        // 区块图标（加大占比）
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 2;
+        ctx.font = '78px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(143, 212, 255, 0.9)';
-        ctx.shadowBlur = 16;
-        ctx.fillText(ch, 64, 70);
+        ctx.fillText(ch, cx, cy + 6);
+        ctx.shadowOffsetY = 0;
+        // 图标下方主题色柔光托底
+        var under = ctx.createRadialGradient(cx, cy + 34, 2, cx, cy + 34, 44);
+        under.addColorStop(0, 'rgba(' + rgb + ',0.35)');
+        under.addColorStop(1, 'rgba(' + rgb + ',0)');
+        ctx.fillStyle = under;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 30, 44, 0, Math.PI * 2);
+        ctx.fill();
         return new THREE.CanvasTexture(cv);
       }
 
-      var planets = [], planetMeshes = [], fadeMats = [sysMat, coreMat, coreGlowMat1, coreGlowMat2];
+      var planets = [], planetMeshes = [], fadeMats = [sysMat, coreMat, coreGlowMat1, coreGlowMat2, crossMatH, crossMatV, discMat, haloMat];
       for (var pi = 0; pi < PLANETS.length; pi++) {
         var pd = PLANETS[pi];
         var tiltGrp = new THREE.Group();
         tiltGrp.rotation.x = pd.tilt;
         tiltGrp.rotation.z = pd.tilt * 0.6;
-        var pmat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: makePlanetTex(pd.color, pd.feature), roughness: 0.55, metalness: 0.25, transparent: true, opacity: 1 });
-        var mesh = new THREE.Mesh(new THREE.SphereGeometry(pd.r, 28, 28), pmat);
-        mesh.userData = { idx: pi, baseScale: 1, hover: false };
-        tiltGrp.add(mesh);
-        // 特点一：星环
-        if (pd.feature === 'ring') {
-          var ringGeo = new THREE.RingGeometry(pd.r * 1.45, pd.r * 2.2, 48);
-          var ringMat = new THREE.MeshBasicMaterial({ color: pd.glow, transparent: true, opacity: 0.32, side: THREE.DoubleSide, depthWrite: false });
-          var ring = new THREE.Mesh(ringGeo, ringMat);
-          ring.rotation.x = Math.PI / 2 - 0.38;
-          mesh.add(ring);
-          fadeMats.push(ringMat);
-          pd._ringMat = ringMat;
-        }
-        // 特点二：卫星
-        if (pd.feature === 'moon') {
-          var moonPivot = new THREE.Group();
-          var moonMat = new THREE.MeshStandardMaterial({ color: 0x9aa7b8, roughness: 0.9, metalness: 0.05, transparent: true, opacity: 1 });
-          var moon = new THREE.Mesh(new THREE.SphereGeometry(pd.r * 0.5, 14, 14), moonMat);
-          moon.position.set(pd.r * 3.2, 0, 0);
-          moonPivot.add(moon);
-          moonPivot.rotation.x = 0.5;
-          mesh.add(moonPivot);
-          fadeMats.push(moonMat);
-          pd._moonPivot = moonPivot;
-        }
-        // 大气辉光（亮色勾边，衬托深色球体）
-        var atmoMat = new THREE.SpriteMaterial({ map: glowTex, color: pd.glow, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false });
-        var atmo = new THREE.Sprite(atmoMat);
-        atmo.scale.setScalar(pd.r * 3.1);
-        mesh.add(atmo);
+        // 行星本体 = 区块图标徽章（玻璃底盘 + 发光描边环，不再有深色球体）
+        var badgeMat = new THREE.SpriteMaterial({ map: makeIconTex(pd.icon, pd.glow), transparent: true, opacity: 1, depthWrite: false });
+        var badge = new THREE.Sprite(badgeMat);
+        badge.scale.set(1.6, 1.6, 1);
+        badge.userData = { idx: pi };
+        // 底部光晕（叠加发光，hover 时增亮）
+        var haloMat = new THREE.SpriteMaterial({ map: glowTex, color: pd.glow, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false });
+        var halo = new THREE.Sprite(haloMat);
+        halo.scale.set(2.7, 2.7, 1);
+        halo.userData = { idx: pi };
+        var body = new THREE.Group();
+        body.add(halo);
+        body.add(badge);
+        tiltGrp.add(body);
         // 轨道细环（亮色）
         var orbGeo = new THREE.BufferGeometry();
         var orbPts = new Float32Array(65 * 3);
@@ -6942,16 +7221,10 @@
         var orbMat = new THREE.LineBasicMaterial({ color: pd.glow, transparent: true, opacity: 0.22 });
         tiltGrp.add(new THREE.Line(orbGeo, orbMat));
         galaxySys.add(tiltGrp);
-        // 区块图标（悬浮行星上方，随公转移动）
-        var iconMat = new THREE.SpriteMaterial({ map: makeIconTex(pd.icon), transparent: true, opacity: 0.95, depthWrite: false });
-        var icon = new THREE.Sprite(iconMat);
-        icon.scale.set(0.9, 0.9, 1);
-        scene.add(icon);
-        fadeMats.push(iconMat);
-        pd._mesh = mesh; pd._mat = pmat; pd._orbMat = orbMat; pd._atmoMat = atmoMat; pd._icon = icon; pd._iconMat = iconMat;
+        pd._body = body; pd._badge = badge; pd._badgeMat = badgeMat; pd._haloMat = haloMat; pd._orbMat = orbMat;
         planets.push(pd);
-        planetMeshes.push(mesh);
-        fadeMats.push(pmat, orbMat, atmoMat);
+        planetMeshes.push(badge, halo);
+        fadeMats.push(badgeMat, haloMat, orbMat);
       }
       for (var fi = 0; fi < fadeMats.length; fi++) {
         if (!fadeMats[fi].userData) fadeMats[fi].userData = {};
@@ -6960,40 +7233,26 @@
       galaxySys.position.set(0, 4.5, 0);
       scene.add(galaxySys);
 
-      // ---- 行星交互：hover 提示 + 点击打开漂浮卡片（捕获阶段，优先于粒子点击） ----
+      // ---- 行星交互：hover 提示 + 点击直达对应卡片（捕获阶段，优先于粒子点击） ----
       var raycaster = new THREE.Raycaster();
       var ndc = new THREE.Vector2();
       var hoverIdx = -1;
-      var card = document.getElementById('planetCard');
-      var cardName = document.getElementById('planetCardName');
-      var cardDesc = document.getElementById('planetCardDesc');
-      var cardLink = document.getElementById('planetCardLink');
-      var cardDot = document.getElementById('planetCardDot');
       var tip = document.getElementById('planetTip');
-      var activePlanet = -1;
 
-      function openPlanetCard(idx) {
-        activePlanet = idx;
+      // 点击行星徽章：3D 冲击波 + 合成音效 + 平滑滚动到对应区块
+      function jumpToPlanet(idx) {
         var pd = PLANETS[idx];
-        cardName.textContent = pd.name;
-        cardDesc.textContent = pd.desc;
-        cardLink.setAttribute('data-target', pd.target);
-        cardDot.style.background = '#' + ('00000' + pd.glow.toString(16)).slice(-6);
-        cardDot.style.boxShadow = '0 0 12px #' + ('00000' + pd.glow.toString(16)).slice(-6);
-        card.classList.add('show');
         try {
           var wp = new THREE.Vector3();
-          pd._mesh.getWorldPosition(wp);
+          pd._body.getWorldPosition(wp);
           spawnPulse3D(wp, pd.glow);
           planetPing();
           spinBoost = 1;
         } catch (err) {}
+        var sec = document.querySelector(pd.target);
+        if (sec) sec.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
       }
-      function closePlanetCard() {
-        activePlanet = -1;
-        if (card) card.classList.remove('show');
-      }
-      window.__openPlanetCard = openPlanetCard; // 测试钩子
+      window.__jumpToPlanet = jumpToPlanet; // 测试钩子
 
       function pickPlanet(clientX, clientY) {
         var rect = canvas.getBoundingClientRect();
@@ -7012,7 +7271,7 @@
             hero.style.cursor = idx >= 0 ? 'pointer' : '';
             if (tip) {
               if (idx >= 0) {
-                tip.textContent = PLANETS[idx].name + ' · 点击打开卡片';
+                tip.textContent = PLANETS[idx].name + ' · 点击前往';
                 tip.classList.add('show');
               } else {
                 tip.classList.remove('show');
@@ -7027,30 +7286,13 @@
       }
 
       hero.addEventListener('click', function (e) {
-        if (e.target.closest && (e.target.closest('.planet-card') || e.target.closest('#planetTip'))) return;
+        if (e.target.closest && e.target.closest('#planetTip')) return;
         var idx = pickPlanet(e.clientX, e.clientY);
         if (idx >= 0) {
           e.stopPropagation(); // 命中行星：不触发 2D 粒子爆炸
-          if (activePlanet === idx) { closePlanetCard(); return; }
-          openPlanetCard(idx);
-        } else if (activePlanet >= 0 && !e.target.closest('.planet-card')) {
-          closePlanetCard();
+          jumpToPlanet(idx);
         }
       }, true);
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closePlanetCard();
-      });
-
-      var cardCloseBtn = document.getElementById('planetCardClose');
-      if (cardCloseBtn) cardCloseBtn.addEventListener('click', closePlanetCard);
-      if (cardLink) cardLink.addEventListener('click', function (e) {
-        e.preventDefault();
-        var sel = cardLink.getAttribute('data-target');
-        closePlanetCard();
-        var sec = document.querySelector(sel);
-        if (sec) sec.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
-      });
 
       // ---------- 流星 ----------
       var meteors = [];
@@ -7215,46 +7457,18 @@
           var corePulse = 0.92 + 0.14 * Math.sin(t * 1.5);
           coreGlow1.material.opacity = 0.5 * fade * corePulse;
           coreGlow2.material.opacity = 0.26 * fade * (1.85 - corePulse);
-          // 行星公转 + 自转 + hover 缩放
+          // 行星徽章公转 + hover 缩放 + 光晕呼吸
           for (var pv = 0; pv < planets.length; pv++) {
             var pp = planets[pv];
             var pa = pp.phase + t * pp.speed;
-            pp._mesh.position.set(Math.cos(pa) * pp.orbit, Math.sin(t * 0.8 + pv) * 0.25, Math.sin(pa) * pp.orbit);
-            pp._mesh.rotation.y = t * 0.06 + pv;
-            var want = (hoverIdx === pv || activePlanet === pv) ? 1.3 : 1;
-            var curS = pp._mesh.scale.x + (want - pp._mesh.scale.x) * 0.12;
-            pp._mesh.scale.set(curS, curS, curS);
-            pp._orbMat.opacity = ((hoverIdx === pv || activePlanet === pv) ? 0.5 : 0.22) * fade;
-            if (pp._moonPivot) pp._moonPivot.rotation.y = t * 0.25;
-            if (pp._ringMat) pp._ringMat.opacity = ((hoverIdx === pv || activePlanet === pv) ? 0.5 : 0.32) * fade;
-            if (pp._icon) {
-              pp._mesh.getWorldPosition(pp._icon.position);
-              pp._icon.position.y += 0.55;
-              var isc = 0.9 * curS;
-              pp._icon.scale.set(isc, isc, 1);
-            }
+            pp._body.position.set(Math.cos(pa) * pp.orbit, Math.sin(t * 0.8 + pv) * 0.25, Math.sin(pa) * pp.orbit);
+            var hot = hoverIdx === pv;
+            var want = hot ? 1.32 : 1;
+            var curS = pp._body.scale.x + (want - pp._body.scale.x) * 0.12;
+            pp._body.scale.set(curS, curS, curS);
+            pp._orbMat.opacity = (hot ? 0.55 : 0.22) * fade;
+            pp._haloMat.opacity = ((hot ? 0.8 : 0.42) + 0.1 * Math.sin(t * 2.2 + pv * 1.7)) * fade;
           }
-          // 漂浮卡片跟随行星（投影到屏幕坐标）
-          if (activePlanet >= 0 && card) {
-            var ap = planets[activePlanet]._mesh;
-            var wp = new THREE.Vector3();
-            ap.getWorldPosition(wp);
-            wp.project(camera);
-            if (fade > 0.3 && wp.z < 1) {
-              var sx = (wp.x * 0.5 + 0.5) * window.innerWidth;
-              var sy = (-wp.y * 0.5 + 0.5) * window.innerHeight;
-              var cw = card.offsetWidth || 300, ch = card.offsetHeight || 150;
-              var cx = Math.min(Math.max(sx + 30, 12), window.innerWidth - cw - 12);
-              var cy = Math.min(Math.max(sy - ch / 2, 12), window.innerHeight - ch - 12);
-              card.style.left = cx + 'px';
-              card.style.top = cy + 'px';
-              card.style.opacity = '';
-            } else {
-              closePlanetCard();
-            }
-          }
-        } else if (activePlanet >= 0) {
-          closePlanetCard();
         }
 
         // 音乐节拍 → 星核脉冲（声音可视化光影）
@@ -7270,8 +7484,13 @@
         // 节拍打在星核上的光
         if (galaxySys.visible) {
           var bp = 1 + beat * 0.16;
-          coreGlow1.scale.set(9 * bp, 9 * bp, 1);
-          coreGlow2.scale.set(17 * (2 - bp), 17 * (2 - bp), 1);
+          coreGlow1.scale.set(13 * bp, 13 * bp, 1);
+          coreGlow2.scale.set(26 * (2 - bp), 26 * (2 - bp), 1);
+          // 吸积光环缓转 + 十字光斑呼吸
+          discRing.rotation.z = t * 0.05;
+          var crossGlow = 0.8 + 0.2 * Math.sin(t * 1.2);
+          crossMatH.opacity = crossGlow * fade;
+          crossMatV.opacity = (1.6 - crossGlow) * fade;
         }
         // 3D 冲击波扩散
         for (var pu = pulses3d.length - 1; pu >= 0; pu--) {
