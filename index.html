@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -3026,7 +3026,7 @@
         box-shadow: var(--shadow-md);
       }
 
-      .site-nav.open {
+      .site-nav.is-open {
         display: flex;
       }
 
@@ -4580,14 +4580,14 @@
     const siteNav = document.getElementById('siteNav');
 
     menuToggle.addEventListener('click', function () {
-      const isOpen = siteNav.classList.toggle('open');
+      const isOpen = siteNav.classList.toggle('is-open');
       menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
 
     // 点击导航链接后关闭移动端菜单
     siteNav.querySelectorAll('a').forEach(function (link) {
       link.addEventListener('click', function () {
-        siteNav.classList.remove('open');
+        siteNav.classList.remove('is-open');
         menuToggle.setAttribute('aria-expanded', 'false');
       });
     });
