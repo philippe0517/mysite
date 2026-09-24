@@ -45,7 +45,7 @@
     }
 
     /* ===== 卡片英文小字标注 ===== */
-    .about-card::after, .personality__block::after, .work-card::after,
+    .about-card::after, .work-card::after,
     .bento-card::after, .twin-card::after, .contact-method::after {
       position: absolute;
       bottom: 10px;
@@ -59,8 +59,7 @@
       font-family: var(--font-body);
     }
     .about-card::after { content: 'ABOUT ME'; }
-    .personality__block::after { content: 'PERSONALITY'; }
-    .work-card::after { content: 'PROJECT'; }
+        .work-card::after { content: 'PROJECT'; }
     .bento-card::after { content: 'SKILL & HOBBY'; }
     .twin-card::after { content: 'DIGITAL TWIN'; }
     .contact-method::after { content: 'CONTACT'; }
@@ -856,11 +855,11 @@
     .hero__title {
     }
 
-        .about-card, .personality__block, .work-card, .twin-card, .contact-method {
+        .about-card, .work-card, .twin-card, .contact-method {
       transition: transform 0.35s ease, box-shadow 0.35s ease;
     }
 
-    .about-card:hover, .personality__block:hover, .work-card:hover,
+    .about-card:hover, .work-card:hover,
     .twin-card:hover, .contact-method:hover, .bento-card:hover {
       box-shadow: 0 14px 46px rgba(2, 8, 20, 0.3), 0 0 26px rgba(111, 195, 255, 0.28);
     }
@@ -1341,200 +1340,6 @@
       line-height: 1.8;
     }
 
-    /* ===== 性格趣味卡 ===== */
-    .personality {
-      background: transparent;
-    }
-
-    .personality__grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      margin-top: 48px;
-    }
-
-    .personality__block {
-      background:
-        repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.022) 0 2px, transparent 2px 14px),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(126, 182, 217, 0.05) 50%, rgba(255, 255, 255, 0.09) 100%);
-      -webkit-backdrop-filter: blur(18px) saturate(1.35);
-      backdrop-filter: blur(18px) saturate(1.35);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(143, 212, 255, 0.08);
-      padding: 32px;
-      transition: var(--transition);
-    }
-
-    .personality__block:hover {
-      /* 独特点：斜纹「多面性格」纹理悬停时浮现变亮 */
-      background:
-        repeating-linear-gradient(45deg, rgba(143, 212, 255, 0.09) 0 2px, transparent 2px 14px),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.09) 0%, rgba(126, 182, 217, 0.07) 50%, rgba(255, 255, 255, 0.11) 100%);
-      box-shadow: 0 12px 40px rgba(2, 8, 20, 0.4), 0 0 30px rgba(111, 195, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-      border-color: var(--color-accent);
-    }
-
-    .personality__block-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--color-text);
-    }
-
-    .personality__block-title svg {
-      width: 22px;
-      height: 22px;
-      color: var(--color-primary);
-    }
-
-    /* 如果我是... 问答列表 */
-    .if-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .if-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px 16px;
-      background-color: rgba(255, 255, 255, 0.055);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: var(--radius-md);
-      transition: var(--transition);
-    }
-
-    .if-item:hover {
-      background-color: rgba(143, 212, 255, 0.12);
-      transform: translateX(4px);
-    }
-
-    .if-item__icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background-color: rgba(126, 182, 217, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: var(--color-primary);
-    }
-
-    .if-item__icon svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    .if-item__content {
-      flex: 1;
-    }
-
-    .if-item__question {
-      font-size: 13px;
-      color: var(--color-text-secondary);
-      margin-bottom: 4px;
-      font-weight: 500;
-    }
-
-    .if-item__answer {
-      font-size: 15px;
-      color: var(--color-text);
-      line-height: 1.6;
-      font-weight: 500;
-    }
-
-    /* 超能力与弱点 */
-    .power-weakness {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .pw-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .pw-group__label {
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--color-border);
-    }
-
-    .pw-group__label--power {
-      color: var(--color-primary);
-      border-bottom-color: rgba(126, 182, 217, 0.3);
-    }
-
-    .pw-group__label--weakness {
-      color: #E8876A;
-      border-bottom-color: rgba(232, 135, 106, 0.3);
-    }
-
-    .pw-group__label svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .pw-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--color-text);
-      transition: var(--transition);
-    }
-
-    .pw-item:hover {
-      transform: translateX(4px);
-    }
-
-    .pw-item--power {
-      background-color: rgba(126, 182, 217, 0.06);
-    }
-
-    .pw-item--power:hover {
-      background-color: rgba(111, 195, 255, 0.18);
-    }
-
-    .pw-item--weakness {
-      background-color: rgba(232, 135, 106, 0.06);
-    }
-
-    .pw-item--weakness:hover {
-      background-color: rgba(232, 135, 106, 0.12);
-    }
-
-    .pw-item__dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-top: 7px;
-      flex-shrink: 0;
-    }
-
-    .pw-item--power .pw-item__dot {
-      background-color: var(--color-primary);
-    }
-
-    .pw-item--weakness .pw-item__dot {
-      background-color: #E8876A;
-    }
-
     /* ===== 项目作品 ===== */
 
     .works__grid {
@@ -1688,11 +1493,6 @@
       width: 14px;
       height: 14px;
       transition: transform 0.3s ease;
-    }
-
-    /* ===== 兴趣技能（Bento Grid） ===== */
-    .skills {
-      background: transparent;
     }
 
     .skills__bento {
@@ -3180,7 +2980,7 @@
 
     @media (max-width: 768px) {
     /* 手机端隐藏装饰性英文角标（10px 低于可读下限，桌面端保留设计感） */
-    .about-card::after, .personality__block::after, .work-card::after,
+    .about-card::after, .work-card::after,
     .bento-card::after, .twin-card::after, .contact-method::after { display: none; }
 
       .section {
@@ -3249,15 +3049,6 @@
 
       .about-card--featured {
         grid-column: span 1;
-      }
-
-      .personality__grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-
-      .personality__block {
-        padding: 24px;
       }
 
       .works__grid {
@@ -3999,7 +3790,7 @@
     }
 
     /* 区块透明化兜底：透出全页星空 */
-    .about, .personality, .skills {
+    .about {
       background: transparent;
     }
 
@@ -4165,8 +3956,8 @@
                 <div class="about-card__stat-label">已发布作品</div>
               </div>
               <div class="about-card__stat">
-                <div class="about-card__stat-number">7+</div>
-                <div class="about-card__stat-label">设计迭代轮次</div>
+                <div class="about-card__stat-number">4</div>
+                <div class="about-card__stat-label">版本迭代</div>
               </div>
               <div class="about-card__stat">
                 <div class="about-card__stat-number">1</div>
@@ -4221,8 +4012,6 @@
         <path d="M0 20 Q15 20 20 15 Q25 10 30 20 Q35 30 40 20 Q45 10 50 20 Q55 30 60 20 Q65 10 70 20 Q75 30 80 20 Q85 10 90 20 Q95 30 100 20 Q105 10 110 20 Q115 30 120 20 Q125 10 130 20 Q135 30 140 20 Q145 10 150 20 Q155 30 160 20 Q165 10 170 20 Q175 30 180 20 Q185 10 190 20 Q195 30 200 20 Q205 10 210 20 Q215 30 220 20 Q225 10 230 20 Q235 30 240 20 Q245 10 250 20 Q255 30 260 20 Q265 10 270 20 Q275 30 280 20 Q285 10 290 20 Q295 25 300 20"/>
       </svg>
     </div>
-
-    <!-- ===== 性格趣味卡 ===== -->
 
     <!-- ===== 项目作品 ===== -->
     <section class="section works" id="works">
