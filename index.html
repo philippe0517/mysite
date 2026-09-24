@@ -1536,43 +1536,6 @@
     }
 
     /* ===== 项目作品 ===== */
-    .works__tabs {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-    }
-
-    .works__tab {
-      padding: 8px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: var(--font-body);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 100px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(126, 182, 217, 0.05));
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-      color: var(--color-text-secondary);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .works__tab:hover {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-
-    .works__tab.active {
-      background-color: var(--color-primary);
-      border-color: var(--color-primary);
-      color: var(--color-white);
-    }
-
-    .work-card.hidden {
-      display: none;
-    }
 
     .works__grid {
       display: grid;
@@ -1652,24 +1615,6 @@
 
     .work-card__cover--alt {
       background: linear-gradient(135deg, rgba(168, 208, 230, 0.38) 0%, rgba(126, 182, 217, 0.48) 100%);
-    }
-
-    .work-card__cover--third {
-      background: linear-gradient(135deg, rgba(197, 224, 240, 0.34) 0%, rgba(168, 208, 230, 0.44) 100%);
-    }
-
-    /* OASIS 封面：绿洲全息网格底纹（同色系蓝白，不下沉不渐隐） */
-    .work-card__cover--oasis {
-      background:
-        repeating-linear-gradient(0deg, rgba(191, 230, 255, 0.1) 0 1px, transparent 1px 22px),
-        repeating-linear-gradient(90deg, rgba(191, 230, 255, 0.1) 0 1px, transparent 1px 22px),
-        linear-gradient(135deg, rgba(126, 182, 217, 0.4) 0%, rgba(95, 127, 216, 0.5) 100%);
-    }
-
-    .work-card__cover--oasis svg {
-      width: 58px;
-      height: 58px;
-      filter: drop-shadow(0 0 10px rgba(191, 230, 255, 0.5));
     }
 
     .work-card__cover svg {
@@ -4012,9 +3957,9 @@
       }
     }
     /* ===== 玻璃卡片系统统一收尾：浅色文字变量 + 弹窗玻璃化 ===== */
-    .about-card, .personality__block, .work-card, .works__tab, .contact-method,
-    .twin-card, .bento-card, .chat-window, .feedback-modal, .feedback-form__textarea,
-    .feedback-chip, .mind-reader__result, .if-item,
+    .about-card, .work-card, .contact-method,
+    .twin-card, .chat-window, .feedback-modal, .feedback-form__textarea,
+    .feedback-chip,
     .chat-msg--bot .chat-msg__bubble, .chat-window__input, .chat-window__quick,
     .chat-input:focus {
       --color-text: #DCEBF7;
@@ -4095,9 +4040,7 @@
         <a class="site-nav__link active" href="#top">首页</a>
         <a class="site-nav__link site-nav__link--game" href="#game">🎮 游戏</a>
         <a class="site-nav__link" href="#about">关于我</a>
-        <a class="site-nav__link" href="#personality">性格趣味卡</a>
         <a class="site-nav__link" href="#works">项目与作品</a>
-        <a class="site-nav__link" href="#skills">兴趣与技能</a>
         <a class="site-nav__link" href="#digital-twin">数字分身</a>
         <a class="site-nav__link" href="#contact">联系我</a>
       </nav>
@@ -4280,131 +4223,6 @@
     </div>
 
     <!-- ===== 性格趣味卡 ===== -->
-    <section class="section personality" id="personality">
-      <div class="container">
-        <div class="section__header reveal">
-          <span class="section__eyebrow">PERSONALITY</span>
-          <h2 class="section__title" data-number="02">性格趣味卡</h2>
-          <p class="section__subtitle">用一些有趣的假设和自嘲，更立体地了解我是谁</p>
-        </div>
-        <div class="personality__grid">
-          <!-- 如果我是... -->
-          <div class="personality__block reveal reveal-delay-1">
-            <h3 class="personality__block-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-              如果我是...
-            </h3>
-            <div class="if-list">
-              <div class="if-item">
-                <div class="if-item__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17.5 19a4.5 4.5 0 1 0 0-9h-1.8A7 7 0 1 0 4 15.9"></path>
-                  </svg>
-                </div>
-                <div class="if-item__content">
-                  <div class="if-item__question">如果我是一种天气</div>
-                  <div class="if-item__answer">多云转晴——偶尔发呆，但大部分时候积极向上，雨过天晴就去打乒乓球</div>
-                </div>
-              </div>
-              <div class="if-item">
-                <div class="if-item__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="16 18 22 12 16 6"></polyline>
-                    <polyline points="8 6 2 12 8 18"></polyline>
-                  </svg>
-                </div>
-                <div class="if-item__content">
-                  <div class="if-item__question">如果我是一种编程语言</div>
-                  <div class="if-item__answer">Python——简洁但强大，能搞定很多事，写起来还挺优雅的</div>
-                </div>
-              </div>
-              <div class="if-item">
-                <div class="if-item__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-                <div class="if-item__content">
-                  <div class="if-item__question">如果我是一种运动</div>
-                  <div class="if-item__answer">乒乓球——快节奏、需专注、攻防转换间见真章，输赢都在一念之间</div>
-                </div>
-              </div>
-              <div class="if-item">
-                <div class="if-item__icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                  </svg>
-                </div>
-                <div class="if-item__content">
-                  <div class="if-item__question">如果我是一座城市</div>
-                  <div class="if-item__answer">天津+深圳的混合体——有烟火气也有创新力，在传统与前沿之间找平衡</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 超能力与弱点 -->
-          <div class="personality__block reveal reveal-delay-2">
-            <h3 class="personality__block-title">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              我的超能力与弱点
-            </h3>
-            <div class="power-weakness">
-              <div class="pw-group">
-                <div class="pw-group__label pw-group__label--power">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  超能力
-                </div>
-                <div class="pw-item pw-item--power">
-                  <span class="pw-item__dot"></span>
-                  <span>快速切换「医学模式」和「工程模式」，在两个领域的交叉点上找灵感</span>
-                </div>
-                <div class="pw-item pw-item--power">
-                  <span class="pw-item__dot"></span>
-                  <span>在压力下保持冷静，打比赛时尤其明显，越关键越稳</span>
-                </div>
-                <div class="pw-item pw-item--power">
-                  <span class="pw-item__dot"></span>
-                  <span>把复杂问题拆成一步步可执行的小任务，先做出来再逐步改</span>
-                </div>
-              </div>
-              <div class="pw-group">
-                <div class="pw-group__label pw-group__label--weakness">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                  </svg>
-                  弱点
-                </div>
-                <div class="pw-item pw-item--weakness">
-                  <span class="pw-item__dot"></span>
-                  <span>选择困难症——每天中午吃什么是人生难题，能纠结半小时</span>
-                </div>
-                <div class="pw-item pw-item--weakness">
-                  <span class="pw-item__dot"></span>
-                  <span>偶尔拖延，但 deadline 前效率爆表，属于"压力型选手"</span>
-                </div>
-                <div class="pw-item pw-item--weakness">
-                  <span class="pw-item__dot"></span>
-                  <span>看到新技术就想试试，容易分心，经常同时开好几个坑</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ===== 项目作品 ===== -->
     <section class="section works" id="works">
@@ -4412,12 +4230,7 @@
         <div class="section__header reveal">
           <span class="section__eyebrow">SELECTED WORKS</span>
           <h2 class="section__title" data-number="03">项目与作品</h2>
-          <p class="section__subtitle">这里记录我的项目和作品，有真实可玩的，也有正在计划中的</p>
-        </div>
-        <div class="works__tabs reveal">
-          <button class="works__tab active" data-filter="all" type="button">全部</button>
-          <button class="works__tab" data-filter="completed" type="button">已完成</button>
-          <button class="works__tab" data-filter="planned" type="button">计划中</button>
+          <p class="section__subtitle">两个真实作品：这一版主页，和一款能玩的 3D 游戏</p>
         </div>
         <div class="works__grid">
           <article class="work-card reveal reveal-delay-1" data-category="completed">
@@ -4487,51 +4300,6 @@
               </div>
             </div>
           </article>
-          <article class="work-card reveal reveal-delay-3" data-category="planned">
-            <div class="work-card__cover work-card__cover--third">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-              </svg>
-            </div>
-            <div class="work-card__body">
-              <h3 class="work-card__title">大学生活工具集</h3>
-              <p class="work-card__desc">计划中的学习小工具集合，包括课程表管理、番茄钟和学习笔记，希望用实用的小工具助力自己的大学生活。</p>
-              <div class="work-card__footer">
-                <span class="work-card__tag">学习计划</span>
-                <span class="work-card__link" style="color:var(--color-text-light);cursor:default;">
-                  想法记录中
-                </span>
-              </div>
-            </div>
-          </article>
-
-          <article class="work-card reveal reveal-delay-1" data-category="planned">
-            <div class="work-card__cover work-card__cover--oasis">
-              <!-- 初代高达 RX-78-2 头部：V 字天线 + 双眼 + 下巴 -->
-              <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M22 15 L26 4 L32 12 L38 4 L42 15"/>
-                <path d="M18 25 Q18 15 32 15 Q46 15 46 25 L46 33 Q46 40 40 42 L38 48 Q35 53 32 53 Q29 53 26 48 L24 42 Q18 40 18 33 Z"/>
-                <path d="M23 30 L29 30 M35 30 L41 30"/>
-                <path d="M32 31 L32 45"/>
-                <path d="M22 36 L27 36 M37 36 L42 36"/>
-              </svg>
-            </div>
-            <div class="work-card__body">
-              <h3 class="work-card__title">OASIS 计划 · 绿洲之门</h3>
-              <p class="work-card__desc">致敬《头号玩家》：正在学习的 WebXR / Three.js 虚拟世界入口。初代高达 RX-78-2（1979）会是我的第一台守护机体——在绿洲里，人人都能成为自己想成为的人。</p>
-              <div class="work-card__footer">
-                <div class="work-card__tags">
-                  <span class="work-card__tag">VR 梦想</span>
-                  <span class="work-card__tag work-card__tag--tech">WebXR</span>
-                  <span class="work-card__tag work-card__tag--tech">Three.js</span>
-                </div>
-                <span class="work-card__link" style="color:var(--color-text-light);cursor:default;">
-                  组装中 · 1979→未来
-                </span>
-              </div>
-            </div>
-          </article>
         </div>
       </div>
     </section>
@@ -4548,146 +4316,6 @@
     </div>
 
     <!-- ===== 兴趣技能（Bento Grid） ===== -->
-    <section class="section skills" id="skills">
-      <div class="container">
-        <div class="section__header reveal">
-          <span class="section__eyebrow">INTERESTS & SKILLS</span>
-          <h2 class="section__title" data-number="04">兴趣与技能</h2>
-          <p class="section__subtitle">学习中的技能，和生活里的热爱</p>
-        </div>
-        <div class="skills__bento">
-          <!-- 大卡片：乒乓球 -->
-          <article class="bento-card bento-card--large reveal reveal-delay-1">
-            <span class="bento-card__badge">最热爱</span>
-            <svg class="bento-card__deco bento-card__deco--pingpong" viewBox="0 0 180 180" fill="none" aria-hidden="true">
-              <circle cx="90" cy="90" r="70" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 6"/>
-              <path d="M30 120 Q70 60 130 80 T160 50" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
-              <circle cx="160" cy="50" r="6" fill="currentColor"/>
-              <path d="M20 150 Q60 100 100 130" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.5"/>
-            </svg>
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M4.93 4.93l4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"></path>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">乒乓球</h3>
-            <p class="bento-card__desc">最大的爱好，享受在球台前挥拍的每一刻。这项运动教会我专注、坚持和快速反应，也让我在学习压力中找到平衡与放松。</p>
-            <div class="bento-card__level">
-              <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="--target-width: 80%"></div>
-              </div>
-              <span class="bento-card__level-text">熟练 · 打了很多年</span>
-            </div>
-          </article>
-
-          <!-- 中等卡片：网页制作 -->
-          <article class="bento-card bento-card--medium bento-card--web reveal reveal-delay-2">
-            <span class="bento-card__number">01</span>
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">网页制作 / 个人主页搭建</h3>
-            <p class="bento-card__desc">用纯 HTML/CSS/JS 搭建静态网页，从 V1 到 V3 一步步迭代，正在学习响应式布局和交互设计。</p>
-            <div class="bento-card__level">
-              <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="--target-width: 35%"></div>
-              </div>
-              <span class="bento-card__level-text">学习中 · 能独立做简单页面</span>
-            </div>
-          </article>
-
-          <!-- 中等卡片：智能医学 -->
-          <article class="bento-card bento-card--medium bento-card--medical reveal reveal-delay-3">
-            <span class="bento-card__number">02</span>
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">智能医学工程 / 专业基础</h3>
-            <p class="bento-card__desc">大一在读，正在打牢医学和工程的交叉基础，对脑机接口方向特别感兴趣，希望未来能在这个前沿领域有所发展。</p>
-            <div class="bento-card__level">
-              <div class="bento-card__level-bar">
-                <div class="bento-card__level-fill" style="--target-width: 30%"></div>
-              </div>
-              <span class="bento-card__level-text">入门 · 大一打基础中</span>
-            </div>
-          </article>
-
-          <!-- 小卡片：阅读 -->
-          <article class="bento-card bento-card--small reveal reveal-delay-1">
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">阅读</h3>
-            <span class="bento-card__number">01</span>
-          </article>
-
-          <!-- 小卡片：科技探索 -->
-          <article class="bento-card bento-card--small reveal reveal-delay-2">
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">科技探索</h3>
-            <span class="bento-card__number">02</span>
-          </article>
-
-          <!-- 小卡片：城市漫步 -->
-          <article class="bento-card bento-card--small reveal reveal-delay-3">
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">城市漫步</h3>
-            <span class="bento-card__number">03</span>
-          </article>
-
-          <!-- 小卡片：时间管理 -->
-          <article class="bento-card bento-card--small reveal reveal-delay-4">
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
-            <h3 class="bento-card__title">时间管理</h3>
-            <span class="bento-card__number">04</span>
-          </article>
-          <article class="bento-card bento-card--goal reveal reveal-delay-1">
-            <div class="bento-card__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="12" r="6"></circle>
-                <circle cx="12" cy="12" r="2"></circle>
-              </svg>
-            </div>
-            <div style="flex: 1;">
-              <h3 class="bento-card__title" style="margin-bottom: 6px;">未来目标 · 脑机接口方向</h3>
-              <p class="bento-card__desc" style="margin-bottom: 0;">对智能医学领域的脑机接口方向特别着迷，希望未来能用技术手段帮助更多人。路还很长，先从大一的基础打扎实，一步步靠近这个目标。</p>
-            </div>
-            <div class="mind-reader" id="mindReader" tabindex="0" role="button" aria-label="点击读取思维">
-              <span class="mind-reader__dot"></span>
-              <span class="mind-reader__text">读取思维</span>
-              <div class="mind-reader__line" id="mindReaderLine"></div>
-              <div class="mind-reader__result" id="mindReaderResult">检测到：想做脑机接口研究</div>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
 
     <!-- ===== 数字分身（静态对话版） ===== -->
     <section class="section digital-twin" id="digital-twin">
@@ -4737,7 +4365,7 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            V3 反馈功能已上线
+            V4 · 由访客反馈驱动
           </div>
           <h3 class="twin-card__title">和数字版的我聊聊</h3>
 <p class="twin-card__desc">
@@ -5256,9 +4884,7 @@
       'top': 'top',
       'game': 'game',
       'about': 'about',
-      'personality': 'personality',
       'works': 'works',
-      'skills': 'skills',
       'digital-twin': 'digital-twin',
       'contact': 'contact'
     };
@@ -5315,32 +4941,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ===== 项目区 Tabs 分类切换 =====
-    (function () {
-      var tabs = document.querySelectorAll('.works__tab');
-      var cards = document.querySelectorAll('.work-card');
-      if (!tabs.length || !cards.length) return;
-
-      tabs.forEach(function (tab) {
-        tab.addEventListener('click', function () {
-          tabs.forEach(function (t) { t.classList.remove('active'); });
-          tab.classList.add('active');
-          var filter = tab.getAttribute('data-filter');
-
-          cards.forEach(function (card) {
-            var category = card.getAttribute('data-category');
-            if (filter === 'all' || category === filter) {
-              card.classList.remove('hidden');
-              card.style.animation = 'none';
-              void card.offsetWidth;
-              card.style.animation = 'fadeInUp 0.4s ease both';
-            } else {
-              card.classList.add('hidden');
-            }
-          });
-        });
-      });
-    })();
 
     // ===== 滚动显现动画（Intersection Observer） =====
     (function () {
@@ -5543,26 +5143,6 @@
       }
     })();
 
-    // ===== Bento Grid 技能条动画（滚动进入视口时触发） =====
-    const bentoFills = document.querySelectorAll('.bento-card__level-fill');
-    const skillsSection = document.getElementById('skills');
-    let bentoAnimated = false;
-
-    function animateBentoSkills() {
-      if (bentoAnimated || bentoFills.length === 0) return;
-      const rect = skillsSection.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.8) {
-        bentoFills.forEach(function (fill, index) {
-          setTimeout(function () {
-            fill.classList.add('animate');
-          }, 150 + index * 150);
-        });
-        bentoAnimated = true;
-      }
-    }
-
-    window.addEventListener('scroll', animateBentoSkills);
-    animateBentoSkills();
 
     // ===== 数字分身（静态对话版） =====
     (function () {
