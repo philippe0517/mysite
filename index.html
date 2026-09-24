@@ -16,7 +16,7 @@
   <!-- 提前与字体服务建立连接，减少首屏字体等待 -->
   <link rel="preconnect" href="https://miaoda.feishu.cn" crossorigin>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237EB6D9'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='14' font-weight='bold' text-anchor='middle' fill='%23ffffff'%3EYZ%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+  <link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap">
   <style>
     /* ===== 设计变量（冰雾蓝 + 白色） ===== */
     :root {
@@ -671,7 +671,7 @@
     .hero__inner {
       display: grid;
       grid-template-columns: 1fr auto;
-      /* 两侧让位银河：拉大列间距，把中央留给旋臂 */
+      /* Hero 两列构图：拉大列间距，中央留白 */
       gap: 110px;
       align-items: center;
       position: relative;
@@ -738,7 +738,7 @@
     }
 
     /* 玻璃面板层（伪元素绘制，文字不受影响）
-       展开度由 --spread 驱动：JS 根据鼠标与银河的接近度平滑写入（0=合拢，1=完全拉开） */
+       */
     .hero__title::before {
       content: '';
       position: absolute;
@@ -760,23 +760,7 @@
         inset 0 -1px 0 rgba(143, 212, 255, 0.16);
       -webkit-backdrop-filter: blur(20px) saturate(1.5);
       backdrop-filter: blur(20px) saturate(1.5);
-      transform: translateY(calc(var(--spread, 0) * -4px)) scaleX(calc(1 + var(--spread, 0) * 1.1));
       transform-origin: center;
-    }
-
-    /* 靠近银河时：标题背后的蓝紫双色辉光随 --spread 渐显 */
-    .hero__title::after {
-      content: '';
-      position: absolute;
-      inset: -18px -32px;
-      z-index: -1;
-      border-radius: 32px;
-      background:
-        radial-gradient(58% 92% at 28% 50%, rgba(111, 195, 255, 0.42), transparent 72%),
-        radial-gradient(58% 92% at 72% 50%, rgba(178, 132, 255, 0.34), transparent 72%);
-      filter: blur(14px);
-      opacity: var(--spread, 0);
-      pointer-events: none;
     }
 
     .hero__title     .hero__title-name {
@@ -851,15 +835,6 @@
       50% { transform: translateY(-20px) rotate(180deg); }
     }
 
-    /* ===== Three.js 3D 星际场景层 ===== */
-    .hero__three {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 0;
-    }
 
     /* 全页可读性纱：顶部透星空，越往下越暗 */
     #bgShade {
@@ -875,28 +850,6 @@
       .game-banner__title { animation: none; }
       .music-fab.playing { animation: none; }
       .section__title::after { display: none; }
-    }
-
-    /* hover 行星时的轻提示 */
-    .planet-tip {
-      position: fixed;
-      left: -9999px;
-      top: -9999px;
-      padding: 5px 12px;
-      border-radius: 100px;
-      background: rgba(10, 18, 34, 0.85);
-      border: 1px solid rgba(143, 212, 255, 0.35);
-      color: #BFE6FF;
-      font-size: 12px;
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 59;
-      opacity: 0;
-      transition: opacity 0.15s ease;
-    }
-
-    .planet-tip.show {
-      opacity: 1;
     }
 
     /* ===== 光影系统 ===== */
@@ -1239,12 +1192,6 @@
       position: relative;
       /* 头像向右微移，与左侧文字群拉开对望 */
       margin-right: -16px;
-    }
-
-    /* 头像视差柔顺过渡（标题不再随鼠标位移；靠近银河拉开标题由 --spread 驱动） */
-    .hero__avatar {
-      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform;
     }
 
     .hero__avatar::before {
@@ -3287,6 +3234,10 @@
     }
 
     @media (max-width: 768px) {
+    /* 手机端隐藏装饰性英文角标（10px 低于可读下限，桌面端保留设计感） */
+    .about-card::after, .personality__block::after, .work-card::after,
+    .bento-card::after, .twin-card::after, .contact-method::after { display: none; }
+
       .section {
         padding: 64px 0;
       }
@@ -4167,8 +4118,6 @@
 
     <!-- ===== Hero 首屏 ===== -->
     <section class="hero">
-      <!-- Three.js 3D 星际场景（最底层） -->
-      <canvas class="hero__three" id="heroThree" aria-hidden="true"></canvas>
       <div id="bgShade" aria-hidden="true"></div>
       <!-- 粒子星域背景（鼠标交互，点击有惊喜） -->
       <canvas class="hero__particles" id="heroParticles" aria-hidden="true"></canvas>
@@ -4220,7 +4169,6 @@
         <div class="hero__avatar page-load page-load-delay-2" aria-label="于哲的头像占位">YZ</div>
       </div>
 
-      <div class="planet-tip" id="planetTip" aria-hidden="true"></div>
     </section>
 
     <!-- ===== 3D 乒乓球游戏入口横幅 ===== -->
@@ -4481,14 +4429,15 @@
               </svg>
             </div>
             <div class="work-card__body">
-              <h3 class="work-card__title">个人主页 V1</h3>
-              <p class="work-card__desc">课程项目，用纯 HTML/CSS/JS 搭建的个人主页。实践语义化标签、响应式布局和产品迭代思维的成果。</p>
+<h3 class="work-card__title">个人主页 V1 → V4</h3>
+<p class="work-card__desc">从静态简历页到 V4 的完整迭代：接入 Supabase 反馈系统（蜜罐防机器人 + 提交冷却）、做了可对话的数字分身、打造可交互粒子星域首屏与隐藏彩蛋。每一版都由访客反馈驱动，改完必跑桌面 + 手机回归测试。</p>
               <div class="work-card__footer">
                 <div class="work-card__tags">
-                  <span class="work-card__tag">网页设计</span>
-                  <span class="work-card__tag work-card__tag--tech">HTML</span>
-                  <span class="work-card__tag work-card__tag--tech">CSS</span>
-                  <span class="work-card__tag work-card__tag--tech">JavaScript</span>
+<span class="work-card__tag">网页设计</span>
+<span class="work-card__tag work-card__tag--tech">HTML</span>
+<span class="work-card__tag work-card__tag--tech">CSS</span>
+<span class="work-card__tag work-card__tag--tech">JavaScript</span>
+<span class="work-card__tag work-card__tag--tech">Supabase</span>
                 </div>
                 <a class="work-card__link" href="#top">
                   正在浏览
@@ -4791,11 +4740,10 @@
             V3 反馈功能已上线
           </div>
           <h3 class="twin-card__title">和数字版的我聊聊</h3>
-          <p class="twin-card__desc">
-            这是我的数字分身，它了解我的基本信息、兴趣爱好和未来方向，
-            可以回答关于我的常见问题。目前是静态版本，预设了一些常见问题，
-            更复杂的对话能力将在后续版本中接入。
-          </p>
+<p class="twin-card__desc">
+这是我的数字分身，它了解我的基本信息、兴趣爱好和未来方向，
+预设了常见问题的问答——点击下方按钮，直接向它提问试试。
+</p>
           <button class="btn btn--primary" id="twinOpenBtn" type="button">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -4899,7 +4847,7 @@
         <div class="site-footer__slogan">保持好奇，持续创造</div>
       </div>
       <div class="site-footer__divider"></div>
-      <div class="site-footer__bottom">个人主页 V3 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
+      <div class="site-footer__bottom">个人主页 V4 · 由访客反馈驱动迭代 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
     </div>
   </footer>
 
@@ -5070,17 +5018,19 @@
             <input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off">
           </div>
         </form>
+
+        <!-- 提交结果视图：与表单常驻共存（切换显示），表单只定义一次，杜绝重复 id 与监听器丢失 -->
+        <div id="feedbackResultPanel" hidden></div>
       </div>
     </div>
   </div>
 
   <!-- Supabase 客户端库 -->
-  <script src="./three.min.js"></script>
-  <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"><\/script>');</script>
-
-  <script src="./supabase-js.js"></script>
+  <script src="./supabase-js.js" defer></script>
 
   <script>
+    // 内嵌主脚本推迟到 DOMContentLoaded（defer 脚本按序执行完之后才触发），避免 1MB+ 库同步阻塞页面
+    document.addEventListener('DOMContentLoaded', function () {
     // ===== 年份自动更新 =====
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
@@ -5874,6 +5824,7 @@
       var modalOverlay = document.getElementById('feedbackModalOverlay');
       var modalClose = document.getElementById('feedbackModalClose');
       var modalBody = document.getElementById('feedbackModalBody');
+      var resultPanel = document.getElementById('feedbackResultPanel');
       var feedbackForm = document.getElementById('feedbackForm');
       var submitBtn = document.getElementById('feedbackSubmitBtn');
       var submitText = document.getElementById('feedbackSubmitText');
@@ -5882,7 +5833,7 @@
       var feedbackDevice = document.getElementById('feedbackDevice');
       var feedbackMessage = document.getElementById('feedbackMessage');
 
-      if (!modalOverlay || !feedbackForm) return;
+      if (!modalOverlay || !feedbackForm || !resultPanel) return;
 
       var isSubmitting = false;
       var lastValues = null; // 提交前暂存表单值，失败重试时恢复
@@ -6050,19 +6001,21 @@
         }
       }
 
-      // ===== 显示结果页面 =====
+      // ===== 显示结果页面（表单常驻，只切换显示，不再重建 DOM）=====
       function showResult(type, title, text, btnText) {
         var iconSvg = type === 'success'
           ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
           : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
 
-        modalBody.innerHTML =
+        resultPanel.innerHTML =
           '<div class="feedback-result">' +
             '<div class="feedback-result__icon ' + type + '">' + iconSvg + '</div>' +
             '<h4 class="feedback-result__title">' + title + '</h4>' +
             '<p class="feedback-result__text">' + text + '</p>' +
             '<button type="button" class="feedback-result__btn" id="feedbackResultBtn">' + btnText + '</button>' +
           '</div>';
+        feedbackForm.hidden = true;
+        resultPanel.hidden = false;
 
         var resultBtn = document.getElementById('feedbackResultBtn');
         if (resultBtn) {
@@ -6087,35 +6040,10 @@
         feedbackForm.reset();
       }
 
-      // ===== 恢复表单视图（从结果页回到表单）=====
+      // ===== 恢复表单视图（从结果页回到表单：仅切换显示，表单与监听器始终唯一）=====
       function restoreForm() {
-        modalBody.innerHTML = '';
-        // 重新创建表单
-        var formHtml = '<form class="feedback-form" id="feedbackForm" novalidate>' +
-          '<div class="feedback-form__privacy">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>' +
-            '<div class="feedback-form__privacy-text">反馈不会公开显示，只有我自己在后台能看到。感谢你的真诚建议！</div>' +
-          '</div>' +
-          '<div class="feedback-form__row">' +
-            '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackName">昵称<span class="optional">（可选）</span></label><input type="text" class="feedback-form__input" id="feedbackName" name="name" placeholder="怎么称呼你？" maxlength="50"></div>' +
-            '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackRelation">与我的关系</label><select class="feedback-form__select" id="feedbackRelation" name="relation"><option value="">请选择</option><option value="同学">同学</option><option value="老师">老师</option><option value="家人">家人</option><option value="朋友">朋友</option><option value="同事">同事</option><option value="其他">其他</option><option value="不便透露">不便透露</option></select></div>' +
-          '</div>' +
-          '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackDevice">本条反馈针对的设备</label><select class="feedback-form__select" id="feedbackDevice" name="device"><option value="">请选择</option><option value="电脑">电脑</option><option value="手机">手机</option><option value="平板">平板</option><option value="其他">其他</option></select></div>' +
-          '<div class="feedback-form__group"><label class="feedback-form__label">想先说点什么？<span class="optional">（点击标签自动填入，可再补充）</span></label><div class="feedback-form__chips" id="feedbackChips"><button type="button" class="feedback-chip" data-prefix="[建议] ">建议</button><button type="button" class="feedback-chip" data-prefix="[看不懂] ">看不懂</button><button type="button" class="feedback-chip" data-prefix="[不好找] ">不好找</button><button type="button" class="feedback-chip" data-prefix="[不方便] ">不方便</button><button type="button" class="feedback-chip" data-prefix="[点赞] ">点赞</button></div></div>' +
-          '<div class="feedback-form__group"><label class="feedback-form__label" for="feedbackMessage">反馈内容<span class="required">*</span></label><textarea class="feedback-form__textarea" id="feedbackMessage" name="message" placeholder="可以说说：哪个部分看不懂？哪里不好找？有什么不方便？或者任何你想告诉我的…" required maxlength="1000"></textarea><div class="feedback-form__hint">尽量描述具体位置和体验，越具体越有帮助</div></div>' +
-          '<button type="submit" class="feedback-form__submit" id="feedbackSubmitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg><span id="feedbackSubmitText">提交反馈</span></button>' +
-          '<div class="hp-field" aria-hidden="true"><label for="feedbackWebsite">网站</label><input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off"></div>' +
-        '</form>';
-        modalBody.innerHTML = formHtml;
-
-        // 重新获取元素引用
-        feedbackForm = document.getElementById('feedbackForm');
-        submitBtn = document.getElementById('feedbackSubmitBtn');
-        submitText = document.getElementById('feedbackSubmitText');
-        feedbackName = document.getElementById('feedbackName');
-        feedbackRelation = document.getElementById('feedbackRelation');
-        feedbackDevice = document.getElementById('feedbackDevice');
-        feedbackMessage = document.getElementById('feedbackMessage');
+        resultPanel.hidden = true;
+        feedbackForm.hidden = false;
 
         // 恢复失败前已输入的内容
         if (lastValues) {
@@ -6127,11 +6055,7 @@
         if (!feedbackDevice.value) {
           autoSelectDevice();
         }
-        bindChips();
         syncChipActive();
-
-        // 重新绑定提交事件
-        feedbackForm.addEventListener('submit', handleSubmit);
       }
 
       // ===== 表单提交处理 =====
@@ -6544,7 +6468,7 @@
 
       // 单击：小脉冲；双击：大爆炸
       hero.addEventListener('click', function (e) {
-        if (e.target.closest('a, button, .site-nav, .hero__title-name, .planet-tip')) return;
+        if (e.target.closest('a, button, .site-nav, .hero__title-name')) return;
         var rect = hero.getBoundingClientRect();
         var x = e.clientX - rect.left, y = e.clientY - rect.top;
         spawnBurst(x, y, 30, 1.1);
@@ -6553,7 +6477,7 @@
       });
 
       hero.addEventListener('dblclick', function (e) {
-        if (e.target.closest('a, button, .site-nav, .planet-tip')) return;
+        if (e.target.closest('a, button, .site-nav')) return;
         var rect = hero.getBoundingClientRect();
         megaBoom(e.clientX - rect.left, e.clientY - rect.top);
       });
@@ -6616,55 +6540,6 @@
       window.__heroFX = { spawnBurst: spawnBurst, megaBoom: megaBoom, fireworksShow: fireworksShow };
     })();
 
-    // ===== Hero：头像视差 + 鼠标靠近银河时拉开标题 =====
-    (function () {
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (window.matchMedia && !window.matchMedia('(pointer: fine)').matches) return;
-      var hero = document.querySelector('.hero');
-      var avatar = document.querySelector('.hero__avatar');
-      if (!hero) return;
-
-      var rafId = null, mx = 0, my = 0;
-      var spreadTarget = 0, spreadCur = 0;
-
-      function apply() {
-        rafId = null;
-        if (avatar) avatar.style.transform = 'translate(' + (mx * -14) + 'px,' + (my * -14) + 'px)';
-        // 标题拉开度平滑逼近目标（不适用 CSS transition，避免与逐帧写入打架）
-        var diff = spreadTarget - spreadCur;
-        if (Math.abs(diff) > 0.0015) {
-          spreadCur += diff * 0.085;
-          rafId = requestAnimationFrame(apply);
-        } else {
-          spreadCur = spreadTarget;
-        }
-        hero.style.setProperty('--spread', spreadCur.toFixed(4));
-      }
-
-      function kick() { if (!rafId) rafId = requestAnimationFrame(apply); }
-
-      // 等入场动画结束后再启用，避免打断 page-load 过渡
-      setTimeout(function () {
-        hero.addEventListener('mousemove', function (e) {
-          var rect = hero.getBoundingClientRect();
-          mx = (e.clientX - rect.left) / rect.width - 0.5;
-          my = (e.clientY - rect.top) / rect.height - 0.5;
-          // 银河吸引点：hero 中心略偏上（银河系在画面中的位置）
-          // 距离归一化：越靠近银河中心 spread 越大，smoothstep 让"靠近"有渐进层次
-          var dx = mx / 0.62;
-          var dy = (my + 0.08) / 0.62;
-          var d = Math.sqrt(dx * dx + dy * dy);
-          var t = Math.max(0, Math.min(1, 1 - d));
-          spreadTarget = t * t * (3 - 2 * t);
-          kick();
-        });
-        hero.addEventListener('mouseleave', function () {
-          mx = 0; my = 0;
-          spreadTarget = 0;
-          kick();
-        });
-      }, 2200);
-    })();
 
     // ===== 卡片 3D Tilt + 光泽跟随（课件 Part 5 · Microinteraction 进阶） =====
     (function () {
@@ -6908,697 +6783,7 @@
       });
     })();
 
-    // ===== Three.js 全页星际场景：真实银河 + 星云 + 闪烁亮星 + 流星 =====
-    (function () {
-      var canvas = document.getElementById('heroThree');
-      var hero = document.querySelector('.hero');
-      if (!canvas || typeof THREE === 'undefined') return;
-      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      var renderer = null;
-      try {
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-      } catch (e) { return; } // WebGL 不可用时静默降级：2D 粒子仍在
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-      var scene = new THREE.Scene();
-      scene.fog = new THREE.Fog(0x070d1a, 70, 230);
-
-      var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 500);
-      camera.position.set(0, 5, 30);
-
-      // ---------- 工具 ----------
-      function gauss() { return (Math.random() + Math.random() + Math.random() + Math.random() - 2) / 2; }
-      function rnd(a, b) { return a + Math.random() * (b - a); }
-
-      // 圆形柔光贴图（星点 / 星云共用基理）
-      function makeSpriteTexture(stops) {
-        var c = document.createElement('canvas');
-        c.width = c.height = 128;
-        var g = c.getContext('2d');
-        var grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-        for (var i = 0; i < stops.length; i++) grad.addColorStop(stops[i][0], stops[i][1]);
-        g.fillStyle = grad;
-        g.fillRect(0, 0, 128, 128);
-        return new THREE.CanvasTexture(c);
-      }
-      var starTex = makeSpriteTexture([[0, 'rgba(255,255,255,1)'], [0.3, 'rgba(255,255,255,0.9)'], [0.55, 'rgba(255,255,255,0.35)'], [1, 'rgba(255,255,255,0)']]);
-      var glowTex = makeSpriteTexture([[0, 'rgba(255,255,255,0.5)'], [0.4, 'rgba(255,255,255,0.18)'], [1, 'rgba(255,255,255,0)']]);
-
-      function makePoints(count, spread, size, opacity, palette) {
-        var geo = new THREE.BufferGeometry();
-        var pos = new Float32Array(count * 3);
-        var col = new Float32Array(count * 3);
-        var color = new THREE.Color();
-        for (var i = 0; i < count; i++) {
-          var p = spread();
-          pos[i * 3] = p.x; pos[i * 3 + 1] = p.y; pos[i * 3 + 2] = p.z;
-          color.set(palette[Math.floor(Math.random() * palette.length)]);
-          col[i * 3] = color.r; col[i * 3 + 1] = color.g; col[i * 3 + 2] = color.b;
-        }
-        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-        var mat = new THREE.PointsMaterial({
-          size: size, vertexColors: true, transparent: true, opacity: opacity,
-          blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-          map: starTex, alphaTest: 0.01
-        });
-        return new THREE.Points(geo, mat);
-      }
-
-      function shellSpread(rMin, rMax, squash) {
-        return function () {
-          var r = rnd(rMin, rMax);
-          var th = Math.random() * Math.PI * 2;
-          var ph = Math.acos(2 * Math.random() - 1);
-          return new THREE.Vector3(
-            r * Math.sin(ph) * Math.cos(th),
-            r * Math.sin(ph) * Math.sin(th) * (squash || 0.62),
-            r * Math.cos(ph)
-          );
-        };
-      }
-
-      var isMobile = window.innerWidth < 768;
-      var paleStar = [0xffffff, 0xbfe6ff, 0x8fd4ff, 0x6fc3ff, 0xd8ecff];
-
-      // ---------- 星海三层 ----------
-      var starsFar = makePoints(isMobile ? 1500 : 3200, shellSpread(70, 170, 0.6), 0.6, 0.9, paleStar);
-      var starsMid = makePoints(isMobile ? 480 : 1000, shellSpread(34, 78, 0.65), 0.95, 0.95, paleStar);
-
-      // 亮星三组（相位闪烁）
-      var brightGroups = [];
-      for (var bg2 = 0; bg2 < 3; bg2++) {
-        var g = makePoints(isMobile ? 36 : 84, shellSpread(24, 60, 0.7), 1.7, 0.9, [0xffffff, 0xcfeaff, 0xa8d8ff]);
-        g.userData.phase = bg2 * 2.1;
-        brightGroups.push(g);
-      }
-
-      // ---------- 银河带（高斯分布，暖白核心→蓝紫边缘） ----------
-      var galaxy = new THREE.Group();
-      var galaxyPoints = (function () {
-        var count = isMobile ? 1700 : 3600;
-        var geo = new THREE.BufferGeometry();
-        var pos = new Float32Array(count * 3);
-        var col = new Float32Array(count * 3);
-        var color = new THREE.Color();
-        var core = new THREE.Color(0xfff2d0), edge = new THREE.Color(0x6a8fd8), pink = new THREE.Color(0xc98fe0);
-        var ax1 = new THREE.Vector3(1, 0, 0), ax2 = new THREE.Vector3(0, 0, 1);
-        for (var i = 0; i < count; i++) {
-          var v = new THREE.Vector3(gauss() * 95, gauss() * 11, gauss() * 34);
-          v.applyAxisAngle(ax1, 0.42);
-          v.applyAxisAngle(ax2, 0.3);
-          v.y += 10;
-          pos[i * 3] = v.x; pos[i * 3 + 1] = v.y; pos[i * 3 + 2] = v.z;
-          var tt = Math.min(1, Math.abs(v.x) / 95);
-          color.copy(core).lerp(edge, tt);
-          if (Math.random() < 0.06) color.copy(pink).lerp(core, Math.random() * 0.5);
-          col[i * 3] = color.r; col[i * 3 + 1] = color.g; col[i * 3 + 2] = color.b;
-        }
-        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-        var mat = new THREE.PointsMaterial({
-          size: 0.5, vertexColors: true, transparent: true, opacity: 0.72,
-          blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-          map: starTex, alphaTest: 0.01
-        });
-        return new THREE.Points(geo, mat);
-      })();
-      galaxy.add(galaxyPoints);
-
-      // ---------- 彩色星云 ----------
-      var nebColors = [0x1e6f9f, 0x5b3a8f, 0x2a5fa8, 0x8f3a6f, 0x1f5f8f];
-      var nebTexes = nebColors.map(function (hex) {
-        var c = document.createElement('canvas');
-        c.width = c.height = 128;
-        var g = c.getContext('2d');
-        var r = (hex >> 16) & 255, gg = (hex >> 8) & 255, b = hex & 255;
-        var grad = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-        grad.addColorStop(0, 'rgba(' + r + ',' + gg + ',' + b + ',0.42)');
-        grad.addColorStop(0.45, 'rgba(' + r + ',' + gg + ',' + b + ',0.16)');
-        grad.addColorStop(1, 'rgba(' + r + ',' + gg + ',' + b + ',0)');
-        g.fillStyle = grad;
-        g.fillRect(0, 0, 128, 128);
-        return new THREE.CanvasTexture(c);
-      });
-      var nebulae = [];
-      var nebCount = isMobile ? 6 : 10;
-      for (var ni = 0; ni < nebCount; ni++) {
-        var sm = new THREE.SpriteMaterial({
-          map: nebTexes[ni % nebTexes.length], transparent: true,
-          opacity: rnd(0.12, 0.22), blending: THREE.AdditiveBlending, depthWrite: false,
-          rotation: Math.random() * Math.PI * 2
-        });
-        var sp = new THREE.Sprite(sm);
-        sp.position.set(rnd(-130, 130), rnd(-14, 30), rnd(-140, -40));
-        sp.scale.setScalar(rnd(50, 110));
-        sp.userData.spin = (Math.random() < 0.5 ? -1 : 1) * rnd(0.0001, 0.0004);
-        nebulae.push(sp);
-        galaxy.add(sp);
-      }
-      // 银河核心柔光（远处光晕，纵深氛围）
-      var coreGlow1 = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0xfff2d0, transparent: true, opacity: 0.13, blending: THREE.AdditiveBlending, depthWrite: false }));
-      coreGlow1.position.set(-52, 22, -95);
-      coreGlow1.scale.setScalar(95);
-      galaxy.add(coreGlow1);
-      var coreGlow2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: 0x2a5fa8, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false }));
-      coreGlow2.position.set(38, 12, -120);
-      coreGlow2.scale.setScalar(150);
-      galaxy.add(coreGlow2);
-
-      scene.add(starsFar, starsMid);
-      for (var bi = 0; bi < brightGroups.length; bi++) scene.add(brightGroups[bi]);
-      scene.add(galaxy);
-
-      // ---------- 奇妙银河系：旋臂星系 + 可点击行星（每颗对应一个区块） ----------
-      var galaxySys = new THREE.Group();
-
-      // 光照（给行星立体明暗）
-      var sysLight = new THREE.PointLight(0x9fd8ff, 2.4, 90);
-      galaxySys.add(sysLight);
-      scene.add(new THREE.AmbientLight(0x334466, 0.75));
-
-      // 螺旋星系粒子（四条壮丽旋臂，核心暖白 → 外缘蓝紫）
-      var SYS_COUNT = isMobile ? 2400 : 4600;
-      var sysGeo = new THREE.BufferGeometry();
-      var sysPos = new Float32Array(SYS_COUNT * 3);
-      var sysCol = new Float32Array(SYS_COUNT * 3);
-      var sysColor = new THREE.Color();
-      var coreC = new THREE.Color(0xfff2d0), midC = new THREE.Color(0x8fd4ff), edgeC = new THREE.Color(0x5f7fd8), pinkC = new THREE.Color(0xc98fe0);
-      for (var si = 0; si < SYS_COUNT; si++) {
-        var arm = si % 4;
-        var tt = Math.pow(Math.random(), 0.72);
-        var ang = tt * 4.4 + arm * (Math.PI / 2) + gauss() * (0.5 - tt * 0.28);
-        var rad = 1.6 + tt * 13.5;
-        sysPos[si * 3] = Math.cos(ang) * rad + gauss() * 0.55;
-        sysPos[si * 3 + 1] = gauss() * (1.5 - tt * 0.9);
-        sysPos[si * 3 + 2] = Math.sin(ang) * rad + gauss() * 0.55;
-        if (tt < 0.3) sysColor.copy(coreC).lerp(midC, tt / 0.3);
-        else sysColor.copy(midC).lerp(edgeC, (tt - 0.3) / 0.7);
-        if (Math.random() < 0.05) sysColor.copy(pinkC);
-        sysCol[si * 3] = sysColor.r; sysCol[si * 3 + 1] = sysColor.g; sysCol[si * 3 + 2] = sysColor.b;
-      }
-      sysGeo.setAttribute('position', new THREE.BufferAttribute(sysPos, 3));
-      sysGeo.setAttribute('color', new THREE.BufferAttribute(sysCol, 3));
-      var sysMat = new THREE.PointsMaterial({
-        size: 0.4, vertexColors: true, transparent: true, opacity: 0.95,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-        map: starTex, alphaTest: 0.01
-      });
-      var sysPoints = new THREE.Points(sysGeo, sysMat);
-      galaxySys.add(sysPoints);
-
-      // 发光星核（纯光晕 + 十字光斑 + 倾斜吸积光环，银河系中心没有星球）
-      var coreMat = new THREE.MeshBasicMaterial({ color: 0xfff7e8, transparent: true, opacity: 1 });
-      var coreGlowMat1 = new THREE.SpriteMaterial({ map: glowTex, color: 0xfff2d0, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false });
-      var coreGlow1 = new THREE.Sprite(coreGlowMat1);
-      coreGlow1.scale.setScalar(13);
-      galaxySys.add(coreGlow1);
-      var coreGlowMat2 = new THREE.SpriteMaterial({ map: glowTex, color: 0x2a7fc9, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false });
-      var coreGlow2 = new THREE.Sprite(coreGlowMat2);
-      coreGlow2.scale.setScalar(26);
-      galaxySys.add(coreGlow2);
-      // 倾斜吸积光环（渐变亮环绕星核，缓慢自转）
-      var discTex = (function () {
-        var cv = document.createElement('canvas');
-        cv.width = 256; cv.height = 256;
-        var ctx = cv.getContext('2d');
-        var g = ctx.createRadialGradient(128, 128, 60, 128, 128, 128);
-        g.addColorStop(0, 'rgba(143,212,255,0)');
-        g.addColorStop(0.55, 'rgba(143,212,255,0.06)');
-        g.addColorStop(0.8, 'rgba(190,150,255,0.4)');
-        g.addColorStop(0.94, 'rgba(255,242,208,0.55)');
-        g.addColorStop(1, 'rgba(255,242,208,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, 256, 256);
-        return new THREE.CanvasTexture(cv);
-      })();
-      var discMat = new THREE.MeshBasicMaterial({ map: discTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false });
-      var discRing = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), discMat);
-      discRing.rotation.x = Math.PI / 2 - 0.42;
-      discRing.rotation.y = 0.14;
-      galaxySys.add(discRing);
-      // 外围恒星环带（一圈稀疏亮星，撑出星系的庞大轮廓）
-      var haloCount = isMobile ? 220 : 420;
-      var haloGeo = new THREE.BufferGeometry();
-      var haloPos = new Float32Array(haloCount * 3);
-      var haloCol = new Float32Array(haloCount * 3);
-      var haloC1 = new THREE.Color(0xbfe6ff), haloC2 = new THREE.Color(0xd8b8ff), haloC3 = new THREE.Color(0xffe9b8);
-      for (var hi = 0; hi < haloCount; hi++) {
-        var ha = Math.random() * Math.PI * 2;
-        var hr = 19 + Math.random() * 6 + gauss() * 0.8;
-        haloPos[hi * 3] = Math.cos(ha) * hr;
-        haloPos[hi * 3 + 1] = gauss() * 1.1;
-        haloPos[hi * 3 + 2] = Math.sin(ha) * hr;
-        var hc = Math.random();
-        var haloColor = hc < 0.5 ? haloC1 : (hc < 0.82 ? haloC2 : haloC3);
-        haloCol[hi * 3] = haloColor.r; haloCol[hi * 3 + 1] = haloColor.g; haloCol[hi * 3 + 2] = haloColor.b;
-      }
-      haloGeo.setAttribute('position', new THREE.BufferAttribute(haloPos, 3));
-      haloGeo.setAttribute('color', new THREE.BufferAttribute(haloCol, 3));
-      var haloMat = new THREE.PointsMaterial({
-        size: 0.85, vertexColors: true, transparent: true, opacity: 0.9,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
-        map: starTex, alphaTest: 0.01
-      });
-      var haloPoints = new THREE.Points(haloGeo, haloMat);
-      galaxySys.add(haloPoints);
-      // 整个星系盘放大：占满视野的庞大体量（手机端收敛，避免溢出）
-      galaxySys.scale.setScalar(isMobile ? 1.15 : 1.55);
-
-      // 行星群：每颗 = 一个区块入口（发光玻璃图标徽章沿轨道公转，点击直达对应卡片）
-      var PLANETS = [
-        { name: '关于我',     target: '#about',        glow: 0x6fc3ff, orbit: 6.8,  speed: 0.015, tilt: 0.10, phase: 0.8, icon: '👤' },
-        { name: '性格趣味卡', target: '#personality',  glow: 0xb48cff, orbit: 8.8,  speed: 0.012, tilt: -0.14, phase: 2.4, icon: '🎭' },
-        { name: '项目与作品', target: '#works',        glow: 0xffb08a, orbit: 10.8, speed: 0.011, tilt: 0.18, phase: 4.2, icon: '💼' },
-        { name: '兴趣与技能', target: '#skills',       glow: 0x7dffb8, orbit: 12.8, speed: 0.01, tilt: -0.08, phase: 1.3, icon: '⚡' },
-        { name: '数字分身',   target: '#digital-twin', glow: 0xff9ecf, orbit: 14.8, speed: 0.008, tilt: 0.12, phase: 5.1, icon: '🤖' },
-        { name: '联系我',     target: '#contact',      glow: 0x5a9bff, orbit: 16.8, speed: 0.007, tilt: -0.16, phase: 3.4, icon: '✉️' }
-      ];
-
-      // 卡片图标徽章纹理：实心玻璃底盘（带主题色）+ 双发光环 + 区块图标（替代原深色球体，需在星空里清晰醒目）
-      function glowRGB(hex) {
-        return ((hex >> 16) & 255) + ',' + ((hex >> 8) & 255) + ',' + (hex & 255);
-      }
-      function makeIconTex(ch, glowHex) {
-        var cv = document.createElement('canvas');
-        cv.width = cv.height = 160;
-        var ctx = cv.getContext('2d');
-        var cx = 80, cy = 80;
-        var rgb = glowRGB(glowHex);
-        // 玻璃底盘：深蓝基底 + 主题色内晕，实心不透明，黑星空上清晰可见
-        var g = ctx.createRadialGradient(cx, cy - 18, 6, cx, cy, 74);
-        g.addColorStop(0, 'rgba(64, 104, 158, 0.98)');
-        g.addColorStop(0.42, 'rgba(38, 66, 108, 0.97)');
-        g.addColorStop(0.8, 'rgba(28, 52, 88, 0.95)');
-        g.addColorStop(1, 'rgba(30, 56, 94, 0.88)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 74, 0, Math.PI * 2);
-        ctx.fill();
-        // 主题色内晕（底盘上半部染上行星自己的颜色）
-        var tint = ctx.createRadialGradient(cx, cy - 26, 4, cx, cy - 10, 62);
-        tint.addColorStop(0, 'rgba(' + rgb + ',0.5)');
-        tint.addColorStop(0.55, 'rgba(' + rgb + ',0.16)');
-        tint.addColorStop(1, 'rgba(' + rgb + ',0)');
-        ctx.fillStyle = tint;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 72, 0, Math.PI * 2);
-        ctx.fill();
-        // 顶部玻璃高光
-        var hl = ctx.createLinearGradient(cx, cy - 68, cx, cy + 6);
-        hl.addColorStop(0, 'rgba(255,255,255,0.4)');
-        hl.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = hl;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 66, Math.PI, Math.PI * 2);
-        ctx.fill();
-        // 主发光描边环（主题色，粗亮）
-        ctx.strokeStyle = 'rgba(' + rgb + ',1)';
-        ctx.lineWidth = 4.5;
-        ctx.shadowColor = 'rgba(' + rgb + ',1)';
-        ctx.shadowBlur = 20;
-        ctx.beginPath();
-        ctx.arc(cx, cy, 63, 0, Math.PI * 2);
-        ctx.stroke();
-        // 外圈细环（半透明，行星徽章的"轨道环"层次）
-        ctx.shadowBlur = 8;
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = 'rgba(' + rgb + ',0.55)';
-        ctx.beginPath();
-        ctx.arc(cx, cy, 71, 0, Math.PI * 2);
-        ctx.stroke();
-        // 区块图标（加大占比）
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 2;
-        ctx.font = '78px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(ch, cx, cy + 6);
-        ctx.shadowOffsetY = 0;
-        // 图标下方主题色柔光托底
-        var under = ctx.createRadialGradient(cx, cy + 34, 2, cx, cy + 34, 44);
-        under.addColorStop(0, 'rgba(' + rgb + ',0.35)');
-        under.addColorStop(1, 'rgba(' + rgb + ',0)');
-        ctx.fillStyle = under;
-        ctx.beginPath();
-        ctx.arc(cx, cy + 30, 44, 0, Math.PI * 2);
-        ctx.fill();
-        return new THREE.CanvasTexture(cv);
-      }
-
-      var planets = [], planetMeshes = [], fadeMats = [sysMat, coreMat, coreGlowMat1, coreGlowMat2, discMat, haloMat];
-      for (var pi = 0; pi < PLANETS.length; pi++) {
-        var pd = PLANETS[pi];
-        var tiltGrp = new THREE.Group();
-        tiltGrp.rotation.x = pd.tilt;
-        tiltGrp.rotation.z = pd.tilt * 0.6;
-        // 行星本体 = 区块图标徽章（玻璃底盘 + 发光描边环，不再有深色球体）
-        var badgeMat = new THREE.SpriteMaterial({ map: makeIconTex(pd.icon, pd.glow), transparent: true, opacity: 1, depthWrite: false });
-        var badge = new THREE.Sprite(badgeMat);
-        badge.scale.set(1.1, 1.1, 1);
-        badge.userData = { idx: pi };
-        // 底部光晕（叠加发光，hover 时增亮）
-        var haloMat = new THREE.SpriteMaterial({ map: glowTex, color: pd.glow, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false });
-        var halo = new THREE.Sprite(haloMat);
-        halo.scale.set(1.9, 1.9, 1);
-        halo.userData = { idx: pi };
-        var body = new THREE.Group();
-        body.add(halo);
-        body.add(badge);
-        tiltGrp.add(body);
-        // 轨道细环（亮色）
-        var orbGeo = new THREE.BufferGeometry();
-        var orbPts = new Float32Array(65 * 3);
-        for (var oi2 = 0; oi2 <= 64; oi2++) {
-          var oa = (oi2 / 64) * Math.PI * 2;
-          orbPts[oi2 * 3] = Math.cos(oa) * pd.orbit;
-          orbPts[oi2 * 3 + 1] = 0;
-          orbPts[oi2 * 3 + 2] = Math.sin(oa) * pd.orbit;
-        }
-        orbGeo.setAttribute('position', new THREE.BufferAttribute(orbPts, 3));
-        var orbMat = new THREE.LineBasicMaterial({ color: pd.glow, transparent: true, opacity: 0.22 });
-        tiltGrp.add(new THREE.Line(orbGeo, orbMat));
-        galaxySys.add(tiltGrp);
-        pd._body = body; pd._badge = badge; pd._badgeMat = badgeMat; pd._haloMat = haloMat; pd._orbMat = orbMat;
-        planets.push(pd);
-        planetMeshes.push(badge, halo);
-        fadeMats.push(badgeMat, haloMat, orbMat);
-      }
-      for (var fi = 0; fi < fadeMats.length; fi++) {
-        if (!fadeMats[fi].userData) fadeMats[fi].userData = {};
-        fadeMats[fi].userData.baseOpacity = fadeMats[fi].opacity;
-      }
-      galaxySys.position.set(0, 4.5, 0);
-      scene.add(galaxySys);
-
-      // ---- 行星交互：hover 提示 + 点击直达对应卡片（捕获阶段，优先于粒子点击） ----
-      var raycaster = new THREE.Raycaster();
-      var ndc = new THREE.Vector2();
-      var hoverIdx = -1;
-      var tip = document.getElementById('planetTip');
-
-      // 点击行星徽章：3D 冲击波 + 合成音效 + 平滑滚动到对应区块
-      function jumpToPlanet(idx) {
-        var pd = PLANETS[idx];
-        try {
-          var wp = new THREE.Vector3();
-          pd._body.getWorldPosition(wp);
-          spawnPulse3D(wp, pd.glow);
-          planetPing();
-          spinBoost = 1;
-        } catch (err) {}
-        var sec = document.querySelector(pd.target);
-        if (sec) sec.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
-      }
-      window.__jumpToPlanet = jumpToPlanet; // 测试钩子
-
-      function pickPlanet(clientX, clientY) {
-        var rect = canvas.getBoundingClientRect();
-        ndc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
-        ndc.y = -((clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(ndc, camera);
-        var hits = raycaster.intersectObjects(planetMeshes, false);
-        return hits.length ? hits[0].object.userData.idx : -1;
-      }
-
-      if (!isMobile && window.matchMedia && !window.matchMedia('(pointer: coarse)').matches) {
-        hero.addEventListener('mousemove', function (e) {
-          var idx = pickPlanet(e.clientX, e.clientY);
-          if (idx !== hoverIdx) {
-            hoverIdx = idx;
-            hero.style.cursor = idx >= 0 ? 'pointer' : '';
-            if (tip) {
-              if (idx >= 0) {
-                tip.textContent = PLANETS[idx].name + ' · 点击前往';
-                tip.classList.add('show');
-              } else {
-                tip.classList.remove('show');
-              }
-            }
-          }
-          if (tip && idx >= 0) {
-            tip.style.left = (e.clientX + 16) + 'px';
-            tip.style.top = (e.clientY - 12) + 'px';
-          }
-        }, true);
-      }
-
-      hero.addEventListener('click', function (e) {
-        if (e.target.closest && e.target.closest('#planetTip')) return;
-        var idx = pickPlanet(e.clientX, e.clientY);
-        if (idx >= 0) {
-          e.stopPropagation(); // 命中行星：不触发 2D 粒子爆炸
-          jumpToPlanet(idx);
-        }
-      }, true);
-
-      // ---------- 流星 ----------
-      var meteors = [];
-      for (var mi = 0; mi < (isMobile ? 3 : 6); mi++) {
-        var mgeo = new THREE.BufferGeometry();
-        mgeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
-        // 尾迹渐变：头部亮白 → 尾部暗蓝（additive 下即视觉淡出）
-        var mcol = new Float32Array([0.97, 0.99, 1, 0.1, 0.22, 0.4]);
-        mgeo.setAttribute('color', new THREE.BufferAttribute(mcol, 3));
-        var mmat = new THREE.LineBasicMaterial({ color: 0xffffff, vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-        var line = new THREE.Line(mgeo, mmat);
-        line.visible = false;
-        line.frustumCulled = false;
-        line.userData = { active: false, t: 0, dur: 1, vel: new THREE.Vector3(), len: 24, next: 1.5 + mi * 2.4 };
-        scene.add(line);
-        meteors.push(line);
-      }
-      function spawnMeteor(m) {
-        var dir = new THREE.Vector3(rnd(-1, 1), -rnd(0.55, 1.05), rnd(-1, 1)).normalize();
-        m.userData.active = true;
-        m.userData.t = 0;
-        m.userData.dur = rnd(0.9, 1.5);
-        m.userData.len = rnd(28, 50);
-        m.userData.vel.copy(dir).multiplyScalar(rnd(105, 165));
-        m.position.set(rnd(-110, 110), rnd(20, 60), rnd(-110, -15));
-        m.visible = true;
-      }
-      var showerTimer = rnd(14, 22); // 流星雨倒计时
-      function updateMeteors(dt) {
-        // 定时流星雨：让整池流星依次连发
-        showerTimer -= dt;
-        if (showerTimer <= 0) {
-          showerTimer = rnd(20, 36);
-          var delay = 0;
-          for (var si = 0; si < meteors.length; si++) {
-            if (!meteors[si].userData.active) {
-              meteors[si].userData.next = delay;
-              delay += rnd(0.12, 0.3);
-            }
-          }
-        }
-        for (var i = 0; i < meteors.length; i++) {
-          var m = meteors[i], u = m.userData;
-          if (!u.active) {
-            u.next -= dt;
-            if (u.next <= 0) { spawnMeteor(m); u.next = rnd(1.6, 4.2); }
-            continue;
-          }
-          u.t += dt;
-          if (u.t >= u.dur) { u.active = false; m.visible = false; continue; }
-          m.position.addScaledVector(u.vel, dt);
-          var back = u.vel.clone().normalize().multiplyScalar(-u.len);
-          var arr = m.geometry.attributes.position.array;
-          arr[0] = 0; arr[1] = 0; arr[2] = 0;
-          arr[3] = back.x; arr[4] = back.y; arr[5] = back.z;
-          m.geometry.attributes.position.needsUpdate = true;
-          m.material.opacity = Math.sin(Math.PI * u.t / u.dur) * 0.95;
-        }
-      }
-
-      // ---------- 尺寸 ----------
-      function resize() {
-        var W = window.innerWidth || 1, H = window.innerHeight || 1;
-        renderer.setSize(W, H, false);
-        camera.aspect = W / H;
-        camera.updateProjectionMatrix();
-      }
-      resize();
-
-      // ---------- 鼠标视差（hero 区域） + 滚动穿行 ----------
-      var target = { x: 0, y: 0 }, cur = { x: 0, y: 0 }, scrollY = 0;
-      var scrollVel = 0, spinBoost = 0;
-      var pulses3d = [];
-
-      // 行星点击：3D 冲击波 + 合成音效
-      var pingAc = null;
-      function planetPing() {
-        try {
-          if (!pingAc) pingAc = new (window.AudioContext || window.webkitAudioContext)();
-          if (pingAc.state === 'suspended') pingAc.resume();
-          var t0 = pingAc.currentTime;
-          [880, 1318.5].forEach(function (f, i) {
-            var o = pingAc.createOscillator();
-            var g = pingAc.createGain();
-            o.type = 'sine';
-            o.frequency.value = f;
-            g.gain.setValueAtTime(0.0001, t0 + i * 0.07);
-            g.gain.linearRampToValueAtTime(0.1, t0 + i * 0.07 + 0.02);
-            g.gain.exponentialRampToValueAtTime(0.001, t0 + i * 0.07 + 0.35);
-            o.connect(g); g.connect(pingAc.destination);
-            o.start(t0 + i * 0.07); o.stop(t0 + i * 0.07 + 0.4);
-          });
-        } catch (e) {}
-      }
-
-      function spawnPulse3D(worldPos, colorHex) {
-        try {
-          var geo = new THREE.RingGeometry(0.28, 0.33, 48);
-          var mat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false });
-          var m = new THREE.Mesh(geo, mat);
-          m.position.copy(worldPos);
-          m.userData = { t: 0 };
-          scene.add(m);
-          pulses3d.push(m);
-        } catch (e) {}
-      }
-      if (!isMobile && window.matchMedia && !window.matchMedia('(pointer: coarse)').matches) {
-        hero.addEventListener('mousemove', function (e) {
-          var rect = hero.getBoundingClientRect();
-          target.x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-          target.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-        });
-        hero.addEventListener('mouseleave', function () { target.x = 0; target.y = 0; });
-      }
-      window.addEventListener('scroll', function () {
-        var y = window.pageYOffset || document.documentElement.scrollTop || 0;
-        scrollVel = scrollVel * 0.7 + (y - scrollY) * 0.3;
-        scrollY = y;
-      }, { passive: true });
-
-      // ---------- 渲染循环 ----------
-      var rafId = null, running = false, pageVisible = true, t = 0;
-      var DT = 0.016;
-
-      function render() {
-        rafId = null;
-        t += DT;
-
-        cur.x += (target.x - cur.x) * 0.045;
-        cur.y += (target.y - cur.y) * 0.045;
-        camera.position.x = cur.x * 4.5;
-        camera.position.y = 5 - cur.y * 2.6 - scrollY * 0.0026;
-        camera.lookAt(0, 4.2, 0);
-
-        // 星海缓转 + 滚动漂移
-        starsFar.rotation.y = t * 0.006;
-        starsMid.rotation.y = -t * 0.011;
-        starsFar.position.y = scrollY * 0.0011;
-        starsMid.position.y = scrollY * 0.0016;
-        galaxy.rotation.y = t * 0.004;
-        galaxy.position.y = scrollY * 0.0008;
-
-        // 亮星闪烁
-        for (var i = 0; i < brightGroups.length; i++) {
-          brightGroups[i].material.opacity = 0.62 + 0.34 * Math.sin(t * 1.35 + brightGroups[i].userData.phase);
-          brightGroups[i].rotation.y = t * 0.008 * (i % 2 === 0 ? 1 : -1);
-        }
-        // 星云呼吸
-        for (var j = 0; j < nebulae.length; j++) {
-          nebulae[j].material.rotation += nebulae[j].userData.spin;
-          nebulae[j].material.opacity = nebulae[j].userData.baseO || (nebulae[j].userData.baseO = nebulae[j].material.opacity);
-          nebulae[j].material.opacity = nebulae[j].userData.baseO * (0.85 + 0.15 * Math.sin(t * 0.4 + j * 1.7));
-        }
-
-        // 银河系随滚动升空淡出
-        var fade = Math.max(0, 1 - scrollY / 950);
-        for (var f = 0; f < fadeMats.length; f++) fadeMats[f].opacity = fadeMats[f].userData.baseOpacity * fade;
-        galaxySys.visible = fade > 0.01;
-        if (galaxySys.visible) {
-          galaxySys.position.y = 4.5 + Math.sin(t * 0.5) * 0.3 + scrollY * 0.0022;
-          sysPoints.rotation.y = t * 0.1; // 星系整体缓慢旋转
-          var corePulse = 0.92 + 0.14 * Math.sin(t * 1.5);
-          coreGlow1.material.opacity = 0.5 * fade * corePulse;
-          coreGlow2.material.opacity = 0.26 * fade * (1.85 - corePulse);
-          // 行星徽章公转 + hover 缩放 + 光晕呼吸
-          for (var pv = 0; pv < planets.length; pv++) {
-            var pp = planets[pv];
-            var pa = pp.phase + t * pp.speed;
-            pp._body.position.set(Math.cos(pa) * pp.orbit, Math.sin(t * 0.8 + pv) * 0.25, Math.sin(pa) * pp.orbit);
-            var hot = hoverIdx === pv;
-            var want = hot ? 1.32 : 1;
-            var curS = pp._body.scale.x + (want - pp._body.scale.x) * 0.12;
-            pp._body.scale.set(curS, curS, curS);
-            pp._orbMat.opacity = (hot ? 0.55 : 0.22) * fade;
-            pp._haloMat.opacity = ((hot ? 0.8 : 0.42) + 0.1 * Math.sin(t * 2.2 + pv * 1.7)) * fade;
-          }
-        }
-
-        // 音乐节拍 → 星核脉冲（声音可视化光影）
-        var beat = 0;
-        if (window.__beatAt) {
-          var dtb = performance.now() - window.__beatAt;
-          if (dtb < 340) beat = 1 - dtb / 340;
-        }
-        // 滚动穿梭：滚动速度驱动星海旋转
-        starsFar.rotation.y += scrollVel * 0.00003;
-        galaxySys.rotation.y += scrollVel * 0.00004 + spinBoost * 0.004;
-        spinBoost *= 0.94;
-        // 节拍打在星核上的光
-        if (galaxySys.visible) {
-          var bp = 1 + beat * 0.16;
-          coreGlow1.scale.set(13 * bp, 13 * bp, 1);
-          coreGlow2.scale.set(26 * (2 - bp), 26 * (2 - bp), 1);
-          // 吸积光环缓转
-          discRing.rotation.z = t * 0.05;
-        }
-        // 3D 冲击波扩散
-        for (var pu = pulses3d.length - 1; pu >= 0; pu--) {
-          var pm = pulses3d[pu];
-          pm.userData.t += DT;
-          var pt = pm.userData.t / 0.9;
-          if (pt >= 1) {
-            scene.remove(pm);
-            pm.geometry.dispose();
-            pm.material.dispose();
-            pulses3d.splice(pu, 1);
-            continue;
-          }
-          pm.lookAt(camera.position);
-          var ps = 1 + pt * 9;
-          pm.scale.set(ps, ps, ps);
-          pm.material.opacity = 0.9 * (1 - pt);
-        }
-
-        updateMeteors(DT);
-        renderer.render(scene, camera);
-        if (running && !reduceMotion) rafId = requestAnimationFrame(render);
-      }
-
-      function setRunning(v) {
-        var should = v && pageVisible;
-        if (should === running) return;
-        running = should;
-        if (running && !rafId && !reduceMotion) rafId = requestAnimationFrame(render);
-      }
-
-      if (reduceMotion) {
-        renderer.render(scene, camera);
-      } else {
-        setRunning(true);
-      }
-      document.addEventListener('visibilitychange', function () {
-        pageVisible = !document.hidden;
-        setRunning(true);
-      });
-
-      var rzTimer = null;
-      window.addEventListener('resize', function () {
-        clearTimeout(rzTimer);
-        rzTimer = setTimeout(function () {
-          isMobile = window.innerWidth < 768;
-          resize();
-          if (reduceMotion) renderer.render(scene, camera);
-        }, 220);
-      });
-    })();
+    }); // end DOMContentLoaded
   </script>
 
 </body>
