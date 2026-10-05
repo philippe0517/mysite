@@ -2884,6 +2884,8 @@
 
       .hero__content {
         margin: 0 auto;
+        /* 允许 grid 单列收缩，修复 320px 窄屏下 min-content 撑破视口 4px */
+        min-width: 0;
       }
 
       .hero__avatar {
@@ -2988,6 +2990,9 @@
         font-size: 38px;
         padding: 10px 18px;
         border-radius: 16px;
+        /* 移动端标题玻璃框随内容居中，与整屏居中构图一致 */
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .hero__title .hero__title-name {
@@ -2996,7 +3001,9 @@
 
       .hero__subtitle {
         font-size: 16px;
-        padding-left: 12px;
+        /* 移动端居中构图下去掉左侧竖条，避免与居中文本错位 */
+        border-left: none;
+        padding-left: 0;
       }
 
       .site-nav {
@@ -3005,7 +3012,8 @@
         top: 68px;
         left: 0;
         right: 0;
-        background: rgba(10, 18, 34, 0.92);
+        /* 高不透明度深色底：即使低端机不支持 backdrop-filter 菜单也可读 */
+        background: rgba(10, 18, 34, 0.98);
         -webkit-backdrop-filter: blur(16px);
         backdrop-filter: blur(16px);
         flex-direction: column;
