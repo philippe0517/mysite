@@ -207,17 +207,6 @@
       50% { opacity: 1; }
     }
 
-    /* 鼠标脑电波轨迹 Canvas */
-    #eegTrailCanvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9998;
-    }
-
     body {
       font-family: var(--font-body);
       background-color: var(--color-bg);
@@ -1110,8 +1099,8 @@
       gap: 10px;
       margin-bottom: 36px;
     }
-    /* ===== 棣栭〉绉戞妧甯︼細楂樿揪寰芥爣 + 鑴戠數娉㈡祦鍏?+ 绁炵粡閾炬帴鏍囩 =====
-       涓€鏉′綆璋冪粏甯﹀悓鏃舵壙杞戒袱涓瘝棰橈紝鍗婇€忔槑鍏嬪埗涓嶆姠閾舵渤鐨勬垙 */
+    /* ===== 首页科技带：雷达徽标 + 脑电流光 + 神经链接标签 =====
+    一条低调细带同时承载两个主题，半透明克制不抢银河的戏 */
     .hero__techline {
       display: flex;
       align-items: center;
@@ -3094,207 +3083,6 @@
         padding: 2px 0;
       }
 
-      /* ===== 兴趣技能移动端重设计（电脑端不变） =====
-         布局策略：2 列骨架——大卡/中卡/目标卡通栏，四张小卡组成 2×2 小方块阵；
-         中卡改横向布局（图标居左），小卡改纵向居中小组件，消除孤立横条感 */
-      .skills__bento {
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: auto;
-        gap: 12px;
-      }
-
-      .bento-card {
-        padding: 20px 18px;
-        border-radius: 18px;
-      }
-
-      /* 焦点卡：乒乓球（通栏） */
-      .bento-card--large {
-        grid-column: span 2;
-        grid-row: span 1;
-        padding: 24px 20px;
-        background: linear-gradient(135deg, rgba(126, 182, 217, 0.1) 0%, rgba(168, 208, 230, 0.16) 100%);
-      }
-
-      .bento-card--large .bento-card__icon {
-        width: 48px;
-        height: 48px;
-        margin-bottom: 14px;
-      }
-
-      .bento-card--large .bento-card__title {
-        font-size: 20px;
-        margin-bottom: 8px;
-      }
-
-      .bento-card--large .bento-card__desc {
-        font-size: 13.5px;
-      }
-
-      .bento-card--large .bento-card__deco--pingpong {
-        width: 150px;
-        height: 150px;
-        bottom: -34px;
-        right: -34px;
-      }
-
-      .bento-card--large .bento-card__badge {
-        top: 16px;
-        right: 16px;
-        font-size: 10px;
-        padding: 3px 10px;
-      }
-
-      .bento-card--large .bento-card__level {
-        padding-top: 12px;
-      }
-
-      /* 中卡：竖排内容卡（移动端标准阅读流，正文全宽不挤压） */
-      .bento-card--medium {
-        grid-column: span 2;
-        padding: 22px 20px;
-      }
-
-      .bento-card--medium .bento-card__icon {
-        width: 42px;
-        height: 42px;
-        margin-bottom: 12px;
-      }
-
-      .bento-card--medium .bento-card__number {
-        top: 18px;
-        right: 16px;
-        font-size: 22px;
-      }
-
-      .bento-card--medium .bento-card__title {
-        font-size: 17px;
-        margin-bottom: 8px;
-        padding-right: 40px;
-      }
-
-      .bento-card--medium .bento-card__desc {
-        font-size: 13.5px;
-        line-height: 1.7;
-      }
-
-      .bento-card--medium .bento-card__level {
-        padding-top: 14px;
-      }
-
-      /* 小卡：2×2 居中小方块（图标上、名称下、小编号），像系统小组件 */
-      .bento-card--small {
-        grid-column: span 1;
-        grid-row: span 1;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 20px 10px 16px;
-        gap: 9px;
-      }
-
-      .bento-card--small .bento-card__icon {
-        width: 42px;
-        height: 42px;
-        margin-bottom: 0;
-      }
-
-      .bento-card--small .bento-card__icon svg {
-        width: 20px;
-        height: 20px;
-      }
-
-      .bento-card--small .bento-card__title {
-        font-size: 13px;
-        margin-bottom: 0;
-      }
-
-      .bento-card--small .bento-card__number {
-        position: absolute;
-        top: 8px;
-        right: 12px;
-        font-size: 13px;
-        opacity: 0.5;
-      }
-
-      /* 未来目标卡：竖排居中 */
-      .bento-card--goal {
-        grid-column: span 2;
-        flex-direction: column !important;
-        text-align: center;
-        gap: 10px !important;
-        padding: 22px 18px;
-      }
-
-      .bento-card--goal .bento-card__title {
-        font-size: 16px;
-      }
-
-      .bento-card--goal .bento-card__desc {
-        font-size: 13px;
-      }
-
-      .contact__methods {
-        grid-template-columns: 1fr;
-      }
-
-      .twin-card {
-        padding: 28px 20px;
-      }
-
-      .site-footer__inner {
-        flex-direction: column;
-        text-align: center;
-        gap: 12px;
-      }
-
-      .site-footer__copy {
-        order: 3;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .hero__title {
-        font-size: 28px;
-        padding: 8px 14px;
-        border-radius: 14px;
-      }
-
-      .hero__title .hero__title-name {
-        font-size: 38px;
-      }
-
-      .hero__actions {
-        flex-direction: column;
-      }
-
-      .hero__actions .btn {
-        width: 100%;
-      }
-
-      .game-banner__btn {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .chat-fab {
-        right: 16px;
-        bottom: 18px;
-        width: 48px;
-        height: 48px;
-      }
-
-      .chat-window {
-        right: 12px;
-        left: 12px;
-        bottom: 74px;
-        width: auto;
-        height: calc(100vh - 140px);
-        max-height: none;
-      }
-    }
-
     /* ===== 反馈悬浮按钮 ===== */
     .feedback-fab {
       position: fixed;
@@ -3820,9 +3608,6 @@
 
   <div class="scroll-progress" id="scrollProgress"></div>
 
-  <!-- ===== 鼠标脑电波轨迹 ===== -->
-  <canvas id="eegTrailCanvas"></canvas>
-
   <!-- ===== 顶部导航 ===== -->
   <header class="site-header">
     <div class="container site-header__inner">
@@ -4018,7 +3803,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">SELECTED WORKS</span>
-          <h2 class="section__title" data-number="03">项目与作品</h2>
+          <h2 class="section__title" data-number="02">项目与作品</h2>
           <p class="section__subtitle">两个真实作品：这一版主页，和一款能玩的 3D 游戏</p>
         </div>
         <div class="works__grid">
@@ -4104,8 +3889,6 @@
       </svg>
     </div>
 
-    <!-- ===== 兴趣技能（Bento Grid） ===== -->
-
     <!-- ===== 数字分身（静态对话版） ===== -->
     <section class="section digital-twin" id="digital-twin">
       <!-- 对话气泡装饰 -->
@@ -4124,7 +3907,7 @@
       <div class="container">
         <div class="section__header reveal">
           <span class="section__eyebrow">DIGITAL TWIN</span>
-          <h2 class="section__title" data-number="05">数字分身</h2>
+          <h2 class="section__title" data-number="03">数字分身</h2>
           <p class="section__subtitle">和「数字版的我」聊聊天，问问关于我的事情</p>
         </div>
         <div class="twin-card reveal reveal-delay-2">
@@ -4188,7 +3971,7 @@
         <div class="contact__inner">
           <div class="reveal">
             <span class="section__eyebrow">GET IN TOUCH</span>
-            <h2 class="section__title" data-number="06">联系我</h2>
+            <h2 class="section__title" data-number="04">联系我</h2>
             <p class="section__subtitle">欢迎交流学习、乒乓球、大学生活，或任何有趣的话题</p>
           </div>
           <div class="contact__methods">
@@ -4774,164 +4557,6 @@
       }, { threshold: 0.3 });
       dividers.forEach(function (d) { observer.observe(d); });
     })();
-
-    // ===== 思维读取器彩蛋 =====
-    (function () {
-      var reader = document.getElementById('mindReader');
-      var line = document.getElementById('mindReaderLine');
-      var result = document.getElementById('mindReaderResult');
-      var textEl = reader ? reader.querySelector('.mind-reader__text') : null;
-      if (!reader || !line || !result || !textEl) return;
-
-      var isReading = false;
-      var mouseX = 0;
-      var mouseY = 0;
-
-      document.addEventListener('mousemove', function (e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        if (isReading) {
-          updateLine();
-        }
-      });
-
-      function updateLine() {
-        var rect = reader.getBoundingClientRect();
-        var startX = rect.left + rect.width / 2;
-        var startY = rect.top + rect.height / 2;
-        var dx = mouseX - startX;
-        var dy = mouseY - startY;
-        var length = Math.sqrt(dx * dx + dy * dy);
-        var angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        line.style.width = length + 'px';
-        line.style.left = (rect.width / 2) + 'px';
-        line.style.top = (rect.height / 2) + 'px';
-        line.style.transform = 'rotate(' + angle + 'deg)';
-        line.style.transformOrigin = '0 50%';
-      }
-
-      function startReading() {
-        if (isReading) return;
-        isReading = true;
-        reader.classList.add('reading');
-        textEl.textContent = '正在读取...';
-        result.classList.remove('show');
-        updateLine();
-
-        setTimeout(function () {
-          textEl.textContent = '读取完成';
-          result.classList.add('show');
-          setTimeout(function () {
-            isReading = false;
-            reader.classList.remove('reading');
-            textEl.textContent = '读取思维';
-            setTimeout(function () {
-              result.classList.remove('show');
-            }, 2000);
-          }, 1500);
-        }, 2000);
-      }
-
-      reader.addEventListener('click', startReading);
-      reader.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          startReading();
-        }
-      });
-    })();
-
-    // ===== 鼠标脑电波轨迹 =====
-    (function () {
-      var canvas = document.getElementById('eegTrailCanvas');
-      if (!canvas) return;
-      var ctx = canvas.getContext('2d');
-      var points = [];
-      var maxPoints = 40;
-      var mouseX = -100;
-      var mouseY = -100;
-      var isMoving = false;
-      var moveTimeout = null;
-
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
-
-      document.addEventListener('mousemove', function (e) {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        isMoving = true;
-        if (moveTimeout) clearTimeout(moveTimeout);
-        moveTimeout = setTimeout(function () { isMoving = false; }, 100);
-      });
-
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        if (isMoving) {
-          points.push({ x: mouseX, y: mouseY, age: 0 });
-          if (points.length > maxPoints) points.shift();
-        }
-
-        if (points.length < 2) {
-          requestAnimationFrame(draw);
-          return;
-        }
-
-        // 绘制脑电波波形轨迹
-        for (var i = 1; i < points.length; i++) {
-          var p1 = points[i - 1];
-          var p2 = points[i];
-          var alpha = (i / points.length) * 0.4;
-
-          // 主波形线
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-
-          // 添加脑电波波动
-          var midX = (p1.x + p2.x) / 2;
-          var midY = (p1.y + p2.y) / 2;
-          var waveAmplitude = 6 * (i / points.length);
-          var waveOffset = Math.sin(Date.now() / 100 + i) * waveAmplitude;
-
-          ctx.quadraticCurveTo(midX, midY + waveOffset, p2.x, p2.y);
-          ctx.strokeStyle = 'rgba(140, 200, 255, ' + alpha + ')';
-          ctx.lineWidth = 2;
-          ctx.lineCap = 'round';
-          ctx.stroke();
-
-          // 高频小波（模拟脑电信号）
-          if (i % 3 === 0) {
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            var highFreq = Math.sin(Date.now() / 50 + i * 2) * 3;
-            ctx.quadraticCurveTo(midX, midY + highFreq, p2.x, p2.y);
-            ctx.strokeStyle = 'rgba(160, 220, 255, ' + (alpha * 0.6) + ')';
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-
-        // 更新点的年龄
-        for (var j = 0; j < points.length; j++) {
-          points[j].age++;
-        }
-
-        // 移除过老的点
-        points = points.filter(function (p) { return p.age < 60; });
-
-        requestAnimationFrame(draw);
-      }
-
-      // 尊重减少动画偏好
-      if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        draw();
-      }
-    })();
-
 
     // ===== 数字分身（静态对话版） =====
     (function () {
@@ -6137,18 +5762,6 @@
 
       fab.addEventListener('click', function () {
         if (playing) { stop(); } else { start(); }
-      });
-    })();
-
-    // ===== 离开页面彩蛋：切走标签页时标题变成喊话 =====
-    (function () {
-      var origTitle = document.title;
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) {
-          document.title = '🏓 球还没落地，快回来！';
-        } else {
-          document.title = origTitle;
-        }
       });
     })();
 
