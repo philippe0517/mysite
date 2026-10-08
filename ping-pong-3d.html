@@ -2493,7 +2493,7 @@
 
     /* ---------- 操控设置（全局，跟随设备，localStorage 记忆） ---------- */
     const LS_CTRL = 'pp3d_ctrl_v1';
-    let ctrlCfg = { wheelStep: .16, moveK: 1 };   // wheelStep: 每格滚轮的 z 位移(0.16≈12格/半圈走完)；moveK: 上下左右移动幅度系数
+    let       ctrlCfg = { wheelStep: .16, moveK: 1.3 }   // 反馈回应(10-08)：移动幅度默认档由"标准"上调至"大"，开箱手感更灵敏；已在操控设置保存过档位的玩家不受影响;   // wheelStep: 每格滚轮的 z 位移(0.16≈12格/半圈走完)；moveK: 上下左右移动幅度系数
     try { const _cc = JSON.parse(localStorage.getItem(LS_CTRL)); if (_cc && _cc.wheelStep) ctrlCfg = Object.assign(ctrlCfg, _cc); } catch (e) {}
     function saveCtrl(){ try { localStorage.setItem(LS_CTRL, JSON.stringify(ctrlCfg)); } catch (e) {} }
     function saveMatchState(snap){ try { localStorage.setItem(LS_MATCH, JSON.stringify(Object.assign({ pid: profiles && profiles.currentId, ts: Date.now() }, snap))); } catch (e) {} }
