@@ -207,6 +207,15 @@
       50% { opacity: 1; }
     }
 
+    /* ===== 横向溢出根防御 =====
+       修复移动端「划到底部整页变宽、需要左右滑动」：
+       任何元素的意外超宽都不再撑出横向滚动条 */
+    html,
+    body {
+      overflow-x: hidden; /* 旧浏览器兜底 */
+      overflow-x: clip;   /* 现代浏览器：仅裁剪横向，不影响纵向滚动 */
+    }
+
     body {
       font-family: var(--font-body);
       background-color: var(--color-bg);
@@ -1204,7 +1213,8 @@
 
     .about__grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      /* 桌面 3 列：featured 大卡通栏 + 3 张普通卡等宽一排，杜绝「左2右1」的失衡感 */
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
     }
 
@@ -1221,7 +1231,7 @@
     }
 
     .about-card--featured {
-      grid-column: span 2;
+      grid-column: 1 / -1;
       /* 独特点：顶部中央「数据接口槽」亮线 */
       background:
         linear-gradient(90deg, transparent, rgba(191, 230, 255, 0.55), transparent) no-repeat 50% 0 / 130px 2px,
@@ -2200,6 +2210,7 @@
     /* ===== 页脚 Marquee 跑马灯 ===== */
     .footer-marquee {
       overflow: hidden;
+      max-width: 100%;
       padding: 16px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       margin-bottom: 32px;
@@ -2257,6 +2268,9 @@
       color: rgba(255, 255, 255, 0.7);
       padding: 48px 0 32px;
       border-top: 1px solid rgba(126, 182, 217, 0.2);
+      /* 页脚横向兜底：跑马灯等任何超宽内容都在页脚内裁剪 */
+      overflow-x: hidden;
+      overflow-x: clip;
     }
 
     .site-footer__inner {
@@ -2907,6 +2921,19 @@
         justify-content: center;
       }
 
+      .about__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .about-card--featured {
+        grid-column: span 2;
+      }
+
+      /* 中屏两列时末张卡片通栏补位，避免右下留空洞 */
+      .about__grid .about-card:last-child {
+        grid-column: span 2;
+      }
+
       .works__grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -3045,6 +3072,11 @@
       }
 
       .about-card--featured {
+        grid-column: span 1;
+      }
+
+      /* 单列下取消补位通栏，防止 span 2 撑出隐式列 */
+      .about__grid .about-card:last-child {
         grid-column: span 1;
       }
 
