@@ -517,19 +517,10 @@
       pointer-events: none;
     }
 
-    /* ===== 游戏导航项：微光徽章 ===== */
+    /* ===== 游戏导航项：文字轻微高亮（无徽章圈） ===== */
     .site-nav__link--game {
       color: var(--color-primary);
-      background: rgba(111, 195, 255, 0.1);
-      border: 1px solid rgba(111, 195, 255, 0.28);
-      border-radius: 100px;
-      padding: 3px 12px;
       font-weight: 600;
-    }
-
-    .site-nav__link--game:hover {
-      background: rgba(111, 195, 255, 0.18);
-      box-shadow: 0 0 14px rgba(111, 195, 255, 0.35);
     }
 
     /* ===== 顶部导航 ===== */
@@ -3217,10 +3208,12 @@
       right: 60px;
       top: 50%;
       transform: translateY(-50%);
-      background: var(--color-text);
-      color: var(--color-white);
+      background: #142A45;
+      color: #DCEBF7;
       padding: 6px 12px;
       border-radius: var(--radius-sm);
+      border: 1px solid rgba(111, 195, 255, 0.45);
+      box-shadow: 0 8px 24px rgba(2, 8, 20, 0.6);
       font-size: 13px;
       white-space: nowrap;
       opacity: 0;
