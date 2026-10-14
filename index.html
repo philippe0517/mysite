@@ -2801,30 +2801,6 @@
       100% { background-position: 250% 0; }
     }
 
-    .game-banner__inner::before {
-      content: '';
-      position: absolute;
-      top: -80px;
-      right: -60px;
-      width: 260px;
-      height: 260px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(126, 182, 217, 0.22) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .game-banner__inner::after {
-      content: '';
-      position: absolute;
-      bottom: -70px;
-      right: 180px;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(168, 208, 230, 0.14) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
     .game-banner__text {
       position: relative;
       z-index: 1;
@@ -3217,10 +3193,12 @@
       right: 60px;
       top: 50%;
       transform: translateY(-50%);
-      background: var(--color-text);
-      color: var(--color-white);
+      background: #142A45;
+      color: #DCEBF7;
       padding: 6px 12px;
       border-radius: var(--radius-sm);
+      border: 1px solid rgba(111, 195, 255, 0.45);
+      box-shadow: 0 8px 24px rgba(2, 8, 20, 0.6);
       font-size: 13px;
       white-space: nowrap;
       opacity: 0;
