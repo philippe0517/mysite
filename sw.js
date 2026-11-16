@@ -1,7 +1,7 @@
 /* 站点 Service Worker（个人主页 + 乒乓球 3D 共用）
    更新策略：页面导航请求 network-first（始终优先拿最新版本，离线才回落缓存），
    其余静态资产 cache-first；新 SW 安装后立即接管（skipWaiting + clients.claim）。 */
-const CACHE = 'yuzhe-home-v7';
+const CACHE = 'yuzhe-home-v8';
 const ASSETS = [
   './',
   './ping-pong-3d.html',
