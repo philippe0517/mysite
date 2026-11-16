@@ -2493,6 +2493,10 @@
       filter: blur(0);
     }
 
+    body.chat-open {
+      overflow: hidden;
+    }
+
     .chat-window__header {
       display: flex;
       align-items: center;
@@ -3326,12 +3330,49 @@
       }
 
       .chat-window {
-        right: 12px;
-        left: 12px;
-        bottom: 74px;
+        right: 8px;
+        left: 8px;
+        bottom: 64px;
         width: auto;
-        height: calc(100vh - 140px);
-        max-height: none;
+        height: calc(100vh - 96px);
+        height: calc(100dvh - 96px);
+        max-height: calc(100dvh - 96px);
+        border-radius: 18px;
+      }
+
+      .chat-window__body {
+        overscroll-behavior: contain;
+        padding: 14px;
+      }
+
+      .chat-window__input {
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      }
+
+      .chat-input {
+        font-size: 16px;
+      }
+
+      .chat-quick__list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 4px;
+      }
+
+      .chat-quick__btn {
+        flex: 0 0 auto;
+      }
+
+      .chat-window__icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .chat-msg__action {
+        opacity: 0.7;
+        font-size: 12px;
+        bottom: -18px;
       }
     }
     /* ===== 反馈悬浮按钮 ===== */
@@ -4352,7 +4393,7 @@
         </button>
       </div>
     </div>
-    <div class="chat-window__body" id="chatBody">
+    <div class="chat-window__body" id="chatBody" role="log" aria-live="polite" aria-relevant="additions">
       <!-- 消息会通过 JS 动态插入 -->
     </div>
     <div class="chat-window__about" id="chatAboutPanel" hidden>
@@ -4973,10 +5014,32 @@
           chatQuickList.appendChild(btn);
         });
 
+        // 移动端键盘弹出时，让聊天窗口跟着可视区域收缩
+        function syncViewport() {
+          if (!chatWindow.classList.contains('open')) return;
+          if (!window.matchMedia('(max-width: 600px)').matches) {
+            chatWindow.style.height = '';
+            chatWindow.style.bottom = '';
+            return;
+          }
+          var vv = window.visualViewport;
+          if (!vv) return;
+          var inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+          chatWindow.style.height = Math.max(240, vv.height - 96) + 'px';
+          chatWindow.style.bottom = (64 + inset) + 'px';
+        }
+
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener('resize', syncViewport);
+          window.visualViewport.addEventListener('scroll', syncViewport);
+        }
+        window.addEventListener('resize', syncViewport);
+
         // 打开/关闭聊天窗口
         function openChat() {
           chatWindow.classList.add('open');
           chatWindow.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('chat-open');
           closeAbout();
           if (!hasGreeted) {
             hasGreeted = true;
@@ -4984,12 +5047,15 @@
               addBotMessage('你好呀！我是于哲的 AI 数字分身，不是他本人，回答基于他提供的资料，可能有不准的地方。可以问我关于他的学习、项目、爱好，或者对某个问题的看法～', { copyable: false });
             }, 300);
           }
-          setTimeout(function () { chatInput.focus(); }, 400);
+          setTimeout(function () { chatInput.focus(); syncViewport(); }, 400);
         }
 
         function closeChat() {
           chatWindow.classList.remove('open');
           chatWindow.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('chat-open');
+          chatWindow.style.height = '';
+          chatWindow.style.bottom = '';
         }
 
         function updateCharCount() {
@@ -5016,6 +5082,8 @@
           });
         }
         chatInput.addEventListener('input', updateCharCount);
+        chatInput.addEventListener('focus', function () { setTimeout(syncViewport, 300); });
+        chatInput.addEventListener('blur', function () { setTimeout(syncViewport, 300); });
 
         chatFab.addEventListener('click', openChat);
         chatClose.addEventListener('click', closeChat);
@@ -5028,7 +5096,7 @@
           msg.innerHTML = '<div class="chat-msg__avatar">我</div><div class="chat-msg__bubble"></div>';
           msg.querySelector('.chat-msg__bubble').textContent = text;
           chatBody.appendChild(msg);
-          scrollToBottom();
+          scrollToBottom(true);
         }
 
         // 添加机器人消息（带打字机效果）
@@ -5104,9 +5172,20 @@
           scrollToBottom();
         }
 
+        function friendlyError(message) {
+          var text = String(message || '');
+          if (/missing_api_key|api.?key|未配置/i.test(text)) return '分身暂时没配置好模型密钥，晚点再来试试。';
+          if (/rate.?limit|too many|429|频繁|太快/i.test(text)) return '今天聊得有点多，休息一会儿再来吧。';
+          if (/timeout|timed out|abort/i.test(text)) return '模型响应有点慢，稍后再试一次吧。';
+          if (/502|503|504|upstream|bad gateway/i.test(text)) return '模型服务暂时不稳定，稍后再试一次吧。';
+          if (/failed to fetch|networkerror|load failed|网络/i.test(text)) return '网络好像断了，检查一下连接再试。';
+          return text || '网络好像不太顺，稍后再试一次吧。';
+        }
+
         function addErrorMessage(message, retryText) {
           var msg = document.createElement('div');
           msg.className = 'chat-msg chat-msg--bot chat-msg--error';
+          msg.setAttribute('role', 'alert');
           msg.innerHTML = '<div class="chat-msg__avatar">YZ</div><div class="chat-msg__bubble"></div>';
           var bubble = msg.querySelector('.chat-msg__bubble');
           bubble.textContent = message;
@@ -5133,7 +5212,7 @@
           msg.id = 'typingIndicator';
           msg.innerHTML = '<div class="chat-msg__avatar">YZ</div><div class="chat-msg__bubble chat-typing"><span></span><span></span><span></span></div>';
           chatBody.appendChild(msg);
-          scrollToBottom();
+          scrollToBottom(true);
         }
 
         function removeTyping() {
@@ -5141,8 +5220,10 @@
           if (t) t.remove();
         }
 
-        function scrollToBottom() {
-          chatBody.scrollTop = chatBody.scrollHeight;
+        function scrollToBottom(force) {
+          if (force || chatBody.scrollHeight - chatBody.scrollTop - chatBody.clientHeight < 80) {
+            chatBody.scrollTop = chatBody.scrollHeight;
+          }
         }
 
         // 创建空气泡，供流式逐字追加
@@ -5274,7 +5355,7 @@
                 stopRequested = false;
                 var msg = '网络好像不太顺，稍后再试一次吧。';
                 if (err && err.name === 'AbortError') msg = stopped ? '已停止生成。' : '这次等太久啦，稍后再试一次吧。';
-                else if (err && err.message) msg = err.message;
+                else if (err && err.message) msg = friendlyError(err.message);
                 addErrorMessage(msg, stopped ? null : trimmed);
               });
           }
