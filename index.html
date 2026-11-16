@@ -1994,6 +1994,21 @@
       line-height: 1.8;
     }
 
+    .twin-card__report {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.65);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.25);
+      transition: var(--transition);
+    }
+
+    .twin-card__report:hover {
+      color: #7ed9ff;
+      border-bottom-color: rgba(126, 217, 255, 0.6);
+    }
+
     .twin-card__badge {
       display: inline-flex;
       align-items: center;
@@ -2546,6 +2561,105 @@
       width: 18px;
       height: 18px;
       display: block;
+    }
+
+    .chat-window__actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .chat-window__icon {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--color-white);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: var(--transition);
+    }
+
+    .chat-window__icon:hover {
+      opacity: 1;
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    .chat-window__about {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 22px 20px;
+      background: rgba(7, 13, 26, 0.97);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      overflow-y: auto;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--color-text);
+    }
+
+    .chat-window__about[hidden] {
+      display: none;
+    }
+
+    .chat-about__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .chat-about__close {
+      background: none;
+      border: none;
+      color: var(--color-text-light);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .chat-about__close:hover {
+      color: var(--color-white);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .chat-window__about p {
+      margin: 0;
+      color: var(--color-text-light);
+    }
+
+    .chat-window__about strong {
+      color: var(--color-text);
+    }
+
+    .chat-about__link {
+      margin-top: 10px;
+      color: #7ed9ff;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .chat-about__link:hover {
+      text-decoration: underline;
+    }
+
+    .chat-window__hint {
+      text-align: right;
+      padding: 0 18px 10px;
+      font-size: 11px;
+      color: var(--color-text-light);
+      background: rgba(10, 18, 34, 0.55);
     }
 
     .chat-window__body {
@@ -4042,6 +4156,7 @@
             </svg>
             开始对话
           </button>
+          <a class="twin-card__report" href="./test-report.html" target="_blank" rel="noopener">24 题测试报告 →</a>
         </div>
       </div>
     </section>
@@ -4173,15 +4288,30 @@
           在线 · AI 驱动
         </div>
       </div>
-      <button class="chat-window__close" id="chatClose" type="button" aria-label="关闭对话">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+      <div class="chat-window__actions">
+        <button class="chat-window__icon" id="chatAbout" type="button" aria-label="关于这个分身" title="关于这个分身">?</button>
+        <button class="chat-window__icon" id="chatClear" type="button" aria-label="清空对话" title="清空对话">↺</button>
+        <button class="chat-window__close" id="chatClose" type="button" aria-label="关闭对话">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="chat-window__body" id="chatBody">
       <!-- 消息会通过 JS 动态插入 -->
+    </div>
+    <div class="chat-window__about" id="chatAboutPanel" hidden>
+      <div class="chat-about__head">
+        <strong>关于这个分身</strong>
+        <button class="chat-about__close" id="chatAboutClose" type="button" aria-label="关闭说明">×</button>
+      </div>
+      <p>这是于哲的 AI 数字分身，基于 DeepSeek 模型，回答都来自他提供的资料。</p>
+      <p><strong>能聊：</strong>经历、项目、专业、技能、兴趣、观点、公开联系方式。</p>
+      <p><strong>不聊：</strong>家庭隐私、成绩排名、政治话题、他人评价、代写作业。</p>
+      <p><strong>技术链路：</strong>GitHub Pages → 阿里云函数计算 FC → DeepSeek API。</p>
+      <a class="chat-about__link" href="./test-report.html" target="_blank" rel="noopener">查看 24 题四类测试报告 →</a>
     </div>
     <div class="chat-window__quick" id="chatQuick">
       <span class="chat-quick__label">常见问题：</span>
@@ -4190,7 +4320,7 @@
       </div>
     </div>
     <div class="chat-window__input">
-      <input type="text" class="chat-input" id="chatInput" placeholder="输入你的问题…" aria-label="输入问题">
+      <input type="text" class="chat-input" id="chatInput" placeholder="输入你的问题…" aria-label="输入问题" maxlength="500">
       <button class="chat-send" id="chatSend" type="button" aria-label="发送">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -4198,6 +4328,7 @@
         </svg>
       </button>
     </div>
+    <div class="chat-window__hint"><span id="chatCharCount">0</span>/500</div>
   </div>
 
   <!-- ===== 反馈悬浮按钮 ===== -->
@@ -4733,10 +4864,12 @@
         // - 本地双击打开 HTML 时用本地服务
         // - 部署在 FC 默认域名下时用相对路径
         // - GitHub Pages 等静态托管时指向 FC 的 API 域名
-        var FC_API_URL = 'https://yuzhe-twin-slhenakedo.cn-hangzhou.fcapp.run/api/chat';
-        var API_URL = (location.protocol === 'file:')
-          ? 'http://localhost:9000/api/chat'
-          : (location.hostname.indexOf('fcapp.run') !== -1 ? '/api/chat' : FC_API_URL);
+        var FC_API_BASE = 'https://yuzhe-twin-slhenakedo.cn-hangzhou.fcapp.run';
+        var API_BASE = (location.protocol === 'file:')
+          ? 'http://localhost:9000'
+          : (location.hostname.indexOf('fcapp.run') !== -1 ? '' : FC_API_BASE);
+        var API_URL = API_BASE + '/api/chat';
+        var STREAM_URL = API_BASE + '/api/chat/stream';
         var history = [];
 
         // DOM 元素
@@ -4748,6 +4881,11 @@
         var chatSend = document.getElementById('chatSend');
         var chatQuickList = document.getElementById('chatQuickList');
         var twinOpenBtn = document.getElementById('twinOpenBtn');
+        var chatAbout = document.getElementById('chatAbout');
+        var chatClear = document.getElementById('chatClear');
+        var chatAboutPanel = document.getElementById('chatAboutPanel');
+        var chatAboutClose = document.getElementById('chatAboutClose');
+        var chatCharCount = document.getElementById('chatCharCount');
 
         if (!chatFab || !chatWindow || !chatBody || !chatInput) return;
 
@@ -4771,6 +4909,7 @@
         function openChat() {
           chatWindow.classList.add('open');
           chatWindow.setAttribute('aria-hidden', 'false');
+          closeAbout();
           if (!hasGreeted) {
             hasGreeted = true;
             setTimeout(function () {
@@ -4784,6 +4923,31 @@
           chatWindow.classList.remove('open');
           chatWindow.setAttribute('aria-hidden', 'true');
         }
+
+        function updateCharCount() {
+          if (chatCharCount) chatCharCount.textContent = String(chatInput.value.length);
+        }
+
+        function openAbout() {
+          if (chatAboutPanel) chatAboutPanel.hidden = false;
+        }
+
+        function closeAbout() {
+          if (chatAboutPanel) chatAboutPanel.hidden = true;
+        }
+
+        if (chatAbout) chatAbout.addEventListener('click', openAbout);
+        if (chatAboutClose) chatAboutClose.addEventListener('click', closeAbout);
+        if (chatClear) {
+          chatClear.addEventListener('click', function () {
+            if (isWaiting || isTyping) return;
+            history = [];
+            chatBody.innerHTML = '';
+            hasGreeted = false;
+            openChat();
+          });
+        }
+        chatInput.addEventListener('input', updateCharCount);
 
         chatFab.addEventListener('click', openChat);
         chatClose.addEventListener('click', closeChat);
@@ -4843,7 +5007,67 @@
           chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // 发送消息：调用后端，由 DeepSeek 生成回答
+        // 创建空气泡，供流式逐字追加
+        function createBotBubble() {
+          var msg = document.createElement('div');
+          msg.className = 'chat-msg chat-msg--bot';
+          msg.innerHTML = '<div class="chat-msg__avatar">YZ</div><div class="chat-msg__bubble"></div>';
+          chatBody.appendChild(msg);
+          scrollToBottom();
+          return msg.querySelector('.chat-msg__bubble');
+        }
+
+        // 读取 SSE 流，返回完整回答
+        function readStream(res) {
+          var reader = res.body.getReader();
+          var decoder = new TextDecoder('utf-8');
+          var buffer = '';
+          var reply = '';
+          var displayed = false;
+          var bubble = createBotBubble();
+
+          function handleEvent(chunk) {
+            var lines = chunk.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i];
+              if (line.indexOf('data:') !== 0) continue;
+              var data = line.slice(5).trim();
+              if (!data || data === '[DONE]') continue;
+              var obj;
+              try { obj = JSON.parse(data); } catch (e) { continue; }
+              if (obj.error) throw new Error(obj.message || '服务暂时不可用，稍后再试。');
+              if (obj.delta) {
+                if (!displayed) removeTyping();
+                reply += obj.delta;
+                bubble.textContent += obj.delta;
+                displayed = true;
+                scrollToBottom();
+              }
+            }
+          }
+
+          function pump() {
+            return reader.read().then(function (result) {
+              if (result.done) {
+                if (buffer.trim()) handleEvent(buffer);
+                if (!displayed && bubble.parentNode) bubble.parentNode.remove();
+                return reply;
+              }
+              buffer += decoder.decode(result.value, { stream: true });
+              var parts = buffer.split('\n\n');
+              buffer = parts.pop() || '';
+              for (var i = 0; i < parts.length; i++) handleEvent(parts[i]);
+              return pump();
+            });
+          }
+
+          return pump().catch(function (err) {
+            err.displayed = displayed;
+            throw err;
+          });
+        }
+
+        // 发送消息：优先流式，失败自动回退普通接口
         function sendMessage(text) {
           if (!text || !text.trim() || isTyping || isWaiting) return;
           var trimmed = text.trim();
@@ -4854,45 +5078,90 @@
 
           addUserMessage(trimmed);
           chatInput.value = '';
+          updateCharCount();
           showTyping();
           isWaiting = true;
 
           var controller = new AbortController();
-          var timer = setTimeout(function () { controller.abort(); }, 35000);
+          var timer = setTimeout(function () { controller.abort(); }, 60000);
 
-          fetch(API_URL, {
+          function finish(reply) {
+            clearTimeout(timer);
+            removeTyping();
+            isWaiting = false;
+            if (!reply) reply = '我这边没拿到回答，稍后再试一次吧。';
+            history.push({ role: 'user', content: trimmed });
+            history.push({ role: 'assistant', content: reply });
+            if (history.length > 16) history = history.slice(-16);
+          }
+
+          function requestFallback() {
+            removeTyping();
+            showTyping();
+            isWaiting = true;
+            var fbController = new AbortController();
+            var fbTimer = setTimeout(function () { fbController.abort(); }, 50000);
+            return fetch(API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: trimmed, history: history }),
+              signal: fbController.signal
+            })
+              .then(function (res) {
+                return res.json().catch(function () { return {}; }).then(function (data) {
+                  if (!res.ok) throw new Error(data.message || '服务暂时不可用，稍后再试。');
+                  return data && data.reply ? String(data.reply) : '';
+                });
+              })
+              .then(function (reply) {
+                clearTimeout(fbTimer);
+                finish(reply);
+                addBotMessage(reply || '我这边没拿到回答，稍后再试一次吧。');
+              })
+              .catch(function (err) {
+                clearTimeout(fbTimer);
+                removeTyping();
+                isWaiting = false;
+                var msg = '网络好像不太顺，稍后再试一次吧。';
+                if (err && err.name === 'AbortError') msg = '这次等太久啦，稍后再试一次吧。';
+                else if (err && err.message) msg = err.message;
+                addBotMessage(msg);
+              });
+          }
+
+          fetch(STREAM_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: trimmed, history: history }),
             signal: controller.signal
           })
             .then(function (res) {
-              return res.json().catch(function () { return {}; }).then(function (data) {
-                if (!res.ok) throw new Error(data.message || '服务暂时不可用，稍后再试。');
-                return data;
-              });
+              if (!res.ok) {
+                return res.json().catch(function () { return {}; }).then(function (data) {
+                  throw new Error(data.message || '服务暂时不可用，稍后再试。');
+                });
+              }
+              if (!res.body || !res.body.getReader) throw new Error('stream_unsupported');
+              return readStream(res);
             })
-            .then(function (data) {
-              clearTimeout(timer);
-              removeTyping();
-              isWaiting = false;
-              var reply = data && data.reply ? String(data.reply) : '我这边没拿到回答，稍后再试一次吧。';
-              addBotMessage(reply);
-              history.push({ role: 'user', content: trimmed });
-              history.push({ role: 'assistant', content: reply });
-              if (history.length > 16) history = history.slice(-16);
+            .then(function (reply) {
+              if (reply) finish(reply);
+              else return requestFallback();
             })
             .catch(function (err) {
-              clearTimeout(timer);
-              removeTyping();
-              isWaiting = false;
-              var msg = '网络好像不太顺，稍后再试一次吧。';
               if (err && err.name === 'AbortError') {
-                msg = '这次等太久啦，稍后再试一次吧。';
-              } else if (err && err.message) {
-                msg = err.message;
+                clearTimeout(timer);
+                removeTyping();
+                isWaiting = false;
+                addBotMessage('这次等太久啦，稍后再试一次吧。');
+              } else if (err && err.displayed) {
+                clearTimeout(timer);
+                removeTyping();
+                isWaiting = false;
+                addBotMessage('回答到一半断了，稍后再试一次吧。');
+              } else {
+                return requestFallback();
               }
-              addBotMessage(msg);
             });
         }
 
