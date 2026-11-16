@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数字分身制作说明 | 于哲</title>
+  <meta name="description" content="于哲数字分身的资料组织、边界设计、模型选择、部署架构和测试方法。">
+  <style>
+    :root {
+      --bg: #070d1a;
+      --panel: rgba(255, 255, 255, 0.045);
+      --line: rgba(255, 255, 255, 0.09);
+      --text: #eef4ff;
+      --muted: #93a4c3;
+      --accent: #7ed9ff;
+      --pass: #56d9a4;
+      --warn: #ffc46b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 48px 20px 64px;
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(60, 120, 255, 0.18), transparent 60%),
+        radial-gradient(700px 400px at 100% 0%, rgba(0, 200, 180, 0.10), transparent 55%),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.75;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 28px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .back:hover { color: var(--accent); }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(30px, 5vw, 44px);
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      margin: 0 0 36px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .card {
+      margin-bottom: 16px;
+      padding: 24px 26px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    p { margin: 0 0 10px; color: var(--muted); }
+    p:last-child { margin-bottom: 0; }
+
+    strong { color: var(--text); }
+
+    ul {
+      margin: 8px 0 10px;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    li { margin: 6px 0; }
+
+    code {
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      font-size: 0.9em;
+    }
+
+    a { color: var(--accent); }
+
+    .note {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--pass);
+      background: rgba(86, 217, 164, 0.08);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: space-between;
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      body { padding: 32px 16px 48px; }
+      .card { padding: 20px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="back" href="./">← 返回个人主页</a>
+
+    <header>
+      <p class="eyebrow">Digital Twin / Build Notes</p>
+      <h1>数字分身是怎么做的</h1>
+      <p class="sub">资料 · 边界 · 模型 · 部署 · 测试 · AI 使用</p>
+    </header>
+
+    <section class="card">
+      <h2>一句话</h2>
+      <p>数字分身不是把聊天记录拼起来，而是四样东西：<strong>我的资料</strong>、<strong>说话规则</strong>、<strong>大模型接口</strong>、<strong>一个网页</strong>。资料和规则决定它像不像我，模型和网页决定它能不能用。</p>
+    </section>
+
+    <section class="card">
+      <h2>1. 资料怎么组织</h2>
+      <p>我把资料拆成 6 份，不塞进一个大文件：</p>
+      <ul>
+        <li><code>00-rules.md</code>：总规则，先判断问题该不该答。</li>
+        <li><code>01-profile.md</code>：基本信息、经历、联系方式。</li>
+        <li><code>02-study.md</code>：专业、课程、项目、技能。</li>
+        <li><code>03-views.md</code>：对 AI 医疗、脑机接口、学习方式等问题的看法。</li>
+        <li><code>04-boundaries.md</code>：家庭、成绩、政治、他人评价、证件号等不聊清单。</li>
+        <li><code>05-style.md</code>：语气、长度、第一人称、避免客服腔。</li>
+      </ul>
+      <p>边界那份最重要。提前写好“这个问题我不方便展开”的话术，比事后补救有效。</p>
+    </section>
+
+    <section class="card">
+      <h2>2. 边界怎么定</h2>
+      <p>我把问题分成三类：能答、可以泛泛答、不答。家庭信息、成绩排名、政治话题、对具体他人的评价、证件号、代写作业，属于不答；薪资、未来规划这类，只给公开过的范围。</p>
+      <p>边界不是靠模型自觉，而是写进系统提示词，再用边界题和攻击题反复测。</p>
+    </section>
+
+    <section class="card">
+      <h2>3. 模型怎么选</h2>
+      <p>用 DeepSeek 的 <code>deepseek-chat</code>，按量计费。没有选免费模型，是因为调试阶段免费接口经常排队、超时、答非所问，反而更耗时间；这个作业的对话量很小，十几块钱足够。</p>
+    </section>
+
+    <section class="card">
+      <h2>4. 部署：为什么是 GitHub Pages + 阿里云 FC</h2>
+      <p>访客主要在国内，所以后端放在阿里云函数计算 FC。前端一开始也想过放 FC，但 FC 默认域名会给 HTML 加 <code>Content-Disposition: attachment</code>，浏览器直接下载而不是显示页面，所以页面放 GitHub Pages，FC 只提供 <code>/api/chat</code> 和 <code>/api/chat/stream</code>。</p>
+      <p>技术链路：GitHub Pages → 阿里云 FC → DeepSeek API。前端只拿回答，不接触 API key。</p>
+      <p class="note">国内不挂 VPN 实测可以打开主页和聊天，这也是选择国内后端的原因。</p>
+    </section>
+
+    <section class="card">
+      <h2>5. 怎么判断“做好了”</h2>
+      <p>准备了 30 道题，分四类：事实 8、观点 6、边界 8、攻击 8。每题预设关键词，记录命中率，再由人工复核“意思对不对”。</p>
+      <p>其中 6 道是进阶题：资料里没有的当天午餐（幻觉）、身份证号（隐私）、多轮追问项目技术栈、多轮问父母、英文注入、角色扮演注入。</p>
+      <p>结果：30/30 通过，关键词命中 71/71。完整逐题记录在<a href="./test-report.html">测试报告</a>。</p>
+    </section>
+
+    <section class="card">
+      <h2>6. 踩过的坑</h2>
+      <ul>
+        <li>流式接口第一次上线 404：FC 触发器指向旧版本，改成 LATEST 后恢复。</li>
+        <li>FC 默认域名强制下载 HTML：前端改放 GitHub Pages，FC 只保留 API。</li>
+        <li>CORS：FC 的 OPTIONS 预检要返回正确头，否则浏览器只显示网络错误。</li>
+        <li>规则误判：V6/A6 的自动规则没命中，人工复核回答后改为通过。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>7. AI 帮了什么，我判断了什么</h2>
+      <p>AI 帮我写页面、写后端、写测试脚本、整理提示词，速度快很多。但“哪些资料能放”“哪些问题不能答”“什么算答对”必须我自己定；测试结果也要我逐条看，不能只看通过率。</p>
+    </section>
+
+    <section class="card">
+      <h2>8. 已知限制</h2>
+      <ul>
+        <li>以单轮测试为主，长对话只做了两轮，不能保证很长上下文都不丢。</li>
+        <li>模型回答有随机性，同一问题可能措辞不同。</li>
+        <li>资料只覆盖我愿意公开的部分，不知道的应该承认不知道。</li>
+      </ul>
+    </section>
+
+    <footer>
+      <a href="./">← 返回个人主页</a>
+      <a href="./test-report.html">30 题测试报告 →</a>
+    </footer>
+  </main>
+</body>
+</html>

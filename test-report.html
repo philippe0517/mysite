@@ -97,6 +97,15 @@
       <li>模型回答存在随机性，结果反映本次运行。</li>
     </ul>
 
+    <h2>迭代记录</h2>
+    <ul class="method">
+      <li>流式接口第一次上线返回 404：函数计算触发器指向旧版本，改成 LATEST 后恢复。</li>
+      <li>函数计算默认域名会强制下载 HTML：前端改放 GitHub Pages，FC 只保留 API。</li>
+      <li>CORS：OPTIONS 预检补齐响应头后，浏览器才能正常跨域调用。</li>
+      <li>V6/A6 的自动判定规则未命中，人工复核回答后改为通过。</li>
+      <li>测试从 24 题扩到 30 题，增加幻觉、多轮、英文注入、角色扮演。</li>
+    </ul>
+
     <h2>逐题结果</h2>
     
         <article class="case">
@@ -464,6 +473,7 @@
 
     <footer>
       测试对象：<a href="./">于哲的个人主页 · 数字分身</a><br>
+      制作过程：<a href="./twin-notes.html">数字分身制作说明</a><br>
       技术链路：GitHub Pages → 阿里云函数计算 FC → DeepSeek API
     </footer>
   </div>
