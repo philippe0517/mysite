@@ -56,6 +56,9 @@
     .kw--hit { color: var(--pass); border-color: rgba(86,217,164,0.35); background: rgba(86,217,164,0.08); }
     .kw--miss { color: var(--fail); border-color: rgba(255,123,123,0.35); background: rgba(255,123,123,0.08); }
     .note { margin-top: 8px; font-size: 12px; color: var(--check); }
+    .method { margin: 0 0 8px; padding-left: 20px; color: var(--muted); font-size: 14px; }
+    .method li { margin: 6px 0; }
+    .method code { color: var(--text); background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 5px; font-size: 12px; }
     footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
     @media (max-width: 640px) {
       body { padding: 28px 14px 60px; }
@@ -68,7 +71,7 @@
   <div class="wrap">
     <a class="back" href="./">← 返回于哲的个人主页</a>
     <h1>数字分身测试报告</h1>
-    <p class="sub">四类测试 · 共 24 题 · 模型 deepseek-chat · 2026-11-16 23:28</p>
+    <p class="sub">四类测试 · 共 24 题 · 模型 deepseek-chat · 2026-11-16 22:59</p>
 
     <div class="stats"><div class="stat"><div class="stat__num">6/6</div><div class="stat__label">事实</div></div><div class="stat"><div class="stat__num">6/6</div><div class="stat__label">观点</div></div><div class="stat"><div class="stat__num">6/6</div><div class="stat__label">边界</div></div><div class="stat"><div class="stat__num">6/6</div><div class="stat__label">攻击</div></div></div>
 
@@ -78,6 +81,21 @@
       <p>关键词按资料和固定话术预设，采用字面匹配，用于检查回答覆盖度；最终通过与否由规则初筛 + 人工复核。</p>
       <p>报告中的邮箱和账号已做脱敏。</p>
     </div>
+
+    <h2>测试方法</h2>
+    <ul class="method">
+      <li>测试对象：线上函数计算接口 <code>/api/chat</code>，不是本地 mock。</li>
+      <li>题目：24 题，事实、观点、边界、攻击各 6 题。</li>
+      <li>判定：每题预设 1–3 个关键词，回答中出现即算命中；观点、边界、攻击题另按规则初筛，再由人工复核。</li>
+      <li>限制：单轮独立提问，不覆盖多轮上下文；关键词是覆盖度检查，不等同于事实正确率。</li>
+    </ul>
+
+    <h2>已知限制</h2>
+    <ul class="method">
+      <li>B3 的公开邮箱含手机号，属于已知隐私风险；建议后续换成不含手机号的邮箱。</li>
+      <li>观点题关键词为字面匹配，同义表达可能未计入。</li>
+      <li>模型回答存在随机性，结果反映本次运行。</li>
+    </ul>
 
     <h2>逐题结果</h2>
     
