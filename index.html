@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="于哲的个人主页 — 天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者">
+  <meta name="description" content="于哲的个人主页 — 天津大学香港理工大学深圳未来技术学院智能医学工程专业大一学生，乒乓球爱好者，提供可对话的 AI 数字分身">
   <title>于哲 | 个人主页</title>
   <meta name="theme-color" content="#070D1A">
   <!-- 社交分享卡片：链接发到微信/QQ 时显示标题 + 摘要 + 配图（服务课堂同伴互测） -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="于哲 | 个人主页">
-  <meta property="og:description" content="智能医学工程大一学生的个人主页：3D 乒乓球游戏、学习工具与网页设计。欢迎参观，也欢迎用右下角按钮给我提反馈！">
+  <meta property="og:description" content="智能医学工程大一学生的个人主页：3D 乒乓球游戏、学习工具与网页设计，还有接入 DeepSeek 的 AI 数字分身。欢迎参观，也欢迎用右下角按钮给我提反馈！">
   <meta property="og:url" content="https://philippe0517.github.io/mysite/">
   <meta property="og:image" content="https://philippe0517.github.io/mysite/icon-512.png">
   <meta name="twitter:card" content="summary">
@@ -3909,7 +3909,7 @@
             </div>
             <div class="work-card__body">
 <h3 class="work-card__title">个人主页 V1 → V4</h3>
-<p class="work-card__desc">从静态简历页到 V4 的完整迭代：接入 Supabase 反馈系统（蜜罐防机器人 + 提交冷却）、做了可对话的数字分身、打造可交互粒子星域首屏与隐藏彩蛋。每一版都由访客反馈驱动，改完必跑桌面 + 手机回归测试。</p>
+<p class="work-card__desc">从静态简历页到 V4 的完整迭代：接入 Supabase 反馈系统（蜜罐防机器人 + 提交冷却）、做了接入 DeepSeek 的可对话数字分身、打造可交互粒子星域首屏与隐藏彩蛋。每一版都由访客反馈驱动，改完必跑桌面 + 手机回归测试。</p>
               <div class="work-card__footer">
                 <div class="work-card__tags">
 <span class="work-card__tag">网页设计</span>
@@ -4170,7 +4170,7 @@
         <div class="chat-window__name">于哲的数字分身</div>
         <div class="chat-window__status">
           <span class="chat-window__status-dot"></span>
-          在线 · 静态版
+          在线 · AI 驱动
         </div>
       </div>
       <button class="chat-window__close" id="chatClose" type="button" aria-label="关闭对话">
@@ -4650,7 +4650,7 @@
       dividers.forEach(function (d) { observer.observe(d); });
     })();
 
-    // ===== 数字分身（静态对话版） =====
+    // ===== 数字分身（DeepSeek 驱动） =====
     (function () {
       try {
         // 问答数据：第一人称、轻松随意语气
@@ -4729,7 +4729,15 @@
           }
         ];
 
-        var fallbackAnswer = '这个问题我还没学会回答呢～你可以试试点击下方的常见问题，或者直接发邮件联系我本人：16602256906@163.com';
+        // 后端地址：
+        // - 本地双击打开 HTML 时用本地服务
+        // - 部署在 FC 默认域名下时用相对路径
+        // - GitHub Pages 等静态托管时指向 FC 的 API 域名
+        var FC_API_URL = 'https://yuzhe-twin-slhenakedo.cn-hangzhou.fcapp.run/api/chat';
+        var API_URL = (location.protocol === 'file:')
+          ? 'http://localhost:9000/api/chat'
+          : (location.hostname.indexOf('fcapp.run') !== -1 ? '/api/chat' : FC_API_URL);
+        var history = [];
 
         // DOM 元素
         var chatFab = document.getElementById('chatFab');
@@ -4744,10 +4752,11 @@
         if (!chatFab || !chatWindow || !chatBody || !chatInput) return;
 
         var isTyping = false;
+        var isWaiting = false;
         var hasGreeted = false;
 
-        // 渲染快捷问题按钮
-        qaData.forEach(function (item) {
+        // 渲染快捷问题按钮（只展示前 6 个，移动端不挤）
+        qaData.slice(0, 6).forEach(function (item) {
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'chat-quick__btn';
@@ -4765,7 +4774,7 @@
           if (!hasGreeted) {
             hasGreeted = true;
             setTimeout(function () {
-              addBotMessage('你好呀！我是于哲的数字分身，可以问我关于他的问题，比如他是谁、爱好是什么、未来想做什么～');
+              addBotMessage('你好呀！我是于哲的 AI 数字分身，回答基于他提供的资料，可能有不准的地方。可以问我关于他的学习、项目、爱好，或者对某个问题的看法～');
             }, 300);
           }
           setTimeout(function () { chatInput.focus(); }, 400);
@@ -4801,6 +4810,8 @@
 
           isTyping = true;
           var i = 0;
+          // 长回答自动加快，避免打字太久
+          var speed = Math.max(8, Math.min(28, 900 / Math.max(text.length, 1)));
           var timer = setInterval(function () {
             if (i < text.length) {
               bubble.textContent += text.charAt(i);
@@ -4810,7 +4821,7 @@
               clearInterval(timer);
               isTyping = false;
             }
-          }, 28);
+          }, speed);
         }
 
         // 显示正在输入
@@ -4832,36 +4843,57 @@
           chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // 关键词匹配
-        function matchAnswer(text) {
-          var lower = text.toLowerCase();
-          var bestMatch = null;
-          var bestScore = 0;
-          qaData.forEach(function (item) {
-            var score = 0;
-            item.keywords.forEach(function (kw) {
-              if (lower.indexOf(kw) !== -1) score++;
-            });
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = item;
-            }
-          });
-          return bestScore > 0 ? bestMatch.answer : fallbackAnswer;
-        }
-
-        // 发送消息
+        // 发送消息：调用后端，由 DeepSeek 生成回答
         function sendMessage(text) {
-          if (!text || !text.trim() || isTyping) return;
+          if (!text || !text.trim() || isTyping || isWaiting) return;
           var trimmed = text.trim();
+          if (trimmed.length > 500) {
+            addBotMessage('一次最多 500 个字，缩短一点再发吧～');
+            return;
+          }
+
           addUserMessage(trimmed);
           chatInput.value = '';
           showTyping();
-          setTimeout(function () {
-            removeTyping();
-            var answer = matchAnswer(trimmed);
-            addBotMessage(answer);
-          }, 600 + Math.random() * 400);
+          isWaiting = true;
+
+          var controller = new AbortController();
+          var timer = setTimeout(function () { controller.abort(); }, 35000);
+
+          fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: trimmed, history: history }),
+            signal: controller.signal
+          })
+            .then(function (res) {
+              return res.json().catch(function () { return {}; }).then(function (data) {
+                if (!res.ok) throw new Error(data.message || '服务暂时不可用，稍后再试。');
+                return data;
+              });
+            })
+            .then(function (data) {
+              clearTimeout(timer);
+              removeTyping();
+              isWaiting = false;
+              var reply = data && data.reply ? String(data.reply) : '我这边没拿到回答，稍后再试一次吧。';
+              addBotMessage(reply);
+              history.push({ role: 'user', content: trimmed });
+              history.push({ role: 'assistant', content: reply });
+              if (history.length > 16) history = history.slice(-16);
+            })
+            .catch(function (err) {
+              clearTimeout(timer);
+              removeTyping();
+              isWaiting = false;
+              var msg = '网络好像不太顺，稍后再试一次吧。';
+              if (err && err.name === 'AbortError') {
+                msg = '这次等太久啦，稍后再试一次吧。';
+              } else if (err && err.message) {
+                msg = err.message;
+              }
+              addBotMessage(msg);
+            });
         }
 
         // 发送按钮

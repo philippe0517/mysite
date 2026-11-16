@@ -1,7 +1,7 @@
-/* 乒乓球 3D · Service Worker（PWA 离线缓存 v2）
+/* 站点 Service Worker（个人主页 + 乒乓球 3D 共用）
    更新策略：页面导航请求 network-first（始终优先拿最新版本，离线才回落缓存），
    其余静态资产 cache-first；新 SW 安装后立即接管（skipWaiting + clients.claim）。 */
-const CACHE = 'pp3d-v3';
+const CACHE = 'yuzhe-home-v5';
 const ASSETS = [
   './',
   './ping-pong-3d.html',
