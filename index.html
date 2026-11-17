@@ -2478,7 +2478,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      z-index: 99;
+      z-index: 1200;
       opacity: 0;
       visibility: hidden;
       transform: translateY(16px) scale(0.96);
@@ -2495,6 +2495,16 @@
 
     body.chat-open {
       overflow: hidden;
+    }
+
+    /* 聊天打开时收起右下角悬浮按钮，避免压住聊天输入/发送键 */
+    body.chat-open #feedbackFab,
+    body.chat-open #musicFab,
+    body.chat-open #toTop,
+    body.chat-open #chatFab {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
     }
 
     .chat-window__header {
@@ -2529,6 +2539,9 @@
       font-size: 15px;
       font-weight: 600;
       line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .chat-window__status {
@@ -3330,14 +3343,29 @@
       }
 
       .chat-window {
+        top: 76px;
         right: 8px;
         left: 8px;
-        bottom: 64px;
+        bottom: 12px;
         width: auto;
-        height: calc(100vh - 96px);
-        height: calc(100dvh - 96px);
-        max-height: calc(100dvh - 96px);
+        height: auto;
+        max-height: none;
         border-radius: 18px;
+      }
+
+      /* 手机端给右下角悬浮按钮留出安全区，链接改为居中块级 */
+      .twin-card {
+        padding: 28px 44px 32px 20px;
+      }
+
+      .twin-card__report {
+        display: block;
+        width: fit-content;
+        margin: 10px auto 0;
+      }
+
+      .twin-card__report + .twin-card__report {
+        margin-left: auto;
       }
 
       .chat-window__body {
@@ -3364,9 +3392,33 @@
         flex: 0 0 auto;
       }
 
+      .chat-window__header {
+        padding: 12px 14px;
+        gap: 8px;
+      }
+
+      .chat-window__avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+      }
+
+      .chat-window__name {
+        font-size: 14px;
+      }
+
+      .chat-window__status {
+        font-size: 11px;
+      }
+
+      .chat-window__actions {
+        gap: 3px;
+      }
+
       .chat-window__icon {
-        width: 34px;
-        height: 34px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
       }
 
       .chat-msg__action {
@@ -4183,7 +4235,7 @@
       </svg>
     </div>
 
-    <!-- ===== 数字分身（静态对话版） ===== -->
+    <!-- ===== 数字分身（DeepSeek 驱动） ===== -->
     <section class="section digital-twin" id="digital-twin">
       <!-- 对话气泡装饰 -->
       <svg class="digital-twin__deco digital-twin__deco--1" viewBox="0 0 80 50" fill="none" aria-hidden="true">
@@ -4231,7 +4283,7 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            V4 · 由访客反馈驱动
+            V4 · 已接入 DeepSeek
           </div>
           <h3 class="twin-card__title">和数字版的我聊聊</h3>
 <p class="twin-card__desc">
@@ -4343,7 +4395,7 @@
         <div class="site-footer__slogan">保持好奇，持续创造</div>
       </div>
       <div class="site-footer__divider"></div>
-      <div class="site-footer__bottom">个人主页 V4 · 由访客反馈驱动迭代 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
+      <div class="site-footer__bottom">个人主页 V4 · 已接入 DeepSeek · 由访客反馈驱动迭代 · 用 HTML/CSS/JS 手工打造 · 设计灵感来自 Vibe Coding 课程</div>
     </div>
   </footer>
 
@@ -5020,13 +5072,14 @@
           if (!window.matchMedia('(max-width: 600px)').matches) {
             chatWindow.style.height = '';
             chatWindow.style.bottom = '';
+            chatWindow.style.top = '';
             return;
           }
           var vv = window.visualViewport;
           if (!vv) return;
-          var inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-          chatWindow.style.height = Math.max(240, vv.height - 96) + 'px';
-          chatWindow.style.bottom = (64 + inset) + 'px';
+          chatWindow.style.top = (vv.offsetTop + 76) + 'px';
+          chatWindow.style.bottom = 'auto';
+          chatWindow.style.height = Math.max(240, vv.height - 88) + 'px';
         }
 
         if (window.visualViewport) {
@@ -5056,6 +5109,7 @@
           document.body.classList.remove('chat-open');
           chatWindow.style.height = '';
           chatWindow.style.bottom = '';
+          chatWindow.style.top = '';
         }
 
         function updateCharCount() {
