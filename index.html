@@ -5372,7 +5372,7 @@
             if (!reply) reply = '我这边没拿到回答，稍后再试一次吧。';
             history.push({ role: 'user', content: trimmed });
             history.push({ role: 'assistant', content: reply });
-            if (history.length > 16) history = history.slice(-16);
+            if (history.length > 6) history = history.slice(-6);
           }
 
           function requestFallback() {
