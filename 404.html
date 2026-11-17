@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>页面已移动 · 于哲的个人主页</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f6f7f9; color: #1f2328; padding: 24px;
+  }
+  .card {
+    max-width: 420px; width: 100%; text-align: center;
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 16px;
+    padding: 40px 28px; box-shadow: 0 10px 30px rgba(0,0,0,.06);
+  }
+  .code { font-size: 44px; font-weight: 700; letter-spacing: 2px; color: #9ca3af; margin: 0 0 8px; }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  p { font-size: 14px; line-height: 1.7; color: #57606a; margin: 0 0 24px; }
+  a.button {
+    display: inline-block; padding: 10px 22px; border-radius: 999px;
+    background: #1f6feb; color: #fff; text-decoration: none; font-size: 14px;
+  }
+  a.button:hover { background: #1558c0; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0d1117; color: #e6edf3; }
+    .card { background: #161b22; border-color: #30363d; box-shadow: none; }
+    p { color: #8b949e; }
+    a.button { background: #388bfd; }
+  }
+</style>
+</head>
+<body>
+  <main class="card">
+    <p class="code">404</p>
+    <h1>这个页面不存在或已移动</h1>
+    <p>你要找的内容已经删除，或者地址输错了。<br>3 秒后自动返回首页。</p>
+    <a class="button" href="/mysite/">立即返回首页</a>
+  </main>
+  <script>
+    setTimeout(function () {
+      location.replace('/mysite/');
+    }, 3000);
+  </script>
+</body>
+</html>
